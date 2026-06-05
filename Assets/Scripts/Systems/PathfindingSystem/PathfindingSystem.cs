@@ -25,10 +25,13 @@ public class PathfindingSystem : MonoBehaviour
             {
                 for (int y = 0; y < gridHeight; y++)
                 {
-                    // Convert our mathematical (X, Y) to Unity's Tilemap (X, Y, Z) coordinate
-                    Vector3Int tilePosition = new Vector3Int(x, y, 0);
+                    // NEW MATH: Get the exact physical world position of this mathematical node
+                    Vector3 worldPos = gridSystem.GetWorldPosition(x, y);
 
-                    // If a tile is painted on the collision layer at this coordinate...
+                    // NEW MATH: Ask Unity to convert that physical position into its Tilemap cell coordinate
+                    Vector3Int tilePosition = collisionTilemap.WorldToCell(worldPos);
+
+                    // If a tile is painted on the collision layer at this exact coordinate...
                     if (collisionTilemap.HasTile(tilePosition))
                     {
                         // ...flag our invisible backend node as unwalkable
@@ -40,6 +43,10 @@ public class PathfindingSystem : MonoBehaviour
                     }
                 }
             }
+        }
+        else
+        {
+            Debug.LogWarning("<color=yellow>[Pathfinding]</color> Collision Tilemap is missing in the Inspector!");
         }
     }
 
