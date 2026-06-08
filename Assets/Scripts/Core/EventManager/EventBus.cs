@@ -38,4 +38,8 @@ public static class EventBus
     // KAIZEN / UI EVENTS
     // ==========================================
     public static Action<int> OnEfficiencyScoreUpdated; // For Advanced Mission 2
+
+    // NEW Input Events
+    public static Action<Vector3> OnMapClicked;
+    public static Action<Vector3> OnPuzzleClicked;
 }

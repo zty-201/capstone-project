@@ -1,15 +1,13 @@
 ﻿using UnityEngine;
 
-public class TestNPC : MonoBehaviour, IInteractable
+public class NPCController : MonoBehaviour, IInteractable
 {
-    [Header("NPC Data")]
-    public string npcName = "Distressed Farmer";
-
     public void Interact()
     {
-        Debug.Log($"<color=yellow>[Interaction]</color> You interacted with {npcName}!");
+        Debug.Log("<color=yellow>[NPC]</color> Farmer says: 'Please fix my pipes!'");
 
-        // Later, this is where you will fire:
-        // EventBus.OnDialogueStarted?.Invoke(missionData);
+        // Transition the game into the minigame state. 
+        // This locks player movement and unlocks the PipeVisual clicks!
+        GameManager.Instance.StateManager.ChangeState(GameManager.Instance.PuzzleState);
     }
 }

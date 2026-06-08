@@ -1,11 +1,6 @@
 public interface IState
 {
-    // Called once when the state begins
-    void Enter();
-
-    // Called every frame while this state is active
-    void Execute();
-
-    // Called once just before the state switches to another one
-    void Exit();
+    void Enter(); // Called once when transitioning into the state
+    void Tick();  // Called every frame (your Update loop)
+    void Exit();  // Called once when transitioning out of the state
 }

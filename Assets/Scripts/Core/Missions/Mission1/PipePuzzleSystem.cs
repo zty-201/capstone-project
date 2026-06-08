@@ -1,0 +1,126 @@
+﻿using System.Collections.Generic;
+using UnityEngine;
+
+public class PipePuzzleSystem : MonoBehaviour
+{
+    [Header("Puzzle Dimensions")]
+    public int width = 3;
+    public int height = 3;
+
+    private PipeNode[,] grid;
+
+    [Header("Win Conditions")]
+    public Vector2Int startPos = new Vector2Int(0, 0); // Bottom-Left (The Pump)
+    public Vector2Int endPos = new Vector2Int(2, 2);   // Top-Right (The Crops)
+
+    private void Start()
+    {
+        InitializeMVPGrid();
+    }
+
+    // Creates a basic hardcoded layout for testing the MVP backend
+    private void InitializeMVPGrid()
+    {
+        grid = new PipeNode[width, height];
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                // Default all grid slots to a simple corner piece
+                grid[x, y] = new PipeNode(x, y, PipeDirection.Up | PipeDirection.Right);
+            }
+        }
+
+        // Hardcode a solvable, scrambled path into the grid
+        grid[0, 0].currentConnections = PipeDirection.Right;
+        grid[1, 0].currentConnections = PipeDirection.Left | PipeDirection.Up;
+        grid[1, 1].currentConnections = PipeDirection.Down | PipeDirection.Right;
+        grid[2, 1].currentConnections = PipeDirection.Left | PipeDirection.Up;
+        grid[2, 2].currentConnections = PipeDirection.Down;
+    }
+
+    // The single entry point for input. Call this when the player clicks a pipe.
+    public void RotatePipeAt(int x, int y)
+    {
+        if (x < 0 || x >= width || y < 0 || y >= height) return;
+
+        // 1. Mathematically rotate the node
+        grid[x, y].RotateClockwise();
+
+        // 2. Run the DFS graph traversal to check if the new rotation solves the grid
+        if (CheckWaterFlow())
+        {
+            Debug.Log("<color=cyan>[PipePuzzleSystem]</color> Unbroken connection established! Mission 1 complete.");
+
+            // Assuming you added the boolean flag to the GameManager as discussed:
+            // GameManager.Instance.CompleteMission1(); 
+        }
+    }
+
+    // --- The Graph Traversal Backend ---
+
+    private bool CheckWaterFlow()
+    {
+        // Reset the power state of all pipes before calculating the new flow
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                grid[x, y].isPowered = false;
+
+        Stack<PipeNode> stack = new Stack<PipeNode>();
+        HashSet<PipeNode> visited = new HashSet<PipeNode>();
+
+        // Begin the flow at the water pump
+        PipeNode startNode = grid[startPos.x, startPos.y];
+        stack.Push(startNode);
+
+        while (stack.Count > 0)
+        {
+            PipeNode current = stack.Pop();
+
+            if (visited.Contains(current)) continue;
+
+            visited.Add(current);
+            current.isPowered = true;
+
+            // Success Condition: The flow has reached the exact coordinates of the crops
+            if (current.x == endPos.x && current.y == endPos.y)
+            {
+                return true;
+            }
+
+            // Attempt to push flow to all 4 cardinal neighbors
+            EvaluateNeighbor(current, PipeDirection.Up, 0, 1, PipeDirection.Down, stack);
+            EvaluateNeighbor(current, PipeDirection.Right, 1, 0, PipeDirection.Left, stack);
+            EvaluateNeighbor(current, PipeDirection.Down, 0, -1, PipeDirection.Up, stack);
+            EvaluateNeighbor(current, PipeDirection.Left, -1, 0, PipeDirection.Right, stack);
+        }
+
+        // If the stack empties and we never hit the end node, the pipes are disconnected
+        return false;
+    }
+
+    // --- The Core Bitwise Verification ---
+
+    private void EvaluateNeighbor(PipeNode current, PipeDirection dirToNeighbor, int offsetX, int offsetY, PipeDirection requiredNeighborDir, Stack<PipeNode> stack)
+    {
+        // 1. Bitwise AND: Does the CURRENT pipe even have an opening pointing in this direction?
+        // (If the result is 0, the bit is missing. No flow possible.)
+        if ((current.currentConnections & dirToNeighbor) == 0) return;
+
+        int nx = current.x + offsetX;
+        int ny = current.y + offsetY;
+
+        // 2. Array Bounds: Does the neighbor exist on the grid?
+        if (nx < 0 || nx >= width || ny < 0 || ny >= height) return;
+
+        PipeNode neighbor = grid[nx, ny];
+
+        // 3. Bitwise AND Inverse: Does the NEIGHBOR pipe have an opening pointing BACK at us?
+        if ((neighbor.currentConnections & requiredNeighborDir) != 0)
+        {
+            // Valid connection! Push it to the stack so water can continue flowing from it.
+            stack.Push(neighbor);
+        }
+    }
+}

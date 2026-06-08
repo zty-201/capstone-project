@@ -1,4 +1,3 @@
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,21 +5,24 @@ public class ExplorationState : IState
 {
     public void Enter()
     {
-        Debug.Log("<color=lightblue>[ExplorationState]</color> Entered: Player is roaming the town.");
+        Debug.Log("<color=green>[State]</color> Exploration Mode Active. Movement Unlocked.");
     }
 
-    public void Execute()
+    public void Tick()
     {
-        // Wait for the player to press 'M' (Simulating opening a mission)
-        if (Keyboard.current != null && Keyboard.current.mKey.wasPressedThisFrame)
+        // Poll for input exactly like you used to
+        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
-            Debug.Log("<color=lightblue>[ExplorationState]</color> 'M' pressed. Transitioning to Mission State...");
-            GameManager.Instance.ChangeState(new MissionState());
+            Vector2 screenPos = Mouse.current.position.ReadValue();
+            Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, Camera.main.nearClipPlane));
+
+            // Broadcast the click intent to the EventBus
+            EventBus.OnMapClicked?.Invoke(worldPos);
         }
     }
 
     public void Exit()
     {
-        Debug.Log("<color=lightblue>[ExplorationState]</color> Exited: Leaving town view.");
+        Debug.Log("<color=green>[State]</color> Exiting Exploration Mode.");
     }
 }
