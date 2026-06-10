@@ -10,11 +10,6 @@ public class PuzzleState : IState
         // Turn the pipes ON when the state starts
         if (GameManager.Instance.puzzleContainer != null)
         {
-            // Snap to camera center, push forward on Z so it renders in front
-            Transform cam = Camera.main.transform;
-            GameManager.Instance.puzzleContainer.transform.position =
-                new Vector3(cam.position.x, cam.position.y, 0f);
-
             GameManager.Instance.puzzleContainer.SetActive(true);
         }
     }

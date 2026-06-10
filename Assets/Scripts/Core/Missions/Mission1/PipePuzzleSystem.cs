@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PipePuzzleSystem : MonoBehaviour
@@ -49,7 +50,7 @@ public class PipePuzzleSystem : MonoBehaviour
 
         if (CheckWaterFlow())
         {
-            Debug.Log("<color=cyan>[PipePuzzleSystem]</color> Connection established!");
+            StartCoroutine(HandlePuzzleVictory());
         }
     }
 
@@ -120,4 +121,21 @@ public class PipePuzzleSystem : MonoBehaviour
             stack.Push(neighbor);
         }
     }
+
+    private IEnumerator HandlePuzzleVictory()
+    {
+        Debug.Log("<color=cyan>[PipePuzzleSystem]</color> Puzzle Solved!");
+
+        // 1. (Optional) Turn all valid pipes blue here by grabbing their PipeVisual scripts
+
+        // 2. Wait for 1.5 seconds so the player sees the solved state
+        yield return new WaitForSeconds(1.5f);
+
+        // 3. Broadcast to your global quest/progression system that Mission 1 is done
+        EventBus.OnMissionCompleted?.Invoke(1, true);
+
+        // 4. Kick the player back to the exploration state
+        GameManager.Instance.StateManager.ChangeState(GameManager.Instance.ExploreState);
+    }
+
 }
