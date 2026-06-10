@@ -27,10 +27,19 @@ public class DialogueManager : MonoBehaviour
 
         sentences = new Queue<string>();
         nextArrow.SetActive(false);
+
+        // Now safe to hide — singleton is already assigned
+        gameObject.SetActive(false);
     }
 
     public void StartDialogue(string[] newSentences)
     {
+        if (newSentences == null || newSentences.Length == 0)
+        {
+            Debug.LogError("[DialogueManager] StartDialogue called with no lines.");
+            return;
+        }
+
         sentences.Clear();
         foreach (string sentence in newSentences)
             sentences.Enqueue(sentence);
