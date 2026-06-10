@@ -89,8 +89,7 @@ public class DialogueManager : MonoBehaviour
     private void EndDialogue()
     {
         Debug.Log("<color=green>[DialogueManager]</color> Conversation Ended.");
-
-        // Hide the UI Box, or transition your State Machine back to ExploreState here
         gameObject.SetActive(false);
+        GameManager.Instance.StateManager.ChangeState(GameManager.Instance.PuzzleState);
     }
 }

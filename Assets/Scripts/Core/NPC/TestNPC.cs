@@ -12,8 +12,5 @@ public class NPCController : MonoBehaviour, IInteractable
 
         // Send the text to the manager
         dialogueManager.StartDialogue(dialogueLines);
-        // Transition the game into the minigame state. 
-        // This locks player movement and unlocks the PipeVisual clicks!
-        GameManager.Instance.StateManager.ChangeState(GameManager.Instance.PuzzleState);
     }
 }
