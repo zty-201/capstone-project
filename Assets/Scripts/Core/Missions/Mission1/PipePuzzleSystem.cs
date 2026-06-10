@@ -13,31 +13,28 @@ public class PipePuzzleSystem : MonoBehaviour
     public Vector2Int startPos = new Vector2Int(0, 0); // Bottom-Left (The Pump)
     public Vector2Int endPos = new Vector2Int(2, 2);   // Top-Right (The Crops)
 
+    // Creates a basic hardcoded layout for testing the MVP backend
     private void Start()
     {
-        InitializeMVPGrid();
+        InitializeGridFromScene();
     }
 
-    // Creates a basic hardcoded layout for testing the MVP backend
-    private void InitializeMVPGrid()
+    private void InitializeGridFromScene()
     {
+        // 1. Create the empty mathematical grid
         grid = new PipeNode[width, height];
 
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                // Default all grid slots to a simple corner piece
-                grid[x, y] = new PipeNode(x, y, PipeDirection.Up | PipeDirection.Right);
-            }
-        }
+        // 2. Find every visual pipe you placed in the Unity Scene
+        PipeVisual[] visualPipes = FindObjectsByType<PipeVisual>(FindObjectsInactive.Exclude);
 
-        // Hardcode a solvable, scrambled path into the grid
-        grid[0, 0].currentConnections = PipeDirection.Right;
-        grid[1, 0].currentConnections = PipeDirection.Left | PipeDirection.Up;
-        grid[1, 1].currentConnections = PipeDirection.Down | PipeDirection.Right;
-        grid[2, 1].currentConnections = PipeDirection.Left | PipeDirection.Up;
-        grid[2, 2].currentConnections = PipeDirection.Down;
+        foreach (PipeVisual pipe in visualPipes)
+        {
+            // 3. Ask the visual pipe what its starting math should be based on its Z-rotation
+            PipeDirection startingBits = pipe.GetStartingBits();
+
+            // 4. Inject it into the mathematical grid
+            grid[pipe.gridX, pipe.gridY] = new PipeNode(pipe.gridX, pipe.gridY, startingBits);
+        }
     }
 
     // The single entry point for input. Call this when the player clicks a pipe.
@@ -45,16 +42,14 @@ public class PipePuzzleSystem : MonoBehaviour
     {
         if (x < 0 || x >= width || y < 0 || y >= height) return;
 
-        // 1. Mathematically rotate the node
+        // THE NEW GUARD CLAUSE: If this grid space is empty, ignore the click!
+        if (grid[x, y] == null) return;
+
         grid[x, y].RotateClockwise();
 
-        // 2. Run the DFS graph traversal to check if the new rotation solves the grid
         if (CheckWaterFlow())
         {
-            Debug.Log("<color=cyan>[PipePuzzleSystem]</color> Unbroken connection established! Mission 1 complete.");
-
-            // Assuming you added the boolean flag to the GameManager as discussed:
-            // GameManager.Instance.CompleteMission1(); 
+            Debug.Log("<color=cyan>[PipePuzzleSystem]</color> Connection established!");
         }
     }
 

@@ -1,26 +1,82 @@
 ﻿using UnityEngine;
-using UnityEngine.EventSystems;
 
-// IPointerClickHandler allows this object to detect standard UI clicks or Physics2D Raycasts
-public class PipeVisual : MonoBehaviour, IPointerClickHandler
+// Define the core shapes your pipes can be
+public enum PipeShape
 {
-    [Header("Grid Coordinates")]
+    EndPiece, // Single opening
+    Straight, // Two opposite openings
+    Corner,   // Two adjacent openings
+    TJunction,// Three openings
+    Cross     // Four openings
+}
+
+public class PipeVisual : MonoBehaviour
+{
+    [Header("Level Design")]
+    public PipeShape shapeType;
     public int gridX;
     public int gridY;
 
     [Header("Dependencies")]
-    public PipePuzzleSystem puzzleSystem; // Drag your GameManager/PuzzleManager here
+    public PipePuzzleSystem puzzleSystem;
 
-    public void OnPointerClick(PointerEventData eventData)
+    private BoxCollider2D col;
+
+    private void Awake()
     {
-        // 1. Guard Clause: Only accept clicks if the game is actually in Puzzle Mode!
-        if (GameManager.Instance.StateManager.CurrentState != GameManager.Instance.PuzzleState)
-            return;
+        col = GetComponent<BoxCollider2D>();
+    }
 
-        // 2. Tell the backend to run the bitwise math
-        puzzleSystem.RotatePipeAt(gridX, gridY);
+    private void OnEnable()
+    {
+        // Subscribe to your custom EventBus
+        EventBus.OnPuzzleClicked += HandlePuzzleClick;
+    }
 
-        // 3. Visually rotate this sprite -90 degrees on the Z axis (Clockwise in Unity 2D)
-        transform.Rotate(0, 0, -90f);
+    private void OnDisable()
+    {
+        EventBus.OnPuzzleClicked -= HandlePuzzleClick;
+    }
+
+    public PipeDirection GetStartingBits()
+    {
+        PipeDirection bits = PipeDirection.None;
+
+        switch (shapeType)
+        {
+            case PipeShape.EndPiece: bits = PipeDirection.Up; break;
+            case PipeShape.Straight: bits = PipeDirection.Up | PipeDirection.Down; break;
+            case PipeShape.Corner: bits = PipeDirection.Down | PipeDirection.Right; break;
+            case PipeShape.TJunction: bits = PipeDirection.Up | PipeDirection.Right | PipeDirection.Down; break;
+            case PipeShape.Cross: bits = PipeDirection.Up | PipeDirection.Right | PipeDirection.Down | PipeDirection.Left; break;
+        }
+
+        float zRot = transform.eulerAngles.z;
+
+        int rotations = 0;
+        if (Mathf.Approximately(zRot, 270f)) rotations = 1;
+        else if (Mathf.Approximately(zRot, 180f)) rotations = 2;
+        else if (Mathf.Approximately(zRot, 90f)) rotations = 3;
+
+        for (int i = 0; i < rotations; i++)
+        {
+            int b = (int)bits;
+            bits = (PipeDirection)(((b << 1) | (b >> 3)) & 15);
+        }
+
+        return bits;
+    }
+
+    private void HandlePuzzleClick(Vector3 worldPos)
+    {
+        // 1. Guard Clause: Ignore if not in the puzzle state
+        if (GameManager.Instance.StateManager.CurrentState != GameManager.Instance.PuzzleState) return;
+
+        // 2. Check if the mouse click exactly overlapped THIS pipe's collider
+        if (col.OverlapPoint(worldPos))
+        {
+            puzzleSystem.RotatePipeAt(gridX, gridY);
+            transform.Rotate(0, 0, -90f);
+        }
     }
 }

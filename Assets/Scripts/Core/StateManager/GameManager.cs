@@ -5,6 +5,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     public GameStateManager StateManager { get; private set; }
+    public GameObject puzzleContainer;
 
     // Define your concrete states here so they can be reused without allocating memory every time
     public ExplorationState ExploreState { get; private set; }
