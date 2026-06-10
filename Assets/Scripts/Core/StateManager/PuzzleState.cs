@@ -24,7 +24,9 @@ public class PuzzleState : IState
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
             Vector2 screenPos = Mouse.current.position.ReadValue();
-            Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, Camera.main.nearClipPlane));
+            float distToPlane = Mathf.Abs(Camera.main.transform.position.z);
+            Vector3 worldPos = Camera.main.ScreenToWorldPoint(
+                new Vector3(screenPos.x, screenPos.y, distToPlane));
 
             EventBus.OnPuzzleClicked?.Invoke(worldPos);
         }

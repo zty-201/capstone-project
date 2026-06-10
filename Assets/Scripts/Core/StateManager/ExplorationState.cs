@@ -14,7 +14,9 @@ public class ExplorationState : IState
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
             Vector2 screenPos = Mouse.current.position.ReadValue();
-            Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, Camera.main.nearClipPlane));
+            float distToPlane = Mathf.Abs(Camera.main.transform.position.z);
+            Vector3 worldPos = Camera.main.ScreenToWorldPoint(
+                new Vector3(screenPos.x, screenPos.y, distToPlane));
 
             // Broadcast the click intent to the EventBus
             EventBus.OnMapClicked?.Invoke(worldPos);

@@ -7,14 +7,14 @@ public static class EventBus
     // ==========================================
     // GAME STATE & TIME EVENTS
     // ==========================================
-    public static Action OnGameInitialized;
-    public static Action<int> OnDayEnded; // Passes the current day number
-    public static Action OnNextDayStarted;
+    public static event Action OnGameInitialized;
+    public static event Action<int> OnDayEnded; // Passes the current day number
+    public static event Action OnNextDayStarted;
 
     // ==========================================
     // MISSION & PDCA EVENTS
     // ==========================================
-    public static Action<int> OnMissionStarted; // Passes the Mission ID
+    public static event Action<int> OnMissionStarted; // Passes the Mission ID
 
     /// <summary>
     /// Triggered when an issue is solved.
@@ -37,7 +37,7 @@ public static class EventBus
     // ==========================================
     // KAIZEN / UI EVENTS
     // ==========================================
-    public static Action<int> OnEfficiencyScoreUpdated; // For Advanced Mission 2
+    public static event Action<int> OnEfficiencyScoreUpdated; // For Advanced Mission 2
 
     // NEW Input Events
     public static Action<Vector3> OnMapClicked;
