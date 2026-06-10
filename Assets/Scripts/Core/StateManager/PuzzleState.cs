@@ -10,13 +10,26 @@ public class PuzzleState : IState
         // Turn the pipes ON when the state starts
         if (GameManager.Instance.puzzleContainer != null)
         {
+            // Snap to camera center, push forward on Z so it renders in front
+            Transform cam = Camera.main.transform;
+            GameManager.Instance.puzzleContainer.transform.position =
+                new Vector3(cam.position.x, cam.position.y, 0f);
+
             GameManager.Instance.puzzleContainer.SetActive(true);
         }
     }
 
     public void Tick()
     {
-        // Wait for the player to press 'X' to leave the puzzle
+        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            Vector2 screenPos = Mouse.current.position.ReadValue();
+            Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, Camera.main.nearClipPlane));
+
+            EventBus.OnPuzzleClicked?.Invoke(worldPos);
+        }
+
+        // Exit puzzle on 'X'
         if (Keyboard.current != null && Keyboard.current.xKey.wasPressedThisFrame)
         {
             Debug.Log("<color=orange>[PuzzleState]</color> 'X' pressed. Transitioning back to Exploration State...");

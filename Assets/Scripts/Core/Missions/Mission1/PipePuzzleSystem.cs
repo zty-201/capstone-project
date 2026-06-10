@@ -60,7 +60,7 @@ public class PipePuzzleSystem : MonoBehaviour
         // Reset the power state of all pipes before calculating the new flow
         for (int x = 0; x < width; x++)
             for (int y = 0; y < height; y++)
-                grid[x, y].isPowered = false;
+                if (grid[x, y] != null) grid[x, y].isPowered = false;
 
         Stack<PipeNode> stack = new Stack<PipeNode>();
         HashSet<PipeNode> visited = new HashSet<PipeNode>();
@@ -110,6 +110,8 @@ public class PipePuzzleSystem : MonoBehaviour
         if (nx < 0 || nx >= width || ny < 0 || ny >= height) return;
 
         PipeNode neighbor = grid[nx, ny];
+
+        if (neighbor == null) return;
 
         // 3. Bitwise AND Inverse: Does the NEIGHBOR pipe have an opening pointing BACK at us?
         if ((neighbor.currentConnections & requiredNeighborDir) != 0)
