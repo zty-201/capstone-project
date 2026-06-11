@@ -6,7 +6,7 @@ public class GameManager : MonoBehaviour
 
     public GameStateManager StateManager { get; private set; }
     public GameObject puzzleContainer;
-
+    public MissionBoardState MissionBoardState { get; private set; }
     public ExplorationState ExploreState { get; private set; }
     public DialogueState DialogueState { get; private set; }
     public PuzzleState PuzzleState { get; private set; }
@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
         ExploreState = new ExplorationState();
         DialogueState = new DialogueState();
         PuzzleState = new PuzzleState();
+        MissionBoardState = new MissionBoardState();
     }
 
     private void Start()
