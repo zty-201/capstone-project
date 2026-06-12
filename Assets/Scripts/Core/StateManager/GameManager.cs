@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
     public ExplorationState ExploreState { get; private set; }
     public DialogueState DialogueState { get; private set; }
     public PuzzleState PuzzleState { get; private set; }
-
+    public ReflectionState ReflectionState { get; private set; }
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour
         DialogueState = new DialogueState();
         PuzzleState = new PuzzleState();
         MissionBoardState = new MissionBoardState();
+        ReflectionState = new ReflectionState();
     }
 
     private void Start()
