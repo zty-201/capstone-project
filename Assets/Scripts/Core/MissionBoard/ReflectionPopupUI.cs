@@ -8,11 +8,28 @@ public class ReflectionPopupUI : MonoBehaviour
     [Header("UI References")]
     public TextMeshProUGUI reflectionText;
 
+    private CanvasGroup canvasGroup;
+
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-        gameObject.SetActive(false);
+        canvasGroup = GetComponent<CanvasGroup>();
+        HidePanel();
+    }
+
+    private void HidePanel()
+    {
+        canvasGroup.alpha = 0f;
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
+    }
+
+    private void ShowPanel()
+    {
+        canvasGroup.alpha = 1f;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
     }
 
     private void OnEnable() => EventBus.OnMissionCompleted += HandleMissionCompleted;
@@ -25,13 +42,13 @@ public class ReflectionPopupUI : MonoBehaviour
             : "The patch worked for now, but the root cause remains...";
 
         reflectionText.text = text;
-        gameObject.SetActive(true);
+        ShowPanel();
         GameManager.Instance.StateManager.ChangeState(GameManager.Instance.ReflectionState);
     }
 
     public void OnDismiss()
     {
-        gameObject.SetActive(false);
+        HidePanel();
         GameManager.Instance.StateManager.ChangeState(GameManager.Instance.ExploreState);
     }
 }

@@ -7,18 +7,34 @@ public class MissionBoardUI : MonoBehaviour
     [Header("Mission Entries")]
     public MissionEntryUI[] missionEntries; // One per mission, assigned in Inspector
 
+    private CanvasGroup canvasGroup;
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-        gameObject.SetActive(false);
+        canvasGroup = GetComponent<CanvasGroup>();
+        HidePanel();
+    }
+
+    private void HidePanel()
+    {
+        canvasGroup.alpha = 0f;
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
+    }
+
+    private void ShowPanel()
+    {
+        canvasGroup.alpha = 1f;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
     }
 
     private void OnEnable() => EventBus.OnMissionCompleted += HandleMissionCompleted;
     private void OnDisable() => EventBus.OnMissionCompleted -= HandleMissionCompleted;
 
-    public void Show() => gameObject.SetActive(true);
-    public void Hide() => gameObject.SetActive(false);
+    public void Show() => ShowPanel();
+    public void Hide() => HidePanel();
 
     private void HandleMissionCompleted(int missionID, bool wasOptimal)
     {
