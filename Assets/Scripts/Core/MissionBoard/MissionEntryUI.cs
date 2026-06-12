@@ -3,7 +3,8 @@ using TMPro;
 
 public class MissionEntryUI : MonoBehaviour
 {
-    public int missionID;
+    public MissionData missionData;
+
     public TextMeshProUGUI missionNameText;
     public TextMeshProUGUI statusText;
     private CanvasGroup canvasGroup;
@@ -11,11 +12,12 @@ public class MissionEntryUI : MonoBehaviour
     private void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
+        missionNameText.text = missionData.missionName; // auto-populate on start
     }
 
     public void MarkCompleted(bool wasOptimal)
     {
-        canvasGroup.alpha = 0.4f;         // Grey out
+        canvasGroup.alpha = 0.4f;
         statusText.text = wasOptimal ? "Resolved" : "Needs Review";
     }
 }

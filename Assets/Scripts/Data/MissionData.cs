@@ -5,7 +5,7 @@ using UnityEngine;
 public class MissionData : ScriptableObject
 {
     [Header("Mission Overview")]
-    public string missionID; // e.g., "M1_ParchedCrops"
+    public int missionID; // e.g., "M1_ParchedCrops"
     public string missionName;
     public bool isAdvancedMission;
 

@@ -3759,7 +3759,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 430d6f0a879bfc7488e5ec007803330b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MissionEntryUI
-  missionID: 1
+  missionData: {fileID: 11400000, guid: 1311ca16048e7d04ab7fb8f5cd2e9d0e, type: 2}
   missionNameText: {fileID: 982329010}
   statusText: {fileID: 290791345}
 --- !u!225 &1582212308
@@ -4341,6 +4341,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ReflectionPopupUI
   reflectionText: {fileID: 1765989746}
+  allMissions:
+  - {fileID: 11400000, guid: 1311ca16048e7d04ab7fb8f5cd2e9d0e, type: 2}
 --- !u!114 &2049310145
 MonoBehaviour:
   m_ObjectHideFlags: 0

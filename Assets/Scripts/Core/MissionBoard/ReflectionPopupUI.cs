@@ -8,6 +8,9 @@ public class ReflectionPopupUI : MonoBehaviour
     [Header("UI References")]
     public TextMeshProUGUI reflectionText;
 
+    [Header("Mission Data")]
+    public MissionData[] allMissions;
+
     private CanvasGroup canvasGroup;
 
     private void Awake()
@@ -37,11 +40,15 @@ public class ReflectionPopupUI : MonoBehaviour
 
     private void HandleMissionCompleted(int missionID, bool wasOptimal)
     {
-        string text = wasOptimal
-            ? "Good choice! Rebuilding the pulley system fixed the root cause."
-            : "The patch worked for now, but the root cause remains...";
+        MissionData data = System.Array.Find(allMissions, m => m.missionID == missionID);
 
-        reflectionText.text = text;
+        if (data == null)
+        {
+            Debug.LogError($"[ReflectionPopupUI] No MissionData found for ID {missionID}");
+            return;
+        }
+
+        reflectionText.text = wasOptimal ? data.optimalReflectionText : data.trivialReflectionText;
         ShowPanel();
         GameManager.Instance.StateManager.ChangeState(GameManager.Instance.ReflectionState);
     }

@@ -41,7 +41,7 @@ public class MissionBoardUI : MonoBehaviour
         // Find the matching entry and grey it out
         foreach (var entry in missionEntries)
         {
-            if (entry.missionID == missionID)
+            if (entry.missionData.missionID == missionID)
             {
                 entry.MarkCompleted(wasOptimal);
                 return;

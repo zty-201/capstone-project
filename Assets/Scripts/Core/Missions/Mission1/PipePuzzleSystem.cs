@@ -132,7 +132,7 @@ public class PipePuzzleSystem : MonoBehaviour
         yield return new WaitForSeconds(1.5f);
 
         // 3. Broadcast to your global quest/progression system that Mission 1 is done
-        Debug.Log($"OnMissionCompleted null check: {EventBus.OnMissionCompleted == null}");
+        // Debug.Log($"OnMissionCompleted null check: {EventBus.OnMissionCompleted == null}");
         EventBus.OnMissionCompleted?.Invoke(1, true);
 
         // 4. Kick the player back to the exploration state
