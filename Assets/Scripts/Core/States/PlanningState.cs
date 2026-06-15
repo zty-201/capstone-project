@@ -36,7 +36,7 @@ public class PlanningState : MonoBehaviour
 
     private void SelectSolution(SolutionType choice)
     {
-        EventBus.OnSolutionSelected?.Invoke(currentMission.missionID, choice);
+        EventBus.RaiseSolutionSelected(currentMission.missionID, choice);
         Hide();
     }
 }

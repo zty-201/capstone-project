@@ -6,12 +6,6 @@ public class PuzzleState : IState
     public void Enter()
     {
         Debug.Log("<color=orange>[PuzzleState]</color> Entered: Playing the Pipe Puzzle.");
-
-        // Turn the pipes ON when the state starts
-        if (GameManager.Instance.puzzleContainer != null)
-        {
-            GameManager.Instance.puzzleContainer.SetActive(true);
-        }
     }
 
     public void Tick()
@@ -37,11 +31,5 @@ public class PuzzleState : IState
     public void Exit()
     {
         Debug.Log("<color=orange>[PuzzleState]</color> Exited: Returning to town.");
-
-        // Turn the pipes OFF when leaving the state
-        if (GameManager.Instance.puzzleContainer != null)
-        {
-            GameManager.Instance.puzzleContainer.SetActive(false);
-        }
     }
 }
