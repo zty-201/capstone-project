@@ -24,6 +24,6 @@ public class WellVisual : MonoBehaviour
         Debug.Log("<color=cyan>[WellVisual]</color> Well patched!");
         yield return new WaitForSeconds(1f);
 
-        EventBus.RaiseMissionCompleted(missionID, false); // Trivial path is always non-optimal
+        EventBus.RaiseMissionCompleted(missionID, false); // well patch = Trivial path
     }
 }
