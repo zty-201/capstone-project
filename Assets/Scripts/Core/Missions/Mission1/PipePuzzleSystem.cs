@@ -15,27 +15,12 @@ public class PipePuzzleSystem : MonoBehaviour
     [Header("Win Conditions")]
     public Vector2Int startPos = new Vector2Int(0, 0); // Bottom-Left (The Pump)
     public Vector2Int endPos = new Vector2Int(2, 2);   // Top-Right (The Crops)
-    private SolutionType solutionTypeUsed;
 
     // Creates a basic hardcoded layout for testing the MVP backend
     private void Start()
     {
         InitializeGridFromScene();
 
-    }
-
-    // NEW — subscription lifecycle (matches your existing OnEnable/OnDisable pattern)
-    private void OnEnable() => EventBus.OnSolutionSelected += HandleSolutionSelected;
-    private void OnDisable() => EventBus.OnSolutionSelected -= HandleSolutionSelected;
-
-    // NEW — Step 4's handler
-    private void HandleSolutionSelected(int selectedMissionID, SolutionType type)
-    {
-        if (selectedMissionID != missionID) return;
-        if (type != SolutionType.Optimal) return; // this system is the Optimal path
-
-        solutionTypeUsed = type;
-        gameObject.SetActive(true);
     }
 
     private void InitializeGridFromScene()
@@ -145,8 +130,7 @@ public class PipePuzzleSystem : MonoBehaviour
         Debug.Log("<color=cyan>[PipePuzzleSystem]</color> Puzzle Solved!");
         yield return new WaitForSeconds(1.5f);
 
-        EventBus.RaiseMissionCompleted(missionID, solutionTypeUsed == SolutionType.Optimal);
-        GameManager.Instance.StateManager.ChangeState(GameManager.Instance.ExploreState); // ADD THIS
+        EventBus.RaiseMissionCompleted(missionID, true); // Optimal path
     }
 
 }
