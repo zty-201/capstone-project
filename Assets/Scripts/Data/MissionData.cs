@@ -8,6 +8,7 @@ public class MissionData : ScriptableObject
     public int missionID; // e.g., "M1_ParchedCrops"
     public string missionName;
     public bool isAdvancedMission;
+    public enum SolutionType { Trivial, Optimal }
 
     [Header("Problem Identification (The Issue)")]
     [TextArea(2, 4)]

@@ -1,6 +1,7 @@
 using System;
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
+using static MissionData;
 
 public static class EventBus
 {
@@ -21,7 +22,9 @@ public static class EventBus
     /// int: Mission ID
     /// bool: True if optimal solution (Proceed to next stage), False if trivial (Needs Check/Act tomorrow)
     /// </summary>
-    public static Action<int, bool> OnMissionCompleted;
+    public static event Action<int, bool> OnMissionCompleted;
+    public static void RaiseMissionCompleted(int missionID, bool wasOptimal)
+    => OnMissionCompleted?.Invoke(missionID, wasOptimal);
 
     // ==========================================
     // PLAYER & MOVEMENT EVENTS
@@ -42,4 +45,7 @@ public static class EventBus
     // NEW Input Events
     public static Action<Vector3> OnMapClicked;
     public static Action<Vector3> OnPuzzleClicked;
+    public static event Action<int, SolutionType> OnSolutionSelected;
+    public static void RaiseSolutionSelected(int missionID, SolutionType type)
+    => OnSolutionSelected?.Invoke(missionID, type);
 }

@@ -1,23 +1,40 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static MissionData;
 
 public class PipePuzzleSystem : MonoBehaviour
 {
     [Header("Puzzle Dimensions")]
     public int width = 3;
     public int height = 3;
+    public int missionID = 1;
 
     private PipeNode[,] grid;
 
     [Header("Win Conditions")]
     public Vector2Int startPos = new Vector2Int(0, 0); // Bottom-Left (The Pump)
     public Vector2Int endPos = new Vector2Int(2, 2);   // Top-Right (The Crops)
+    private SolutionType solutionTypeUsed;
 
     // Creates a basic hardcoded layout for testing the MVP backend
     private void Start()
     {
         InitializeGridFromScene();
+    }
+
+    // NEW — subscription lifecycle (matches your existing OnEnable/OnDisable pattern)
+    private void OnEnable() => EventBus.OnSolutionSelected += HandleSolutionSelected;
+    private void OnDisable() => EventBus.OnSolutionSelected -= HandleSolutionSelected;
+
+    // NEW — Step 4's handler
+    private void HandleSolutionSelected(int selectedMissionID, SolutionType type)
+    {
+        if (selectedMissionID != missionID) return;
+        if (type != SolutionType.Optimal) return; // this system is the Optimal path
+
+        solutionTypeUsed = type;
+        gameObject.SetActive(true);
     }
 
     private void InitializeGridFromScene()
@@ -125,18 +142,9 @@ public class PipePuzzleSystem : MonoBehaviour
     private IEnumerator HandlePuzzleVictory()
     {
         Debug.Log("<color=cyan>[PipePuzzleSystem]</color> Puzzle Solved!");
-
-        // 1. (Optional) Turn all valid pipes blue here by grabbing their PipeVisual scripts
-
-        // 2. Wait for 1.5 seconds so the player sees the solved state
         yield return new WaitForSeconds(1.5f);
 
-        // 3. Broadcast to your global quest/progression system that Mission 1 is done
-        // Debug.Log($"OnMissionCompleted null check: {EventBus.OnMissionCompleted == null}");
-        EventBus.OnMissionCompleted?.Invoke(1, true);
-
-        // 4. Kick the player back to the exploration state
-        //GameManager.Instance.StateManager.ChangeState(GameManager.Instance.ExploreState);
+        EventBus.RaiseMissionCompleted(missionID, solutionTypeUsed == SolutionType.Optimal);
     }
 
 }
