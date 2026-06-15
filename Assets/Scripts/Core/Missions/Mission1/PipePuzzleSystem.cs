@@ -21,6 +21,7 @@ public class PipePuzzleSystem : MonoBehaviour
     private void Start()
     {
         InitializeGridFromScene();
+
     }
 
     // NEW — subscription lifecycle (matches your existing OnEnable/OnDisable pattern)
@@ -145,6 +146,7 @@ public class PipePuzzleSystem : MonoBehaviour
         yield return new WaitForSeconds(1.5f);
 
         EventBus.RaiseMissionCompleted(missionID, solutionTypeUsed == SolutionType.Optimal);
+        GameManager.Instance.StateManager.ChangeState(GameManager.Instance.ExploreState); // ADD THIS
     }
 
 }

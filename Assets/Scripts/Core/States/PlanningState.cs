@@ -1,42 +1,24 @@
 ﻿using UnityEngine;
-using static MissionData;
+using UnityEngine.InputSystem;
 
-public class PlanningState : MonoBehaviour
+public class PlanningState : IState
 {
-    public static PlanningState Instance { get; private set; }
-    private CanvasGroup canvasGroup;
-    private MissionData currentMission;
-
-    private void Awake()
+    public void Enter()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-        Instance = this;
-        canvasGroup = GetComponent<CanvasGroup>();
-        Hide();
+        Debug.Log("<color=magenta>[PlanningState]</color> Entered: Awaiting solution choice.");
     }
 
-    public void Show(MissionData mission)
+    public void Tick()
     {
-        currentMission = mission;
-        canvasGroup.alpha = 1f;
-        canvasGroup.interactable = true;
-        canvasGroup.blocksRaycasts = true;
+        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            PlanningUI.Instance.Hide();
+            GameManager.Instance.StateManager.ChangeState(GameManager.Instance.ExploreState);
+        }
     }
 
-    public void Hide()
+    public void Exit()
     {
-        canvasGroup.alpha = 0f;
-        canvasGroup.interactable = false;
-        canvasGroup.blocksRaycasts = false;
-    }
-
-    // Wired to button OnClick in Inspector
-    public void SelectTrivial() => SelectSolution(SolutionType.Trivial);
-    public void SelectOptimal() => SelectSolution(SolutionType.Optimal);
-
-    private void SelectSolution(SolutionType choice)
-    {
-        EventBus.RaiseSolutionSelected(currentMission.missionID, choice);
-        Hide();
+        Debug.Log("<color=magenta>[PlanningState]</color> Exited.");
     }
 }

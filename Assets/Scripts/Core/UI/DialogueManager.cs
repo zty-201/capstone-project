@@ -19,6 +19,7 @@ public class DialogueManager : MonoBehaviour
     private string currentSentence;
     private bool isTyping = false;
     private Coroutine typingCoroutine;
+    private MissionData pendingMission;
 
     private void Awake()
     {
@@ -32,8 +33,10 @@ public class DialogueManager : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public void StartDialogue(string[] newSentences)
+    public void StartDialogue(string[] newSentences, MissionData mission) // CHANGED signature
     {
+        pendingMission = mission;
+
         if (newSentences == null || newSentences.Length == 0)
         {
             Debug.LogError("[DialogueManager] StartDialogue called with no lines.");
@@ -95,6 +98,15 @@ public class DialogueManager : MonoBehaviour
     {
         Debug.Log("<color=green>[DialogueManager]</color> Conversation ended.");
         gameObject.SetActive(false);
-        GameManager.Instance.StateManager.ChangeState(GameManager.Instance.PuzzleState);
+
+        if (pendingMission != null)
+        {
+            PlanningUI.Instance.Show(pendingMission);
+            GameManager.Instance.StateManager.ChangeState(GameManager.Instance.PlanningState);
+        }
+        else
+        {
+            GameManager.Instance.StateManager.ChangeState(GameManager.Instance.ExploreState);
+        }
     }
 }
