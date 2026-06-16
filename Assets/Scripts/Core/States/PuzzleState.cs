@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PuzzleState : IState
@@ -17,14 +17,13 @@ public class PuzzleState : IState
             Vector3 worldPos = Camera.main.ScreenToWorldPoint(
                 new Vector3(screenPos.x, screenPos.y, distToPlane));
 
-            EventBus.OnPuzzleClicked?.Invoke(worldPos);
+            EventBus.RaisePuzzleClicked(worldPos);
         }
 
-        // Exit puzzle on 'X'
         if (Keyboard.current != null && Keyboard.current.xKey.wasPressedThisFrame)
         {
             Debug.Log("<color=orange>[PuzzleState]</color> 'X' pressed. Transitioning back to Exploration State...");
-            GameManager.Instance.StateManager.ChangeState(GameManager.Instance.ExploreState);
+            GameManager.Instance.StateManager.ChangeState(GameStateType.Exploration);
         }
     }
 

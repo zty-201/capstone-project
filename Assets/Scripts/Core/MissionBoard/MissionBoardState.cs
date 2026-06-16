@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class MissionBoardState : IState
@@ -8,7 +8,7 @@ public class MissionBoardState : IState
     public void Tick()
     {
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-            GameManager.Instance.StateManager.ChangeState(GameManager.Instance.ExploreState);
+            GameManager.Instance.StateManager.ChangeState(GameStateType.Exploration);
     }
 
     public void Exit()

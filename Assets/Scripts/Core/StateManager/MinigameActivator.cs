@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using static MissionData;
+using UnityEngine;
 
 public class MinigameActivator : MonoBehaviour
 {
@@ -9,10 +8,6 @@ public class MinigameActivator : MonoBehaviour
 
     [Header("Target")]
     public GameObject container;
-
-    public enum MinigameStateType { Puzzle, PatchWell }
-    [Header("State To Enter")]
-    public MinigameStateType stateToEnter;
 
     private void OnEnable()
     {
@@ -32,17 +27,16 @@ public class MinigameActivator : MonoBehaviour
 
         container.SetActive(true);
 
-        IState target = stateToEnter == MinigameStateType.Puzzle
-            ? (IState)GameManager.Instance.PuzzleState
-            : GameManager.Instance.PatchWellState;
-        GameManager.Instance.StateManager.ChangeState(target);
+        GameStateType targetState = solutionType == SolutionType.Optimal
+            ? GameStateType.Puzzle
+            : GameStateType.PatchWell;
+        GameManager.Instance.StateManager.ChangeState(targetState);
     }
 
     private void HandleMissionCompleted(int completedMissionID, bool wasOptimal)
     {
         if (completedMissionID != missionID) return;
 
-        // Only deactivate the path that was actually played
         bool thisPathWasPlayed = (solutionType == SolutionType.Optimal && wasOptimal)
                               || (solutionType == SolutionType.Trivial && !wasOptimal);
         if (!thisPathWasPlayed) return;

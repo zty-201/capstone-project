@@ -19,7 +19,7 @@ public class ExplorationState : IState
                 new Vector3(screenPos.x, screenPos.y, distToPlane));
 
             // Broadcast the click intent to the EventBus
-            EventBus.OnMapClicked?.Invoke(worldPos);
+            EventBus.RaiseMapClicked(worldPos);
         }
     }
 

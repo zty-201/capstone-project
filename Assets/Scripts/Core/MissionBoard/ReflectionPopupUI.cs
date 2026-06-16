@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using TMPro;
 
 public class ReflectionPopupUI : MonoBehaviour
@@ -9,7 +9,7 @@ public class ReflectionPopupUI : MonoBehaviour
     public TextMeshProUGUI reflectionText;
 
     [Header("Mission Data")]
-    public MissionData[] allMissions;
+    public MissionRegistry missionRegistry;
 
     private CanvasGroup canvasGroup;
 
@@ -17,6 +17,10 @@ public class ReflectionPopupUI : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+
+        if (reflectionText == null) Debug.LogError($"[{name}] reflectionText is not assigned!", this);
+        if (missionRegistry == null) Debug.LogError($"[{name}] missionRegistry is not assigned!", this);
+
         canvasGroup = GetComponent<CanvasGroup>();
         HidePanel();
     }
@@ -40,7 +44,7 @@ public class ReflectionPopupUI : MonoBehaviour
 
     private void HandleMissionCompleted(int missionID, bool wasOptimal)
     {
-        MissionData data = System.Array.Find(allMissions, m => m.missionID == missionID);
+        MissionData data = missionRegistry.GetByID(missionID);
 
         if (data == null)
         {
@@ -50,12 +54,12 @@ public class ReflectionPopupUI : MonoBehaviour
 
         reflectionText.text = wasOptimal ? data.optimalReflectionText : data.trivialReflectionText;
         ShowPanel();
-        GameManager.Instance.StateManager.ChangeState(GameManager.Instance.ReflectionState);
+        GameManager.Instance.StateManager.ChangeState(GameStateType.Reflection);
     }
 
     public void OnDismiss()
     {
         HidePanel();
-        GameManager.Instance.StateManager.ChangeState(GameManager.Instance.ExploreState);
+        GameManager.Instance.StateManager.ChangeState(GameStateType.Exploration);
     }
 }

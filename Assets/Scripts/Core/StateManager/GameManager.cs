@@ -1,35 +1,32 @@
-﻿using UnityEngine;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
-
     public GameStateManager StateManager { get; private set; }
-    public MissionBoardState MissionBoardState { get; private set; }
-    public ExplorationState ExploreState { get; private set; }
-    public DialogueState DialogueState { get; private set; }
-    public PuzzleState PuzzleState { get; private set; }
-    public ReflectionState ReflectionState { get; private set; }
-    public PatchWellState PatchWellState { get; private set; }
-    public PlanningState PlanningState { get; private set; }
+
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
 
         StateManager = new GameStateManager();
-        ExploreState = new ExplorationState();
-        DialogueState = new DialogueState();
-        PuzzleState = new PuzzleState();
-        MissionBoardState = new MissionBoardState();
-        ReflectionState = new ReflectionState();
-        PatchWellState = new PatchWellState();
-        PlanningState = new PlanningState();
+        StateManager.RegisterStates(new Dictionary<GameStateType, IState>
+        {
+            { GameStateType.Exploration,  new ExplorationState()  },
+            { GameStateType.Dialogue,     new DialogueState()     },
+            { GameStateType.Planning,     new PlanningState()     },
+            { GameStateType.Puzzle,       new PuzzleState()       },
+            { GameStateType.PatchWell,    new PatchWellState()    },
+            { GameStateType.Reflection,   new ReflectionState()   },
+            { GameStateType.MissionBoard, new MissionBoardState() },
+        });
     }
 
     private void Start()
     {
-        StateManager.ChangeState(ExploreState);
+        StateManager.ChangeState(GameStateType.Exploration);
     }
 
     private void Update()

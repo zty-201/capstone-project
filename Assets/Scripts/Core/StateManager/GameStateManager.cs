@@ -1,18 +1,29 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameStateManager
 {
-    public IState CurrentState { get; private set; }
+    private Dictionary<GameStateType, IState> _states = new Dictionary<GameStateType, IState>();
 
-    public void ChangeState(IState newState)
+    public IState CurrentState { get; private set; }
+    public GameStateType CurrentStateType { get; private set; }
+
+    public void RegisterStates(Dictionary<GameStateType, IState> states)
     {
-        // Clean up the old state before entering the new one
-        if (CurrentState != null)
+        _states = states;
+    }
+
+    public void ChangeState(GameStateType type)
+    {
+        if (!_states.TryGetValue(type, out IState newState))
         {
-            CurrentState.Exit();
+            Debug.LogError($"[GameStateManager] No state registered for {type}");
+            return;
         }
 
+        CurrentState?.Exit();
         CurrentState = newState;
+        CurrentStateType = type;
         CurrentState.Enter();
 
         Debug.Log($"<color=cyan>[GameStateManager]</color> Transitioned to: {newState.GetType().Name}");
@@ -20,10 +31,6 @@ public class GameStateManager
 
     public void Update()
     {
-        // Pass the frame tick down to whichever state is currently active
-        if (CurrentState != null)
-        {
-            CurrentState.Tick();
-        }
+        CurrentState?.Tick();
     }
 }

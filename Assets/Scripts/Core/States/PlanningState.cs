@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlanningState : IState
@@ -10,10 +10,13 @@ public class PlanningState : IState
 
     public void Tick()
     {
+        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+            PlanningUI.Instance.OnAdvance();
+
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             PlanningUI.Instance.Hide();
-            GameManager.Instance.StateManager.ChangeState(GameManager.Instance.ExploreState);
+            GameManager.Instance.StateManager.ChangeState(GameStateType.Exploration);
         }
     }
 

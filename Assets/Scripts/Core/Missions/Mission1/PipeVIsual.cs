@@ -70,7 +70,7 @@ public class PipeVisual : MonoBehaviour
     private void HandlePuzzleClick(Vector3 worldPos)
     {
         // 1. Guard Clause: Ignore if not in the puzzle state
-        if (GameManager.Instance.StateManager.CurrentState != GameManager.Instance.PuzzleState) return;
+        if (GameManager.Instance.StateManager.CurrentStateType != GameStateType.Puzzle) return;
 
         // 2. Check if the mouse click exactly overlapped THIS pipe's collider
         if (col.OverlapPoint(worldPos))

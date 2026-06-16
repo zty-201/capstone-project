@@ -1,27 +1,38 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 using TMPro;
-using static MissionData;
 
 public class PlanningUI : MonoBehaviour
 {
     public static PlanningUI Instance { get; private set; }
 
     [Header("UI References")]
-    public TextMeshProUGUI displayText;     // shared text area for both solution names
-    public GameObject choiceButtonGroup;    // parent containing both buttons, hidden until both texts shown
+    public TextMeshProUGUI displayText;
+    public GameObject nextArrow;
+    public GameObject choiceButtonGroup;
 
     [Header("Settings")]
     public float typeSpeed = 0.05f;
 
     private CanvasGroup canvasGroup;
     private MissionData currentMission;
-    private Coroutine sequenceCoroutine;
+
+    private bool isTyping = false;
+    private string currentText = "";
+    private Coroutine typingCoroutine;
+
+    private enum Stage { Trivial, Optimal, Buttons }
+    private Stage stage;
 
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+
+        if (displayText == null) Debug.LogError($"[{name}] displayText is not assigned!", this);
+        if (nextArrow == null) Debug.LogError($"[{name}] nextArrow is not assigned!", this);
+        if (choiceButtonGroup == null) Debug.LogError($"[{name}] choiceButtonGroup is not assigned!", this);
+
         canvasGroup = GetComponent<CanvasGroup>();
         Hide();
     }
@@ -35,9 +46,10 @@ public class PlanningUI : MonoBehaviour
         canvasGroup.blocksRaycasts = true;
 
         choiceButtonGroup.SetActive(false);
+        nextArrow.SetActive(false);
 
-        if (sequenceCoroutine != null) StopCoroutine(sequenceCoroutine);
-        sequenceCoroutine = StartCoroutine(RunSequence());
+        stage = Stage.Trivial;
+        StartTyping(currentMission.trivialSolutionName);
     }
 
     public void Hide()
@@ -47,32 +59,61 @@ public class PlanningUI : MonoBehaviour
         canvasGroup.blocksRaycasts = false;
     }
 
-    private IEnumerator RunSequence()
+    // Called by PlanningState on left click
+    public void OnAdvance()
     {
-        // 1. Show trivial solution name
-        yield return TypeText(currentMission.trivialSolutionName);
-        yield return new WaitForSeconds(1f); // brief pause to let player read
+        if (stage == Stage.Buttons) return;
 
-        // 2. Clear, then show optimal solution name
-        displayText.text = "";
-        yield return TypeText(currentMission.optimalSolutionName);
-        yield return new WaitForSeconds(1f);
+        if (isTyping)
+        {
+            if (typingCoroutine != null) StopCoroutine(typingCoroutine);
+            displayText.text = currentText;
+            isTyping = false;
+            nextArrow.SetActive(true);
+            return;
+        }
 
-        // 3. Reveal the two choice buttons ("1" = Trivial, "2" = Optimal)
-        choiceButtonGroup.SetActive(true);
+        // Not typing — advance to next stage
+        nextArrow.SetActive(false);
+
+        if (stage == Stage.Trivial)
+        {
+            stage = Stage.Optimal;
+            displayText.text = "";
+            StartTyping(currentMission.optimalSolutionName);
+        }
+        else if (stage == Stage.Optimal)
+        {
+            stage = Stage.Buttons;
+            displayText.text = "";
+            nextArrow.SetActive(false);
+            choiceButtonGroup.SetActive(true);
+        }
     }
 
-    private IEnumerator TypeText(string sentence)
+    private void StartTyping(string sentence)
     {
+        if (typingCoroutine != null) StopCoroutine(typingCoroutine);
+        typingCoroutine = StartCoroutine(TypeSentence(sentence));
+    }
+
+    private IEnumerator TypeSentence(string sentence)
+    {
+        currentText = sentence;
+        isTyping = true;
+        nextArrow.SetActive(false);
         displayText.text = "";
+
         foreach (char letter in sentence.ToCharArray())
         {
             displayText.text += letter;
             yield return new WaitForSeconds(typeSpeed);
         }
+
+        isTyping = false;
+        nextArrow.SetActive(true);
     }
 
-    // Wired to button OnClick in Inspector
     public void SelectTrivial() => SelectSolution(SolutionType.Trivial);
     public void SelectOptimal() => SelectSolution(SolutionType.Optimal);
 

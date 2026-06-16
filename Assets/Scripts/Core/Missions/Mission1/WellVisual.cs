@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 
 public class WellVisual : MonoBehaviour
@@ -15,7 +15,7 @@ public class WellVisual : MonoBehaviour
 
     private void HandleWellClicked(Vector3 worldPos)
     {
-        if (GameManager.Instance.StateManager.CurrentState != GameManager.Instance.PatchWellState) return;
+        if (GameManager.Instance.StateManager.CurrentStateType != GameStateType.PatchWell) return;
         if (col.OverlapPoint(worldPos)) StartCoroutine(HandlePatchVictory());
     }
 
@@ -24,6 +24,6 @@ public class WellVisual : MonoBehaviour
         Debug.Log("<color=cyan>[WellVisual]</color> Well patched!");
         yield return new WaitForSeconds(1f);
 
-        EventBus.RaiseMissionCompleted(missionID, false); // well patch = Trivial path
+        EventBus.RaiseMissionCompleted(missionID, false);
     }
 }

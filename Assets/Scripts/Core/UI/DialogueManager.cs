@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -26,14 +26,15 @@ public class DialogueManager : MonoBehaviour
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
 
+        if (dialogueText == null) Debug.LogError($"[{name}] dialogueText is not assigned!", this);
+        if (nextArrow == null) Debug.LogError($"[{name}] nextArrow is not assigned!", this);
+
         sentences = new Queue<string>();
         nextArrow.SetActive(false);
-
-        // Now safe to hide — singleton is already assigned
         gameObject.SetActive(false);
     }
 
-    public void StartDialogue(string[] newSentences, MissionData mission) // CHANGED signature
+    public void StartDialogue(string[] newSentences, MissionData mission)
     {
         pendingMission = mission;
 
@@ -102,11 +103,11 @@ public class DialogueManager : MonoBehaviour
         if (pendingMission != null)
         {
             PlanningUI.Instance.Show(pendingMission);
-            GameManager.Instance.StateManager.ChangeState(GameManager.Instance.PlanningState);
+            GameManager.Instance.StateManager.ChangeState(GameStateType.Planning);
         }
         else
         {
-            GameManager.Instance.StateManager.ChangeState(GameManager.Instance.ExploreState);
+            GameManager.Instance.StateManager.ChangeState(GameStateType.Exploration);
         }
     }
 }

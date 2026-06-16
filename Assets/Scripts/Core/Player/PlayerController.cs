@@ -57,7 +57,7 @@ public class PlayerController : MonoBehaviour
             }
 
             transform.position = targetPos;
-            EventBus.OnPlayerMoved?.Invoke(new Vector2Int(path[i].x, path[i].y));
+            EventBus.RaisePlayerMoved(new Vector2Int(path[i].x, path[i].y));
         }
 
         anim.SetFloat("Speed", 0f);

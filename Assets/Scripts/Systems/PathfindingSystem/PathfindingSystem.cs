@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -13,33 +13,30 @@ public class PathfindingSystem : MonoBehaviour
     public Tilemap collisionTilemap;
 
     private GridSystem gridSystem;
+
+    private void Awake()
+    {
+        if (collisionTilemap == null)
+            Debug.LogError($"[{name}] collisionTilemap is not assigned!", this);
+    }
+
     private void Start()
     {
-        // 1. Initialize the mathematical grid
         gridSystem = new GridSystem(gridWidth, gridHeight, cellSize, gridOrigin);
 
-        // 2. Scan the visual Tilemap to update the math
         if (collisionTilemap != null)
         {
             for (int x = 0; x < gridWidth; x++)
             {
                 for (int y = 0; y < gridHeight; y++)
                 {
-                    // NEW MATH: Get the exact physical world position of this mathematical node
                     Vector3 worldPos = gridSystem.GetWorldPosition(x, y);
-
-                    // NEW MATH: Ask Unity to convert that physical position into its Tilemap cell coordinate
                     Vector3Int tilePosition = collisionTilemap.WorldToCell(worldPos);
 
-                    // If a tile is painted on the collision layer at this exact coordinate...
                     if (collisionTilemap.HasTile(tilePosition))
                     {
-                        // ...flag our invisible backend node as unwalkable
                         GridNode node = gridSystem.GetNode(x, y);
-                        if (node != null)
-                        {
-                            node.isWalkable = false;
-                        }
+                        if (node != null) node.isWalkable = false;
                     }
                 }
             }
@@ -57,7 +54,6 @@ public class PathfindingSystem : MonoBehaviour
 
     public Vector3 GetWorldPositionCenter(int x, int y)
     {
-        // Add half a cell size to the origin-adjusted position to get the dead center
         return gridSystem.GetWorldPosition(x, y) + new Vector3(cellSize / 2f, cellSize / 2f, 0);
     }
 
@@ -71,40 +67,39 @@ public class PathfindingSystem : MonoBehaviour
 
         if (startNode == null || endNode == null || !endNode.isWalkable) return;
 
-        List<GridNode> openList = new List<GridNode> { startNode };
-        HashSet<GridNode> closedList = new HashSet<GridNode>();
-
         // Reset all nodes
         for (int x = 0; x < gridWidth; x++)
-        {
             for (int y = 0; y < gridHeight; y++)
             {
                 GridNode node = gridSystem.GetNode(x, y);
                 node.gCost = int.MaxValue;
                 node.cameFromNode = null;
             }
-        }
 
         startNode.gCost = 0;
         startNode.hCost = CalculateManhattanDistance(startNode, endNode);
 
-        while (openList.Count > 0)
+        NodeMinHeap openHeap = new NodeMinHeap();
+        HashSet<GridNode> closedSet = new HashSet<GridNode>();
+        openHeap.Enqueue(startNode);
+
+        while (openHeap.Count > 0)
         {
-            GridNode currentNode = GetLowestFCostNode(openList);
+            GridNode currentNode = openHeap.Dequeue();
+
+            // Skip stale heap entries for nodes already finalized
+            if (closedSet.Contains(currentNode)) continue;
+            closedSet.Add(currentNode);
 
             if (currentNode == endNode)
             {
-                // Path found! Broadcast it.
-                EventBus.OnPathGenerated?.Invoke(CalculatePath(endNode));
+                EventBus.RaisePathGenerated(BuildPath(endNode));
                 return;
             }
 
-            openList.Remove(currentNode);
-            closedList.Add(currentNode);
-
             foreach (GridNode neighbor in GetNeighbors(currentNode))
             {
-                if (closedList.Contains(neighbor) || !neighbor.isWalkable) continue;
+                if (closedSet.Contains(neighbor) || !neighbor.isWalkable) continue;
 
                 int tentativeGCost = currentNode.gCost + CalculateManhattanDistance(currentNode, neighbor);
 
@@ -113,8 +108,7 @@ public class PathfindingSystem : MonoBehaviour
                     neighbor.cameFromNode = currentNode;
                     neighbor.gCost = tentativeGCost;
                     neighbor.hCost = CalculateManhattanDistance(neighbor, endNode);
-
-                    if (!openList.Contains(neighbor)) openList.Add(neighbor);
+                    openHeap.Enqueue(neighbor);
                 }
             }
         }
@@ -125,7 +119,6 @@ public class PathfindingSystem : MonoBehaviour
     private List<GridNode> GetNeighbors(GridNode node)
     {
         List<GridNode> neighbors = new List<GridNode>();
-        // 4-way orthogonal movement
         if (node.x > 0) neighbors.Add(gridSystem.GetNode(node.x - 1, node.y));
         if (node.x < gridWidth - 1) neighbors.Add(gridSystem.GetNode(node.x + 1, node.y));
         if (node.y > 0) neighbors.Add(gridSystem.GetNode(node.x, node.y - 1));
@@ -138,17 +131,7 @@ public class PathfindingSystem : MonoBehaviour
         return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y);
     }
 
-    private GridNode GetLowestFCostNode(List<GridNode> nodeList)
-    {
-        GridNode lowest = nodeList[0];
-        for (int i = 1; i < nodeList.Count; i++)
-        {
-            if (nodeList[i].fCost < lowest.fCost) lowest = nodeList[i];
-        }
-        return lowest;
-    }
-
-    private List<GridNode> CalculatePath(GridNode endNode)
+    private List<GridNode> BuildPath(GridNode endNode)
     {
         List<GridNode> path = new List<GridNode> { endNode };
         GridNode currentNode = endNode;
@@ -161,9 +144,6 @@ public class PathfindingSystem : MonoBehaviour
         return path;
     }
 
-    // ---------------------------------------------------------
-    // DEBUG VISUALS: Draw the grid in the Scene/Game view
-    // ---------------------------------------------------------
     private void OnDrawGizmos()
     {
         if (!Application.isPlaying || gridSystem == null) return;
@@ -172,10 +152,8 @@ public class PathfindingSystem : MonoBehaviour
         {
             for (int y = 0; y < gridHeight; y++)
             {
-                // Use the helper method instead of raw math!
                 Vector3 cellPosition = gridSystem.GetWorldPosition(x, y);
                 Vector3 centerOffset = new Vector3(cellSize / 2f, cellSize / 2f, 0);
-
                 GridNode node = gridSystem.GetNode(x, y);
 
                 if (node != null && !node.isWalkable)
