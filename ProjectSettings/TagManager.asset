@@ -44,11 +44,17 @@ TagManager:
   - name: Ground
     uniqueID: 955047945
     locked: 0
-  - name: Environment
+  - name: Environment-Base
     uniqueID: 1998254675
+    locked: 0
+  - name: NPC
+    uniqueID: 1651368817
     locked: 0
   - name: Entities
     uniqueID: 695304961
+    locked: 0
+  - name: Environment-Front
+    uniqueID: 2934691563
     locked: 0
   - name: UI
     uniqueID: 1800175817

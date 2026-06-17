@@ -5,17 +5,20 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5f;
+    [SerializeField] private LayerMask npcLayerMask;
+
     private Coroutine movementCoroutine;
+    private Vector2Int currentDestination;
 
     private Animator anim;
-    private SpriteRenderer spriteRenderer; // 1. Add reference
+    private SpriteRenderer spriteRenderer;
 
     public PathfindingSystem pathfindingSystem;
 
     private void Awake()
     {
         anim = GetComponent<Animator>();
-        spriteRenderer = GetComponent<SpriteRenderer>(); // 2. Cache component
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     private void OnEnable() => EventBus.OnPathGenerated += HandlePathGenerated;
@@ -23,6 +26,9 @@ public class PlayerController : MonoBehaviour
 
     private void HandlePathGenerated(List<GridNode> path)
     {
+        if (path.Count > 0)
+            currentDestination = new Vector2Int(path[path.Count - 1].x, path[path.Count - 1].y);
+
         if (movementCoroutine != null) StopCoroutine(movementCoroutine);
         movementCoroutine = StartCoroutine(FollowPath(path));
     }
@@ -33,22 +39,26 @@ public class PlayerController : MonoBehaviour
 
         for (int i = 1; i < path.Count; i++)
         {
+            bool isFinalNode = i == path.Count - 1;
             Vector3 targetPos = pathfindingSystem.GetWorldPositionCenter(path[i].x, path[i].y);
-            Vector3 moveDir = (targetPos - transform.position).normalized;
 
+            if (!isFinalNode)
+            {
+                Collider2D hit = Physics2D.OverlapPoint(targetPos, npcLayerMask);
+                if (hit != null)
+                {
+                    pathfindingSystem.GetGridCoordinates(transform.position, out int cx, out int cy);
+                    EventBus.RaisePathRequested(new Vector2Int(cx, cy), currentDestination);
+                    yield break;
+                }
+            }
+
+            Vector3 moveDir = (targetPos - transform.position).normalized;
             anim.SetFloat("MoveX", moveDir.x);
             anim.SetFloat("MoveY", moveDir.y);
 
-            // 3. Flip the sprite based on horizontal direction
-            // We only check > 0 or < 0 so that strictly vertical movement doesn't overwrite the last horizontal facing state
-            if (moveDir.x < -0.01f)
-            {
-                spriteRenderer.flipX = true;  // Facing Left
-            }
-            else if (moveDir.x > 0.01f)
-            {
-                spriteRenderer.flipX = false; // Facing Right
-            }
+            if (moveDir.x < -0.01f) spriteRenderer.flipX = true;
+            else if (moveDir.x > 0.01f) spriteRenderer.flipX = false;
 
             while (Vector3.Distance(transform.position, targetPos) > 0.01f)
             {

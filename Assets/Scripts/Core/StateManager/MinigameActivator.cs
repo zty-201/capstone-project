@@ -8,6 +8,7 @@ public class MinigameActivator : MonoBehaviour
 
     [Header("Target")]
     public GameObject container;
+    public GameStateType targetState;
 
     private void OnEnable()
     {
@@ -26,10 +27,6 @@ public class MinigameActivator : MonoBehaviour
         if (selectedMissionID != missionID || type != solutionType) return;
 
         container.SetActive(true);
-
-        GameStateType targetState = solutionType == SolutionType.Optimal
-            ? GameStateType.Puzzle
-            : GameStateType.PatchWell;
         GameManager.Instance.StateManager.ChangeState(targetState);
     }
 

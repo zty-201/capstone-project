@@ -52,6 +52,13 @@ public class PathfindingSystem : MonoBehaviour
         gridSystem.GetXY(worldPos, out x, out y);
     }
 
+    public void SetWalkable(Vector3 worldPos, bool walkable)
+    {
+        gridSystem.GetXY(worldPos, out int x, out int y);
+        GridNode node = gridSystem.GetNode(x, y);
+        if (node != null) node.isWalkable = walkable;
+    }
+
     public Vector3 GetWorldPositionCenter(int x, int y)
     {
         return gridSystem.GetWorldPosition(x, y) + new Vector3(cellSize / 2f, cellSize / 2f, 0);
