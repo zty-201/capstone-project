@@ -15,7 +15,8 @@ MonoBehaviour:
   missionID: 1
   missionName: The Parched Crops
   isAdvancedMission: 0
-  villagerComplaint: The crops are dying, there isn't enough water pressure!
+  villagerComplaint:
+  - Theres not enough water to water the crops!
   actualRootCause: The central well is structurally compromised, leaking water into
     the soil
   who: 

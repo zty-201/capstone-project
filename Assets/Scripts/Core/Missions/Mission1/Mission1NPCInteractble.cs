@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class RiverInteractable : MonoBehaviour, IInteractable
+public class NPCController : MonoBehaviour, IInteractable
 {
     public MissionData associatedMission;
 

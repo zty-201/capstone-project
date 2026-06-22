@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10fc3a025822d194aad4d77cfe8095cc, type: 3}
+  m_Name: M2_CleaningRiver
+  m_EditorClassIdentifier: Assembly-CSharp::MissionData
+  missionID: 2
+  missionName: Clogged River
+  isAdvancedMission: 0
+  villagerComplaint:
+  - It hard to catch any fish nowadays!
+  actualRootCause: 'The rubbish blocked the upstrean of the river, causing a lack
+    of water downstream and thus no fish. '
+  who: 
+  what: 
+  where: 
+  when: 
+  why: 
+  trivialSolutionName: Clear the rubbish
+  optimalSolutionName: Setup a automatic rubbish collector
+  trivialReflectionText: The rubbish has been cleared, but the root cause hasnt be
+    solved ...
+  optimalReflectionText: Good! You demostrated Jidoka in this mission choice by creating
+    the automatic rubbish cleaner and solving the root cause.

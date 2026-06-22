@@ -10,7 +10,7 @@ public class MissionData : ScriptableObject
 
     [Header("Problem Identification (The Issue)")]
     [TextArea(2, 4)]
-    public string villagerComplaint;
+    public string[] villagerComplaint;
     [TextArea(2, 4)]
     public string actualRootCause;
 
