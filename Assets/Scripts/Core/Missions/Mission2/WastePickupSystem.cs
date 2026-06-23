@@ -3,12 +3,13 @@ using UnityEngine;
 public class WastePickupSystem : MonoBehaviour
 {
     [SerializeField] private int missionID = 2;
+    [SerializeField] private int wasteCount;
 
     private int remaining;
 
     private void OnEnable()
     {
-        remaining = GetComponentsInChildren<WastePiece>().Length;
+        remaining = wasteCount;
     }
 
     public void OnWasteRemoved()

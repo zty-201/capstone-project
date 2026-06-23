@@ -4,7 +4,7 @@ public class RiverManager : MonoBehaviour
 {
     [SerializeField] private int missionID = 2;
     [SerializeField] private GameObject blockageVisual;
-    [SerializeField] private Animator riverAnimator;
+    [SerializeField] private GameObject animatedRiverTilemap;
 
     private void OnEnable() => EventBus.OnMissionCompleted += HandleMissionCompleted;
     private void OnDisable() => EventBus.OnMissionCompleted -= HandleMissionCompleted;
@@ -13,6 +13,6 @@ public class RiverManager : MonoBehaviour
     {
         if (id != missionID) return;
         if (blockageVisual != null) blockageVisual.SetActive(false);
-        if (riverAnimator != null) riverAnimator.SetTrigger("Flow");
+        if (animatedRiverTilemap != null) animatedRiverTilemap.SetActive(true);
     }
 }
