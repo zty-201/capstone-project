@@ -10,6 +10,8 @@ public static class EventBus
     public static event Action OnGameInitialized;
     public static event Action<int> OnDayEnded;
     public static event Action OnNextDayStarted;
+    public static event Action<int> OnDayCompleted;
+    public static void RaiseDayCompleted(int day) => OnDayCompleted?.Invoke(day);
 
     // ==========================================
     // MISSION & PDCA EVENTS

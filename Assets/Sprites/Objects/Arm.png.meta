@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: de70c632510f8604c8206b012e4331cc
+guid: 66914f8799203de479c52ffd8c2eee0f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -855298285791758126
-    second: 1_0
+      213: -5241291705561067677
+    second: Arm_0
+  - first:
+      213: -5836736191948761875
+    second: Arm_1
+  - first:
+      213: -1678204271498640645
+    second: Arm_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,45 +119,67 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 1_0
+      name: Arm_0
       rect:
         serializedVersion: 2
-        x: 2
-        y: 49
-        width: 80
-        height: 48
+        x: 16
+        y: 40
+        width: 13
+        height: 17
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2d8b16a9dbe5124f0800000000000000
-      internalID: -855298285791758126
+      spriteID: 36fc4dd96f03347b0800000000000000
+      internalID: -5241291705561067677
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 1_1
+      name: Arm_1
       rect:
         serializedVersion: 2
-        x: 2
-        y: 1
-        width: 80
-        height: 48
+        x: 43
+        y: 46
+        width: 34
+        height: 33
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: c7e67e89bd86b3248bc4f2319414f077
-      internalID: 1439682238
+      spriteID: de45a379b5fbffea0800000000000000
+      internalID: -5836736191948761875
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Arm_2
+      rect:
+        serializedVersion: 2
+        x: 30
+        y: 4
+        width: 47
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf2c7c84b12d5b8e0800000000000000
+      internalID: -1678204271498640645
       vertices: []
       indices: 
       edges: []
@@ -160,7 +188,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -168,12 +196,11 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries:
-      - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":80.0,"y":48.0},"gridSpriteOffset":{"x":2.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
+      entries: []
     nameFileIdTable:
-      1_0: -855298285791758126
-      1_1: 1439682238
+      Arm_0: -5241291705561067677
+      Arm_1: -5836736191948761875
+      Arm_2: -1678204271498640645
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
