@@ -21,7 +21,7 @@ public class PlanningUI : MonoBehaviour
     private string currentText = "";
     private Coroutine typingCoroutine;
 
-    private enum Stage { Trivial, Optimal, Buttons }
+    private enum Stage { Trivial, Optimal, FiveW, Buttons }
     private Stage stage;
 
     private void Awake()
@@ -84,11 +84,28 @@ public class PlanningUI : MonoBehaviour
         }
         else if (stage == Stage.Optimal)
         {
+            stage = Stage.FiveW;
+            displayText.text = FormatFiveW();
+            nextArrow.SetActive(true);
+        }
+        else if (stage == Stage.FiveW)
+        {
             stage = Stage.Buttons;
             displayText.text = "";
             nextArrow.SetActive(false);
             choiceButtonGroup.SetActive(true);
         }
+    }
+
+    private string FormatFiveW()
+    {
+        string F(string s) => string.IsNullOrWhiteSpace(s) ? "—" : s;
+        return $"<b>Root Cause Analysis</b>\n\n" +
+               $"<b>Who:</b> {F(currentMission.who)}\n" +
+               $"<b>What:</b> {F(currentMission.what)}\n" +
+               $"<b>Where:</b> {F(currentMission.where)}\n" +
+               $"<b>When:</b> {F(currentMission.when)}\n" +
+               $"<b>Why:</b> {F(currentMission.why)}";
     }
 
     private void StartTyping(string sentence)

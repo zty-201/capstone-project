@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour
             { GameStateType.PatchWell,    new PatchWellState()    },
             { GameStateType.Reflection,   new ReflectionState()   },
             { GameStateType.MissionBoard, new MissionBoardState() },
+            { GameStateType.DayComplete,  new DayCompleteState()  },
         });
     }
 

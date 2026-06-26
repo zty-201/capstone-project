@@ -6,5 +6,6 @@ public enum GameStateType
     Puzzle,
     PatchWell,
     Reflection,
-    MissionBoard
+    MissionBoard,
+    DayComplete
 }

@@ -21,10 +21,19 @@ public class PipeVisual : MonoBehaviour
     public PipePuzzleSystem puzzleSystem;
 
     private BoxCollider2D col;
+    private SpriteRenderer sr;
+
+    private static readonly Color PoweredColor = new Color(0.45f, 0.85f, 1f);
 
     private void Awake()
     {
         col = GetComponent<BoxCollider2D>();
+        sr = GetComponent<SpriteRenderer>();
+    }
+
+    public void SetPowered(bool powered)
+    {
+        sr.color = powered ? PoweredColor : Color.white;
     }
 
     private void OnEnable()

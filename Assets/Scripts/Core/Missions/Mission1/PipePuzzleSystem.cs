@@ -10,6 +10,7 @@ public class PipePuzzleSystem : MonoBehaviour
     public int missionID = 1;
 
     private PipeNode[,] grid;
+    private PipeVisual[] visuals;
 
     [Header("Win Conditions")]
     public Vector2Int startPos = new Vector2Int(0, 0);
@@ -24,9 +25,9 @@ public class PipePuzzleSystem : MonoBehaviour
     {
         grid = new PipeNode[width, height];
 
-        PipeVisual[] visualPipes = FindObjectsByType<PipeVisual>(FindObjectsInactive.Exclude);
+        visuals = FindObjectsByType<PipeVisual>(FindObjectsInactive.Exclude);
 
-        foreach (PipeVisual pipe in visualPipes)
+        foreach (PipeVisual pipe in visuals)
         {
             PipeDirection startingBits = pipe.GetStartingBits();
             grid[pipe.gridX, pipe.gridY] = new PipeNode(pipe.gridX, pipe.gridY, startingBits);
@@ -40,10 +41,9 @@ public class PipePuzzleSystem : MonoBehaviour
 
         grid[x, y].RotateClockwise();
 
-        if (CheckWaterFlow())
-        {
-            StartCoroutine(HandlePuzzleVictory());
-        }
+        bool solved = CheckWaterFlow();
+        UpdateVisuals();
+        if (solved) StartCoroutine(HandlePuzzleVictory());
     }
 
     private bool CheckWaterFlow()
@@ -92,6 +92,15 @@ public class PipePuzzleSystem : MonoBehaviour
 
         if ((neighbor.currentConnections & requiredNeighborDir) != 0)
             stack.Push(neighbor);
+    }
+
+    private void UpdateVisuals()
+    {
+        foreach (PipeVisual v in visuals)
+        {
+            PipeNode node = grid[v.gridX, v.gridY];
+            if (node != null) v.SetPowered(node.isPowered);
+        }
     }
 
     private IEnumerator HandlePuzzleVictory()
