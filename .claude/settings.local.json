@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 *)",
+      "Bash(grep -rn \"class TrivialContainer\\\\|class OptimalContainer\" Assets/Scripts/)",
+      "Bash(grep -rln \"TrivialContainer\\\\|OptimalContainer\" Assets/Scripts/)",
+      "Bash(grep -n \"^--- !u!1 &589524945$\\\\|^--- !u!1 &589524946$\" SampleScene.unity)",
+      "Bash(awk '/m_Name: WastePiece_2/{found=1} found && /m_LocalPosition/{print; exit}' SampleScene.unity)",
+      "Bash(awk '/m_Name: WastePiece_3/{found=1} found && /m_LocalPosition/{print; exit}' SampleScene.unity)"
+    ]
+  }
+}
