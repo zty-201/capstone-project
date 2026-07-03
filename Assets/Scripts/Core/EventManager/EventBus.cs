@@ -44,7 +44,9 @@ public static class EventBus
     // ==========================================
     // KAIZEN / UI EVENTS
     // ==========================================
-    public static event Action<int> OnEfficiencyScoreUpdated;
+    public static event Action<int> OnSatisfactionChanged;
+    public static void RaiseSatisfactionChanged(int newValue)
+        => OnSatisfactionChanged?.Invoke(newValue);
 
     public static event Action<Vector3> OnMapClicked;
     public static void RaiseMapClicked(Vector3 worldPos)

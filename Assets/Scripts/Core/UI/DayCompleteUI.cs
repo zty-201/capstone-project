@@ -28,10 +28,20 @@ public class DayCompleteUI : MonoBehaviour
 
     private void HandleDayCompleted(int day)
     {
+        int satisfaction = TownSatisfactionSystem.Instance.CurrentSatisfaction;
         titleText.text = $"Day {day} Complete!";
-        subtitleText.text = "You chose the optimal solution for every problem.\nThe village is on the path to lasting improvement.";
+        subtitleText.text = BuildSubtitle(satisfaction);
         ShowPanel();
         GameManager.Instance.StateManager.ChangeState(GameStateType.DayComplete);
+    }
+
+    private string BuildSubtitle(int satisfaction)
+    {
+        if (satisfaction >= 80)
+            return $"Town Satisfaction: {satisfaction}/100\nThe village is thriving under your care.";
+        if (satisfaction >= 50)
+            return $"Town Satisfaction: {satisfaction}/100\nProgress is being made, but there's more to improve.";
+        return $"Town Satisfaction: {satisfaction}/100\nThe village is struggling. Focus on root causes tomorrow.";
     }
 
     public void OnDismiss()

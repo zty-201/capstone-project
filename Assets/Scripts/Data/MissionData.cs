@@ -29,4 +29,8 @@ public class MissionData : ScriptableObject
     public string trivialReflectionText;
     [TextArea(2, 4)]
     public string optimalReflectionText;
+
+    [Header("Town Satisfaction Impact")]
+    public int trivialSatisfactionReward = 10;
+    public int optimalSatisfactionReward = 25;
 }

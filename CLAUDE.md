@@ -42,11 +42,12 @@ Open the project in the Unity Editor (Unity 6). There are no CLI build or test c
 | `PatchWell` | Polls mouse clicks, fires `RaiseWellClicked` |
 | `Reflection` | Delegates left-click to `ReflectionPopupUI.OnDismiss()` |
 | `MissionBoard` | ESC returns to Exploration |
+| `DayComplete` | Empty stub — the day-complete panel is dismissed via a UI Button wired directly to `DayCompleteUI.OnDismiss()` in the Inspector, not through `Tick()` |
 
 ### Event Bus
 `EventBus` is a static class of C# events. Systems subscribe in `OnEnable`/`OnDisable` and raise via the `Raise*` helpers. This is the only coupling layer between systems — no direct references across domains.
 
-Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionSelected`, `OnMissionCompleted`.
+Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionSelected`, `OnMissionCompleted`, `OnDayCompleted`, `OnSatisfactionChanged`.
 
 ### Mission Flow (complete happy path)
 1. Player clicks NPC (`IInteractable.Interact()`) → `DialogueState`
@@ -57,8 +58,11 @@ Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionS
 6. `ReflectionPopupUI` listens, shows feedback text from `MissionData`, changes state to `Reflection`
 7. Player clicks to dismiss → `Exploration`; `MissionBoardUI` listens to grey out the entry
 
+### Mission Board
+`MissionBoardUI` holds one `MissionEntryUI` per mission (assigned in Inspector). On `OnMissionCompleted`, the matching entry greys out (`alpha = 0.4`) and its status label reads "Resolved" (optimal) or "Needs Review" (trivial). Note: this label does not currently imply a working revisit flow — `NPCController.HandleSolutionSelected` disables the NPC's GameObject on `OnSolutionSelected` regardless of which solution type was picked, so a "Needs Review" (trivial) mission cannot currently be reopened in-game.
+
 ### Data Layer (ScriptableObjects)
-- **`MissionData`** — all text content for one mission: complaint, root cause, 5W fields, solution names, reflection texts. Create via `Kaizen Systems/Mission Data`.
+- **`MissionData`** — all text content for one mission: complaint, root cause, 5W fields, solution names, reflection texts. Create via `Kaizen Systems/Mission Data`. As of the current Day 1 missions (`M1_ParchedCrops`, `M2_CleaningRiver`), the 5W fields are unpopulated (empty strings) even though `PlanningUI` renders them.
 - **`MissionRegistry`** — array of `MissionData`, looked up by `missionID`. Create via `Kaizen Systems/Mission Registry`. Assign in Inspector on `ReflectionPopupUI`.
 
 ### Pathfinding & Grid
@@ -80,13 +84,22 @@ The interactable is `RiverInteractable` on the waste blockage (not an NPC). Both
 `PipeDirection` is a `[Flags]` bitmask enum (Up=1, Right=2, Down=4, Left=8). `PipeNode` holds the current connection bitmask and rotates clockwise via a left bit-shift with wrap-around (`(bits << 1 | bits >> 3) & 15`). `PipeVisual` (MonoBehaviour) reads its `PipeShape` and inspector transform rotation to compute starting bits, then delegates clicks to `PipePuzzleSystem.RotatePipeAt`. The puzzle system runs a DFS flood-fill from `startPos` to `endPos` to check for a valid water path after every rotation. Trivial solution (`WellVisual`) raises `RaiseMissionCompleted(id, false)`; pipe puzzle raises `(id, true)`.
 
 ### Singletons
-`GameManager`, `DialogueManager`, `PlanningUI`, `MissionBoardUI`, `ReflectionPopupUI` all follow the same pattern: static `Instance`, destroyed if a duplicate exists in `Awake`.
+`GameManager`, `DialogueManager`, `PlanningUI`, `MissionBoardUI`, `ReflectionPopupUI`, `DayCompleteUI`, `TownSatisfactionSystem` all follow the same pattern: static `Instance`, destroyed if a duplicate exists in `Awake`.
 
 ### IInteractable
-`NPCController`, `MissionBoardInteractable`, `RiverInteractable`, `WastePiece`, `MachinePart`, `AssemblyPoint`, and `PlacementPoint` all implement `IInteractable`. `InputManager` detects them via `Physics2D.OverlapPoint` and calls `Interact()` when the player is within 1 grid cell (or routes the player adjacent first).
+`NPCController`, `MissionBoardInteractable`, `RiverInteractable`, `WastePiece`, `MachinePart`, `AssemblyPoint`, `PlacementPoint`, `TrashPiece`, and `TownHallInteractable` all implement `IInteractable`. `InputManager` detects them via `Physics2D.OverlapPoint` and calls `Interact()` when the player is within 1 grid cell (or routes the player adjacent first).
+
+`InteractionIndicator` is an optional companion component placed on an interactable's GameObject: it shows a bobbing prompt icon whenever the player is within `showRange` during `Exploration`. Call its `Hide()` method once the owning interactable has been permanently consumed (e.g. a collected `MachinePart`).
+
+### Town Satisfaction System
+`TownSatisfactionSystem` (singleton, on `ProgressManager` GameObject) owns a single `CurrentSatisfaction` value (0..`MaxSatisfaction`, starts at `startingSatisfaction`). It listens to `OnMissionCompleted`, looks up the completed mission via its `MissionRegistry` reference, and applies `MissionData.optimalSatisfactionReward` or `.trivialSatisfactionReward` (defaults 25 / 10) through its public `ApplyDelta(int)` method, clamping and raising `RaiseSatisfactionChanged(CurrentSatisfaction)` on every change. `SatisfactionBarUI` (always-visible HUD element, no `CanvasGroup` show/hide) subscribes to `OnSatisfactionChanged` and drives a `Filled`-type `Image.fillAmount`.
+
+`TrashSpawner` periodically instantiates a `trashPrefab` at a random unoccupied point from its `spawnPoints` array, and — independently — ticks every `decayTickInterval` seconds, applying `-satisfactionPenaltyPerTick` per active trash piece via `TownSatisfactionSystem.ApplyDelta`. Both timers live in one `Update()` gated by `GameManager.Instance.StateManager.CurrentStateType != GameStateType.Exploration` (early return), so spawning and decay both pause during any non-Exploration state (dialogue, minigames, mission board, day-complete, etc.) and resume only in `Exploration`. Each `TrashPiece` tracks its own `accumulatedLoss` — the sum of `ApplyDelta`'s actual (post-clamp) return value each tick it was hit — and refunds that exact amount on `Interact()` before removing itself from the spawner's occupied set and destroying its GameObject, so cleaning up a piece fully undoes its impact on the bar without over-refunding at the 0/max clamp edges.
 
 ### Day Progression & Town Hall Upgrade
-`DayProgressTracker` (on `ProgressManager` GameObject) listens to `OnMissionCompleted` and tracks optimal completions per day. When all required missions for a day are completed optimally, it fires `RaiseDayCompleted(day)`. Configure per instance via `day` (int) and `requiredOptimalMissions` (int array) in the Inspector — Day 1 uses `{ 1, 2 }`.
+Day-end is player-controlled, not automatic. `TownHallInteractable` (on the `TownHall` GameObject, alongside `TownHallUpgrade`) fires `RaiseDayCompleted(currentDay)` directly from `Interact()` whenever the player walks up and interacts with Town Hall — there is no mission-completion gating on this trigger.
+
+`DayCompleteUI` reads `TownSatisfactionSystem.Instance.CurrentSatisfaction` in its `OnDayCompleted` handler and picks a tiered subtitle (`>= 80` thriving / `50-79` mixed progress / `< 50` struggling) — the satisfaction bar is now the actual measure of how the day went, not mission optimality tracking.
 
 `TownHallUpgrade` (on the town hall entity) listens to `OnDayCompleted(int day)` and activates the matching index in its `stages` array, deactivating all others. Index 0 = default, index 1 = Day 1 upgrade, index 2 = Day 2 upgrade. The town hall is built as a multi-child SpriteRenderer GameObject (not tilemaps) so each stage can have a Base sprite (EntityTilemap sorting layer) and a Roof sprite (ForeGroundTilemap sorting layer) to preserve player depth layering.
 
