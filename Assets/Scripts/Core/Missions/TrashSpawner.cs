@@ -11,16 +11,14 @@ public class TrashSpawner : MonoBehaviour
     [SerializeField] private float minSpawnInterval = 25f;
     [SerializeField] private float maxSpawnInterval = 45f;
 
-    [Header("Decay While Uncleaned")]
-    [SerializeField] private float decayTickInterval = 10f;
-    [SerializeField] private int satisfactionPenaltyPerTick = 3;
+    [Header("Penalty On Spawn")]
+    [SerializeField] private int satisfactionPenaltyPerTrash = 5;
 
     private readonly Dictionary<Transform, TrashPiece> occupied = new Dictionary<Transform, TrashPiece>();
     private readonly List<Transform> freePointsBuffer = new List<Transform>();
 
     private float spawnTimer;
     private float nextSpawnInterval;
-    private float decayTimer;
 
     private void Awake() => nextSpawnInterval = Random.Range(minSpawnInterval, maxSpawnInterval);
 
@@ -34,13 +32,6 @@ public class TrashSpawner : MonoBehaviour
             spawnTimer = 0f;
             nextSpawnInterval = Random.Range(minSpawnInterval, maxSpawnInterval);
             TrySpawnTrash();
-        }
-
-        decayTimer += Time.deltaTime;
-        if (decayTimer >= decayTickInterval)
-        {
-            decayTimer = 0f;
-            ApplyDecayTick();
         }
     }
 
@@ -59,17 +50,9 @@ public class TrashSpawner : MonoBehaviour
         TrashPiece piece = instance.GetComponent<TrashPiece>();
         piece.Init(this, chosen);
         occupied[chosen] = piece;
-    }
 
-    private void ApplyDecayTick()
-    {
-        if (occupied.Count == 0) return;
-
-        foreach (TrashPiece piece in occupied.Values)
-        {
-            int actualDelta = TownSatisfactionSystem.Instance.ApplyDelta(-satisfactionPenaltyPerTick);
-            piece.TrackLoss(-actualDelta);
-        }
+        int actualDelta = TownSatisfactionSystem.Instance.ApplyDelta(-satisfactionPenaltyPerTrash);
+        piece.TrackLoss(-actualDelta);
     }
 
     public void RemoveTrash(Transform spawnPoint) => occupied.Remove(spawnPoint);

@@ -989,10 +989,9 @@ MonoBehaviour:
   - {fileID: 2126317017}
   - {fileID: 1636277970}
   - {fileID: 1353010124}
-  minSpawnInterval: 25
-  maxSpawnInterval: 45
-  decayTickInterval: 10
-  satisfactionPenaltyPerTick: 3
+  minSpawnInterval: 60
+  maxSpawnInterval: 90
+  satisfactionPenaltyPerTrash: 5
 --- !u!1 &147946366
 GameObject:
   m_ObjectHideFlags: 0
@@ -3401,7 +3400,7 @@ Tilemap:
       - {fileID: 2118230991, guid: fff0c8a91a4379c449c121053e7fcdad, type: 3}
       - {fileID: -2085421595, guid: d833c6569c1397744b019018d0a947f9, type: 3}
       - {fileID: -1362774101, guid: 4703df8e9f2791b4cb6060ea32d5dc39, type: 3}
-      m_AnimationSpeed: 6.0000005
+      m_AnimationSpeed: 6
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 12, y: 11, z: 0}
@@ -3566,7 +3565,7 @@ Tilemap:
       - {fileID: 957951291, guid: fff0c8a91a4379c449c121053e7fcdad, type: 3}
       - {fileID: -1900177187, guid: d833c6569c1397744b019018d0a947f9, type: 3}
       - {fileID: 646951989, guid: 4703df8e9f2791b4cb6060ea32d5dc39, type: 3}
-      m_AnimationSpeed: 6.0000005
+      m_AnimationSpeed: 6
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 7, y: 12, z: 0}
@@ -3881,7 +3880,7 @@ Tilemap:
       - {fileID: -759921509, guid: fff0c8a91a4379c449c121053e7fcdad, type: 3}
       - {fileID: -1563304751, guid: d833c6569c1397744b019018d0a947f9, type: 3}
       - {fileID: 990076275, guid: 4703df8e9f2791b4cb6060ea32d5dc39, type: 3}
-      m_AnimationSpeed: 6
+      m_AnimationSpeed: 6.0000005
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 12, y: 13, z: 0}
@@ -3896,7 +3895,7 @@ Tilemap:
       - {fileID: 1023866806, guid: fff0c8a91a4379c449c121053e7fcdad, type: 3}
       - {fileID: 1423457078, guid: d833c6569c1397744b019018d0a947f9, type: 3}
       - {fileID: -1107811893, guid: 4703df8e9f2791b4cb6060ea32d5dc39, type: 3}
-      m_AnimationSpeed: 6
+      m_AnimationSpeed: 6.0000005
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 13, y: 13, z: 0}

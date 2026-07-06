@@ -1,4 +1,47 @@
+Android Compatibility
 
+1. Done: input abstraction — added PointerInput (Assets/Scripts/Systems/Input/PointerInput.cs), a static
+   helper over Pointer.current (common base class for Mouse/Touchscreen/Pen) instead of Mouse.current.
+   All 7 state classes (Exploration, Dialogue, Planning, Puzzle, PatchWell, Reflection, MissionBoard)
+   now go through it, so tap-to-click works on Android touchscreens with no per-state changes.
 
+2. Android back button: verify Keyboard.current.escapeKey.wasPressedThisFrame actually fires from the
+   Android back button/gesture on-device. Community reports say this is unreliable with the new Input
+   System (works consistently with the legacy Input Manager's KeyCode.Escape, less so here) — test early,
+   and ExplorationState currently has no back-button handler at all, so a back press there falls through
+   to the OS default (suspend/quit). Decide on a policy (confirm-quit prompt vs. no-op) before shipping.
 
-6. Optional: on M1_ParchedCrops and M2_CleaningRiver MissionData assets, tune Trivial Satisfaction Reward / Optimal Satisfaction Reward under "Town Satisfaction Impact" (defaults 10 / 25 apply automatically).
+3. Touch target sizing: PipeVisual tiles, WastePiece, MachinePart, and other Physics2D.OverlapPoint
+   targets were sized for mouse-precision clicks. Check they meet ~44-48dp minimum tap-target guidance
+   for fingers, or players will mis-tap.
+
+4. Safe area / canvas scaling: nothing currently reads Screen.safeArea. Add a safe-area fitter to the
+   top-level canvases (SatisfactionBarUI, DialogueManager, PlanningUI, MissionBoardUI, DayCompleteUI,
+   ReflectionPopupUI) so HUD/dialogue isn't clipped by notches/punch-holes/gesture-nav bars. Confirm
+   Canvas Scaler is set to "Scale With Screen Size" with a sensible reference resolution.
+
+5. Camera framing: test CameraFollower/orthographic size across aspect-ratio extremes (tall ~19.5:9
+   phones vs. squarer ~4:3 tablets) to avoid exposing out-of-bounds tilemap or cropping gameplay.
+
+6. Switch Build Settings platform to Android now (even mid-content) to surface IL2CPP/ARM64 requirement
+   (Google Play mandates ARM64), texture compression (ASTC), and shader-compatibility issues early.
+
+7. App lifecycle: test pause/resume explicitly (phone calls, notifications, home button backgrounding).
+   Typing coroutines and TrashSpawner's timers run on Time.deltaTime so they should be fine, but verify
+   no large decay/spawn tick fires on resume after being backgrounded a long time.
+
+Other Polish (from review)
+
+8. Day progression doesn't advance: TownHallInteractable.currentDay (Assets/Scripts/Core/Missions/
+   TownHallInteractable.cs) is a hardcoded serialized int, never incremented anywhere. Every Town Hall
+   interaction fires OnDayCompleted with the same day number, so TownHallUpgrade's staged sprites will
+   never progress past whatever is set in the Inspector. Needs something (GameManager or a new day
+   tracker) to own and increment the day count.
+
+9. Trivial-path missions can't be revisited: MissionEntryUI labels a trivial completion "Needs Review,"
+   implying a revisit flow, but NPCController.HandleSolutionSelected disables the NPC's GameObject
+   regardless of which solution was picked. Decide: implement revisit, or change the trivial-completion
+   label so it doesn't promise one.
+
+10. 5W root-cause fields are empty on M1_ParchedCrops and M2_CleaningRiver MissionData assets. PlanningUI
+    renders them correctly but currently shows all em-dashes — content pass needed, not a code fix.

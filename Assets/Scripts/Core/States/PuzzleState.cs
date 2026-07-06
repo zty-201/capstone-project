@@ -10,19 +10,12 @@ public class PuzzleState : IState
 
     public void Tick()
     {
-        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
-        {
-            Vector2 screenPos = Mouse.current.position.ReadValue();
-            float distToPlane = Mathf.Abs(Camera.main.transform.position.z);
-            Vector3 worldPos = Camera.main.ScreenToWorldPoint(
-                new Vector3(screenPos.x, screenPos.y, distToPlane));
-
+        if (PointerInput.TryGetPrimaryPressWorldPosition(out Vector3 worldPos))
             EventBus.RaisePuzzleClicked(worldPos);
-        }
 
-        if (Keyboard.current != null && Keyboard.current.xKey.wasPressedThisFrame)
+        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
-            Debug.Log("<color=orange>[PuzzleState]</color> 'X' pressed. Transitioning back to Exploration State...");
+            Debug.Log("<color=orange>[PuzzleState]</color> ESC pressed. Transitioning back to Exploration State...");
             GameManager.Instance.StateManager.ChangeState(GameStateType.Exploration);
         }
     }

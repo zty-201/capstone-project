@@ -1,12 +1,10 @@
-﻿using UnityEngine.InputSystem;
-
-public class ReflectionState : IState
+﻿public class ReflectionState : IState
 {
     public void Enter() { }
 
     public void Tick()
     {
-        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+        if (PointerInput.PrimaryPressedThisFrame())
             ReflectionPopupUI.Instance.OnDismiss();
     }
 

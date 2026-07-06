@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class DialogueState : IState
 {
@@ -10,7 +9,7 @@ public class DialogueState : IState
 
     public void Tick()
     {
-        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+        if (PointerInput.PrimaryPressedThisFrame())
             DialogueManager.Instance.OnAdvanceDialogue();
     }
 

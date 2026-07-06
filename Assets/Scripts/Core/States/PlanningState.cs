@@ -10,7 +10,7 @@ public class PlanningState : IState
 
     public void Tick()
     {
-        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+        if (PointerInput.PrimaryPressedThisFrame())
             PlanningUI.Instance.OnAdvance();
 
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
