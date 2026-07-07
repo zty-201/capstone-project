@@ -69,10 +69,19 @@ public class PathfindingSystem : MonoBehaviour
 
     private void CalculatePath(Vector2Int start, Vector2Int end)
     {
+        List<GridNode> path = RequestPathSync(start, end);
+        if (path != null) EventBus.RaisePathGenerated(path);
+    }
+
+    // Synchronous path query for callers that don't want to go through the shared
+    // OnPathRequested/OnPathGenerated broadcast (e.g. NPCs), since every subscriber
+    // receives every OnPathGenerated event regardless of who asked for it.
+    public List<GridNode> RequestPathSync(Vector2Int start, Vector2Int end)
+    {
         GridNode startNode = gridSystem.GetNode(start.x, start.y);
         GridNode endNode = gridSystem.GetNode(end.x, end.y);
 
-        if (startNode == null || endNode == null || !endNode.isWalkable) return;
+        if (startNode == null || endNode == null || !endNode.isWalkable) return null;
 
         // Reset all nodes
         for (int x = 0; x < gridWidth; x++)
@@ -99,10 +108,7 @@ public class PathfindingSystem : MonoBehaviour
             closedSet.Add(currentNode);
 
             if (currentNode == endNode)
-            {
-                EventBus.RaisePathGenerated(BuildPath(endNode));
-                return;
-            }
+                return BuildPath(endNode);
 
             foreach (GridNode neighbor in GetNeighbors(currentNode))
             {
@@ -121,6 +127,35 @@ public class PathfindingSystem : MonoBehaviour
         }
 
         Debug.LogWarning("No valid path found.");
+        return null;
+    }
+
+    // Picks a random walkable cell reachable from `from` via flood-fill, so NPC patrol
+    // logic never targets a walkable "island" cut off by unwalkable tiles.
+    public Vector2Int GetRandomWalkableCoordinates(Vector2Int from)
+    {
+        GridNode startNode = gridSystem.GetNode(from.x, from.y);
+
+        HashSet<GridNode> visited = new HashSet<GridNode> { startNode };
+        Queue<GridNode> frontier = new Queue<GridNode>();
+        List<GridNode> reachable = new List<GridNode>();
+        frontier.Enqueue(startNode);
+
+        while (frontier.Count > 0)
+        {
+            GridNode current = frontier.Dequeue();
+            reachable.Add(current);
+
+            foreach (GridNode neighbor in GetNeighbors(current))
+            {
+                if (!neighbor.isWalkable || visited.Contains(neighbor)) continue;
+                visited.Add(neighbor);
+                frontier.Enqueue(neighbor);
+            }
+        }
+
+        GridNode picked = reachable[Random.Range(0, reachable.Count)];
+        return new Vector2Int(picked.x, picked.y);
     }
 
     private List<GridNode> GetNeighbors(GridNode node)

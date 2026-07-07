@@ -8,7 +8,11 @@
       "Bash(awk '/m_Name: WastePiece_2/{found=1} found && /m_LocalPosition/{print; exit}' SampleScene.unity)",
       "Bash(awk '/m_Name: WastePiece_3/{found=1} found && /m_LocalPosition/{print; exit}' SampleScene.unity)",
       "WebSearch",
-      "WebFetch(domain:docs.unity3d.com)"
+      "WebFetch(domain:docs.unity3d.com)",
+      "Bash(git log *)",
+      "Bash(grep -rn \"class NPCController\" Assets/)",
+      "Bash(grep -rln \"NPCController\" Assets/)",
+      "Bash(grep -rli \"patrol\" Assets/)"
     ]
   }
 }

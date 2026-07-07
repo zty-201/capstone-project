@@ -47,6 +47,11 @@ public class PlayerController : MonoBehaviour
                 Collider2D hit = Physics2D.OverlapPoint(targetPos, npcLayerMask);
                 if (hit != null)
                 {
+                    // Wait a frame before re-requesting: if the reroute is blocked again at its
+                    // first step, this keeps each retry a fresh call from Unity's coroutine
+                    // scheduler instead of a synchronous recursive call within this one, which
+                    // would otherwise blow the stack when the obstacle doesn't move between tries.
+                    yield return null;
                     pathfindingSystem.GetGridCoordinates(transform.position, out int cx, out int cy);
                     EventBus.RaisePathRequested(new Vector2Int(cx, cy), currentDestination);
                     yield break;
