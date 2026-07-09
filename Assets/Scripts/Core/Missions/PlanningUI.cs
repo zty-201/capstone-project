@@ -14,6 +14,9 @@ public class PlanningUI : MonoBehaviour
     [Header("Settings")]
     public float typeSpeed = 0.05f;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip typeBlipClip;
+
     private CanvasGroup canvasGroup;
     private MissionData currentMission;
 
@@ -124,6 +127,7 @@ public class PlanningUI : MonoBehaviour
         foreach (char letter in sentence.ToCharArray())
         {
             displayText.text += letter;
+            if (!char.IsWhiteSpace(letter)) AudioManager.Instance.PlaySFX(typeBlipClip);
             yield return new WaitForSeconds(typeSpeed);
         }
 

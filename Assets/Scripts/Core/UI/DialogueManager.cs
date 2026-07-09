@@ -15,6 +15,9 @@ public class DialogueManager : MonoBehaviour
     [Header("Settings")]
     public float typeSpeed = 0.05f;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip typeBlipClip;
+
     private Queue<string> sentences;
     private string currentSentence;
     private bool isTyping = false;
@@ -88,6 +91,7 @@ public class DialogueManager : MonoBehaviour
         foreach (char letter in sentence.ToCharArray())
         {
             dialogueText.text += letter;
+            if (!char.IsWhiteSpace(letter)) AudioManager.Instance.PlaySFX(typeBlipClip);
             yield return new WaitForSeconds(typeSpeed);
         }
 

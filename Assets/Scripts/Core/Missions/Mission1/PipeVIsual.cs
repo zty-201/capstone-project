@@ -17,8 +17,8 @@ public class PipeVisual : MonoBehaviour
     public int gridX;
     public int gridY;
 
-    [Header("Dependencies")]
-    public PipePuzzleSystem puzzleSystem;
+    [Header("Audio")]
+    [SerializeField] private AudioClip rotateClip;
 
     private BoxCollider2D col;
     private SpriteRenderer sr;
@@ -84,8 +84,9 @@ public class PipeVisual : MonoBehaviour
         // 2. Check if the mouse click exactly overlapped THIS pipe's collider
         if (col.OverlapPoint(worldPos))
         {
-            puzzleSystem.RotatePipeAt(gridX, gridY);
+            PipePuzzleSystem.Instance.RotatePipeAt(gridX, gridY);
             transform.Rotate(0, 0, -90f);
+            AudioManager.Instance.PlaySFX(rotateClip);
         }
     }
 }

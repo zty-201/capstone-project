@@ -7,6 +7,9 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed = 5f;
     [SerializeField] private LayerMask npcLayerMask;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip footstepClip;
+
     private Coroutine movementCoroutine;
     private Vector2Int currentDestination;
 
@@ -77,4 +80,7 @@ public class PlayerController : MonoBehaviour
 
         anim.SetFloat("Speed", 0f);
     }
+
+    // Called by an Animation Event on the walk-cycle clip's foot-plant frame(s).
+    public void PlayFootstepSound() => AudioManager.Instance.PlaySFXExclusive(footstepClip);
 }

@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PipePuzzleSystem : MonoBehaviour
 {
+    public static PipePuzzleSystem Instance { get; private set; }
+
     [Header("Puzzle Dimensions")]
     public int width = 3;
     public int height = 3;
@@ -15,6 +17,12 @@ public class PipePuzzleSystem : MonoBehaviour
     [Header("Win Conditions")]
     public Vector2Int startPos = new Vector2Int(0, 0);
     public Vector2Int endPos = new Vector2Int(2, 2);
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
+    }
 
     private void Start()
     {

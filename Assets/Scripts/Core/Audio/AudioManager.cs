@@ -7,11 +7,15 @@ public class AudioManager : MonoBehaviour
     [Header("Sources")]
     [SerializeField] private AudioSource musicSource;
     [SerializeField] private AudioSource sfxSource;
+    [SerializeField] private AudioSource exclusiveSource;
 
     [Header("Mission Stingers")]
     [SerializeField] private AudioClip missionCompletedOptimalClip;
     [SerializeField] private AudioClip missionCompletedTrivialClip;
     [SerializeField] private AudioClip dayCompletedClip;
+
+    [Header("UI")]
+    [SerializeField] private AudioClip uiClickClip;
 
     private void Awake()
     {
@@ -20,6 +24,7 @@ public class AudioManager : MonoBehaviour
 
         if (musicSource == null) Debug.LogError($"[{name}] musicSource is not assigned!", this);
         if (sfxSource == null) Debug.LogError($"[{name}] sfxSource is not assigned!", this);
+        if (exclusiveSource == null) Debug.LogError($"[{name}] exclusiveSource is not assigned!", this);
     }
 
     private void OnEnable()
@@ -54,5 +59,20 @@ public class AudioManager : MonoBehaviour
     {
         if (clip == null) return;
         sfxSource.PlayOneShot(clip);
+    }
+
+    // No-argument wrapper so Button.OnClick() can wire it directly in the Inspector.
+    public void PlayUIClick() => PlaySFX(uiClickClip);
+
+    /// <summary>
+    /// For sounds that must never overlap themselves (e.g. footsteps): restarts
+    /// playback on the same dedicated source instead of layering via PlayOneShot,
+    /// so rapid repeated calls cut the previous instance off rather than stacking.
+    /// </summary>
+    public void PlaySFXExclusive(AudioClip clip)
+    {
+        if (clip == null) return;
+        exclusiveSource.clip = clip;
+        exclusiveSource.Play();
     }
 }

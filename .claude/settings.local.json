@@ -12,7 +12,8 @@
       "Bash(git log *)",
       "Bash(grep -rn \"class NPCController\" Assets/)",
       "Bash(grep -rln \"NPCController\" Assets/)",
-      "Bash(grep -rli \"patrol\" Assets/)"
+      "Bash(grep -rli \"patrol\" Assets/)",
+      "Bash(awk 'BEGIN{RS=\"--- !u!1 &\"} /Pipe_/')"
     ]
   }
 }
