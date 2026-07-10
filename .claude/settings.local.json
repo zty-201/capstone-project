@@ -13,7 +13,9 @@
       "Bash(grep -rn \"class NPCController\" Assets/)",
       "Bash(grep -rln \"NPCController\" Assets/)",
       "Bash(grep -rli \"patrol\" Assets/)",
-      "Bash(awk 'BEGIN{RS=\"--- !u!1 &\"} /Pipe_/')"
+      "Bash(awk 'BEGIN{RS=\"--- !u!1 &\"} /Pipe_/')",
+      "Bash(grep -n \"^--- !u!1 &1227439110\\\\|^--- !u!1 &1227439110$\" SampleScene.unity)",
+      "Bash(awk ' *)"
     ]
   }
 }

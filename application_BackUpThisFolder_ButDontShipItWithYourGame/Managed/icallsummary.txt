@@ -370,6 +370,12 @@ UnityEngine.AudioClip::get_samples_Injected
 UnityEngine.AudioClip::get_length_Injected
 UnityEngine.AudioSettings::StartAudioOutput
 UnityEngine.AudioSettings::StopAudioOutput
+UnityEngine.AudioSource::get_generatorObject_Injected
+UnityEngine.AudioSource::PlayHelper_Injected
+UnityEngine.AudioSource::PlayOneShotHelper_Injected
+UnityEngine.AudioSource::Stop_Injected
+UnityEngine.AudioSource::set_generatorObject_Injected
+UnityEngine.AudioSource::set_loop_Injected
 UnityEngine.Avatar::get_humanDescription_Injected
 UnityEngine.AvatarMask::GetHumanoidBodyPartActive_Injected
 UnityEngine.AvatarMask::get_transformCount_Injected

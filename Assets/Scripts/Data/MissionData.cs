@@ -21,6 +21,13 @@ public class MissionData : ScriptableObject
     public string when;
     public string why;
 
+    [Header("5W Distractor Options (wrong answers shown alongside the correct one)")]
+    public string[] whoDistractors;
+    public string[] whatDistractors;
+    public string[] whereDistractors;
+    public string[] whenDistractors;
+    public string[] whyDistractors;
+
     [Header("Action Phase (Do)")]
     public string trivialSolutionName;
     public string optimalSolutionName;

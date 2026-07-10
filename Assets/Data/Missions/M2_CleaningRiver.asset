@@ -19,11 +19,31 @@ MonoBehaviour:
   - It hard to catch any fish nowadays!
   actualRootCause: 'The rubbish blocked the upstrean of the river, causing a lack
     of water downstream and thus no fish. '
-  who: 
-  what: 
-  where: 
-  when: 
-  why: 
+  who: The village fishermen
+  what: Rubbish is blocking the river upstream
+  where: Upstream, at the blockage
+  when: Continuously, as waste piles up
+  why: Villagers dump waste with no collection system
+  whoDistractors:
+  - The village merchants
+  - The town blacksmith
+  - The traveling bards
+  whatDistractors:
+  - The fish swam to another river
+  - The river water turned undrinkable
+  - A drought dried up the riverbed
+  whereDistractors:
+  - Downstream near the fishing docks
+  - At the village well
+  - In the nearby lake
+  whenDistractors:
+  - Only during the rainy season
+  - Once every few years
+  - After the harvest festival
+  whyDistractors:
+  - The fish dislike village noise
+  - The river naturally changed course
+  - Overfishing depleted the fish
   trivialSolutionName: Clear the rubbish
   optimalSolutionName: Setup a automatic rubbish collector
   trivialReflectionText: The rubbish has been cleared, but the root cause hasnt be

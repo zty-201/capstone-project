@@ -19,11 +19,31 @@ MonoBehaviour:
   - Theres not enough water to water the crops!
   actualRootCause: The central well is structurally compromised, leaking water into
     the soil
-  who: 
-  what: 
-  where: 
-  when: 
-  why: 
+  who: The village's crop farmers
+  what: The well is leaking into the soil
+  where: At the village's central well
+  when: Every time water is drawn
+  why: The well's structure is cracked
+  whoDistractors:
+  - The village blacksmith
+  - The traveling merchants
+  - The town guards
+  whatDistractors:
+  - Pests are eating the crops
+  - The crops were planted too late
+  - There's been no rain for weeks
+  whereDistractors:
+  - In the crop fields themselves
+  - Downstream at the river
+  - In the village grain storehouse
+  whenDistractors:
+  - Only during the winter months
+  - Once a year at harvest
+  - After last week's storm
+  whyDistractors:
+  - Farmers are overusing water
+  - The irrigation channels are blocked
+  - The crops need more sunlight
   trivialSolutionName: Patch the bucket and rope
   optimalSolutionName: Rebuild the pulley and pipe filter system
   trivialReflectionText: The patch worked for now, but the root cause remains. The
