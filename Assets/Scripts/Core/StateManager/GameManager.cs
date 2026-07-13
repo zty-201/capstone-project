@@ -18,10 +18,10 @@ public class GameManager : MonoBehaviour
             { GameStateType.Dialogue,     new DialogueState()     },
             { GameStateType.Planning,     new PlanningState()     },
             { GameStateType.Puzzle,       new PuzzleState()       },
-            { GameStateType.PatchWell,    new PatchWellState()    },
             { GameStateType.Reflection,   new ReflectionState()   },
             { GameStateType.MissionBoard, new MissionBoardState() },
             { GameStateType.DayComplete,  new DayCompleteState()  },
+            { GameStateType.InfoBoard,    new InfoBoardState()    },
         });
     }
 

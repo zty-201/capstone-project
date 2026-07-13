@@ -18,14 +18,15 @@ public class PlanningUI : MonoBehaviour
     [Header("UI References")]
     public TextMeshProUGUI displayText;
     public GameObject nextArrow;
-    public GameObject choiceButtonGroup;
 
-    [Header("5W Multiple Choice")]
+    [Header("5 Whys Multiple Choice")]
     public GameObject fiveWChoiceGroup;
     public FiveWChoiceButton[] fiveWChoiceButtons;
+    public TextMeshProUGUI hintText;
 
     [Header("Settings")]
     public float typeSpeed = 0.05f;
+    public float choiceFeedbackDelay = 0.4f;
 
     [Header("Audio")]
     [SerializeField] private AudioClip typeBlipClip;
@@ -38,10 +39,14 @@ public class PlanningUI : MonoBehaviour
     private string currentText = "";
     private Coroutine typingCoroutine;
 
-    private readonly List<string> currentFiveWOptions = new List<string>();
-    private string currentFiveWCorrect;
+    private readonly List<string> currentOptions = new List<string>();
+    private string currentCorrectAnswer;
 
-    private enum Stage { Trivial, Optimal, Who, What, Where, When, Why, Buttons }
+    private int whyIndex;
+    private int correctCount;
+    private bool outcomeIsOptimal;
+
+    private enum Stage { Trivial, Optimal, Why, Outcome }
     private Stage stage;
 
     private void Awake()
@@ -51,7 +56,6 @@ public class PlanningUI : MonoBehaviour
 
         if (displayText == null) Debug.LogError($"[{name}] displayText is not assigned!", this);
         if (nextArrow == null) Debug.LogError($"[{name}] nextArrow is not assigned!", this);
-        if (choiceButtonGroup == null) Debug.LogError($"[{name}] choiceButtonGroup is not assigned!", this);
         if (fiveWChoiceGroup == null) Debug.LogError($"[{name}] fiveWChoiceGroup is not assigned!", this);
 
         canvasGroup = GetComponent<CanvasGroup>();
@@ -66,8 +70,8 @@ public class PlanningUI : MonoBehaviour
         canvasGroup.interactable = true;
         canvasGroup.blocksRaycasts = true;
 
-        choiceButtonGroup.SetActive(false);
         fiveWChoiceGroup.SetActive(false);
+        if (hintText != null) hintText.gameObject.SetActive(false);
         nextArrow.SetActive(false);
 
         stage = Stage.Trivial;
@@ -84,8 +88,6 @@ public class PlanningUI : MonoBehaviour
     // Called by PlanningState on left click
     public void OnAdvance()
     {
-        if (stage == Stage.Buttons) return;
-
         if (isTyping)
         {
             if (typingCoroutine != null) StopCoroutine(typingCoroutine);
@@ -95,136 +97,133 @@ public class PlanningUI : MonoBehaviour
             return;
         }
 
-        if (IsFiveWStage(stage)) return; // advancing here is gated by picking the correct choice button
+        if (stage == Stage.Why) return; // advancing here is gated by picking a choice button
 
         nextArrow.SetActive(false);
 
-        if (stage == Stage.Trivial)
+        switch (stage)
         {
-            stage = Stage.Optimal;
-            displayText.text = "";
-            StartTyping(currentMission.optimalSolutionName);
-        }
-        else if (stage == Stage.Optimal)
-        {
-            stage = Stage.Who;
-            BeginFiveWStage();
+            case Stage.Trivial:
+                stage = Stage.Optimal;
+                displayText.text = "";
+                StartTyping(currentMission.optimalSolutionName);
+                break;
+
+            case Stage.Optimal:
+                stage = Stage.Why;
+                whyIndex = 0;
+                correctCount = 0;
+                if (hintText != null) hintText.gameObject.SetActive(true);
+                BeginWhyStage();
+                break;
+
+            case Stage.Outcome:
+                SelectSolution(outcomeIsOptimal ? SolutionType.Optimal : SolutionType.Trivial);
+                break;
         }
     }
-
-    private static bool IsFiveWStage(Stage s) =>
-        s == Stage.Who || s == Stage.What || s == Stage.Where || s == Stage.When || s == Stage.Why;
 
     private void FinishTyping()
     {
-        if (IsFiveWStage(stage)) ShowFiveWChoices();
+        if (stage == Stage.Why) ShowWhyChoices();
         else nextArrow.SetActive(true);
     }
 
-    private void BeginFiveWStage()
+    private void BeginWhyStage()
     {
         fiveWChoiceGroup.SetActive(false);
 
-        var (correct, distractors) = GetFiveWAnswerData(stage);
-        if (string.IsNullOrWhiteSpace(correct))
+        if (currentMission.fiveWhys == null || whyIndex >= currentMission.fiveWhys.Length)
         {
-            Debug.LogError($"[{name}] Mission {currentMission.missionID} is missing a 5W answer for stage {stage}", this);
+            Debug.LogError($"[{name}] Mission {currentMission.missionID} is missing 5 Whys stage {whyIndex}", this);
             return;
         }
 
-        currentFiveWCorrect = correct;
-        currentFiveWOptions.Clear();
-        currentFiveWOptions.AddRange(distractors ?? System.Array.Empty<string>());
-        currentFiveWOptions.Add(correct);
-        Shuffle(currentFiveWOptions);
+        var data = currentMission.fiveWhys[whyIndex];
+        if (string.IsNullOrWhiteSpace(data.correctAnswer))
+        {
+            Debug.LogError($"[{name}] Mission {currentMission.missionID} is missing a Why answer for stage {whyIndex}", this);
+            return;
+        }
+
+        currentCorrectAnswer = data.correctAnswer;
+        currentOptions.Clear();
+        currentOptions.AddRange(data.distractors ?? System.Array.Empty<string>());
+        currentOptions.Add(data.correctAnswer);
+        Shuffle(currentOptions);
+
+        if (hintText != null) hintText.text = data.hint;
 
         displayText.text = "";
-        StartTyping(BuildFiveWPrompt(stage, currentFiveWOptions));
+        StartTyping(BuildWhyPrompt(data.question, currentOptions));
     }
 
-    private string GetFiveWQuestion(Stage s) => s switch
-    {
-        Stage.Who => "Who is affected by this problem?",
-        Stage.What => "What is actually happening?",
-        Stage.Where => "Where is this happening?",
-        Stage.When => "When does this happen?",
-        Stage.Why => "Why is this happening?",
-        _ => throw new System.ArgumentOutOfRangeException(nameof(s), s, null)
-    };
-
-    private (string correct, string[] distractors) GetFiveWAnswerData(Stage s) => s switch
-    {
-        Stage.Who => (currentMission.who, currentMission.whoDistractors),
-        Stage.What => (currentMission.what, currentMission.whatDistractors),
-        Stage.Where => (currentMission.where, currentMission.whereDistractors),
-        Stage.When => (currentMission.when, currentMission.whenDistractors),
-        Stage.Why => (currentMission.why, currentMission.whyDistractors),
-        _ => throw new System.ArgumentOutOfRangeException(nameof(s), s, null)
-    };
-
-    private string BuildFiveWPrompt(Stage s, List<string> options)
+    private string BuildWhyPrompt(string question, List<string> options)
     {
         var sb = new System.Text.StringBuilder();
-        sb.Append(GetFiveWQuestion(s));
+        sb.Append($"Why #{whyIndex + 1}: ").Append(question);
         sb.Append("\n\n");
         for (int i = 0; i < options.Count; i++)
             sb.Append($"{i + 1}. {options[i]}\n");
         return sb.ToString().TrimEnd();
     }
 
-    private void ShowFiveWChoices()
+    private void ShowWhyChoices()
     {
         for (int i = 0; i < fiveWChoiceButtons.Length; i++)
         {
             var choiceButton = fiveWChoiceButtons[i];
-            bool active = i < currentFiveWOptions.Count;
+            bool active = i < currentOptions.Count;
             choiceButton.button.gameObject.SetActive(active);
             if (!active) continue;
 
+            choiceButton.button.interactable = true;
             int optionIndex = i;
             choiceButton.button.onClick.RemoveAllListeners();
-            choiceButton.button.onClick.AddListener(() => OnFiveWChoiceSelected(choiceButton, optionIndex));
+            choiceButton.button.onClick.AddListener(() => OnWhyChoiceSelected(choiceButton, optionIndex));
         }
 
         fiveWChoiceGroup.SetActive(true);
     }
 
-    private void OnFiveWChoiceSelected(FiveWChoiceButton choiceButton, int optionIndex)
+    private void OnWhyChoiceSelected(FiveWChoiceButton choiceButton, int optionIndex)
     {
-        if (currentFiveWOptions[optionIndex] == currentFiveWCorrect)
-        {
-            fiveWChoiceGroup.SetActive(false);
-            AdvanceFromFiveW();
-        }
-        else
-        {
-            AudioManager.Instance.PlaySFX(wrongChoiceClip);
-            StartCoroutine(FlashWrong(choiceButton.label));
-        }
+        foreach (var choice in fiveWChoiceButtons)
+            choice.button.interactable = false;
+
+        bool isCorrect = currentOptions[optionIndex] == currentCorrectAnswer;
+        if (isCorrect) correctCount++;
+        else AudioManager.Instance.PlaySFX(wrongChoiceClip);
+
+        StartCoroutine(FlashChoiceThenAdvance(choiceButton.label, isCorrect));
     }
 
-    private void AdvanceFromFiveW()
-    {
-        switch (stage)
-        {
-            case Stage.Who: stage = Stage.What; BeginFiveWStage(); break;
-            case Stage.What: stage = Stage.Where; BeginFiveWStage(); break;
-            case Stage.Where: stage = Stage.When; BeginFiveWStage(); break;
-            case Stage.When: stage = Stage.Why; BeginFiveWStage(); break;
-            case Stage.Why:
-                stage = Stage.Buttons;
-                displayText.text = "What approach would you like to choose?";
-                choiceButtonGroup.SetActive(true);
-                break;
-        }
-    }
-
-    private static IEnumerator FlashWrong(TextMeshProUGUI label)
+    private IEnumerator FlashChoiceThenAdvance(TextMeshProUGUI label, bool isCorrect)
     {
         Color original = label.color;
-        label.color = Color.red;
-        yield return new WaitForSeconds(0.3f);
+        label.color = isCorrect ? Color.green : Color.red;
+        yield return new WaitForSeconds(choiceFeedbackDelay);
         label.color = original;
+
+        fiveWChoiceGroup.SetActive(false);
+
+        whyIndex++;
+        if (whyIndex < currentMission.fiveWhys.Length)
+            BeginWhyStage();
+        else
+            FinishFiveWhys();
+    }
+
+    private void FinishFiveWhys()
+    {
+        stage = Stage.Outcome;
+        if (hintText != null) hintText.gameObject.SetActive(false);
+
+        outcomeIsOptimal = correctCount >= currentMission.fiveWhys.Length;
+        displayText.text = "";
+        StartTyping(outcomeIsOptimal
+            ? "You've traced the true root cause. Time to fix this properly."
+            : "You lost the thread partway through... this will need a quick fix for now.");
     }
 
     private static void Shuffle<T>(IList<T> list)
@@ -259,9 +258,6 @@ public class PlanningUI : MonoBehaviour
         isTyping = false;
         FinishTyping();
     }
-
-    public void SelectTrivial() => SelectSolution(SolutionType.Trivial);
-    public void SelectOptimal() => SelectSolution(SolutionType.Optimal);
 
     private void SelectSolution(SolutionType choice)
     {

@@ -19,31 +19,46 @@ MonoBehaviour:
   - Theres not enough water to water the crops!
   actualRootCause: The central well is structurally compromised, leaking water into
     the soil
-  who: The village's crop farmers
-  what: The well is leaking into the soil
-  where: At the village's central well
-  when: Every time water is drawn
-  why: The well's structure is cracked
-  whoDistractors:
-  - The village blacksmith
-  - The traveling merchants
-  - The town guards
-  whatDistractors:
-  - Pests are eating the crops
-  - The crops were planted too late
-  - There's been no rain for weeks
-  whereDistractors:
-  - In the crop fields themselves
-  - Downstream at the river
-  - In the village grain storehouse
-  whenDistractors:
-  - Only during the winter months
-  - Once a year at harvest
-  - After last week's storm
-  whyDistractors:
-  - Farmers are overusing water
-  - The irrigation channels are blocked
-  - The crops need more sunlight
+  fiveWhys:
+  - question: Why isn't there enough water reaching the crops?
+    correctAnswer: The village well isn't drawing enough water.
+    distractors:
+    - There's been no rain for weeks.
+    - The crops need more sunlight.
+    - Pests are eating the crops.
+    hint: The complaint is about water supply. Look at the source, not the crops
+      themselves.
+  - question: Why isn't the well drawing enough water?
+    correctAnswer: Water is leaking out of the well before it reaches the surface.
+    distractors:
+    - Farmers are overusing the water.
+    - The bucket has a hole in it.
+    - The rope keeps snapping.
+    hint: Something is happening to the water on its way up.
+  - question: Why is water leaking out of the well?
+    correctAnswer: The well's stone lining is cracked.
+    distractors:
+    - The irrigation channels are blocked.
+    - The pulley is jammed.
+    - The well was dug too shallow.
+    hint: Think about the well's physical structure, not the tools used to draw
+      water.
+  - question: Why is the well's lining cracked?
+    correctAnswer: It's old and was never reinforced.
+    distractors:
+    - Someone deliberately damaged it.
+    - It cracked from this week's storm.
+    - Tree roots grew through it overnight.
+    hint: Consider how long the well has been in service.
+  - question: Why does a cracked, unreinforced well keep failing?
+    correctAnswer: There's no proper pulley and filter system to reduce strain on
+      the old structure.
+    distractors:
+    - The village hasn't prayed for rain.
+    - Nobody checks the well regularly.
+    - The bucket is the wrong size.
+    hint: Think about what kind of system upgrade would actually stop this from
+      recurring.
   trivialSolutionName: Patch the bucket and rope
   optimalSolutionName: Rebuild the pulley and pipe filter system
   trivialReflectionText: The patch worked for now, but the root cause remains. The

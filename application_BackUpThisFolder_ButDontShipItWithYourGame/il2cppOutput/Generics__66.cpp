@@ -34632,7 +34632,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void IsOfType_1__cctor_m4E93EB65AAFC28F33D8D2
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 75364
+// Method Definition Index: 75371
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Type_t* IsometricRuleTile_1_get_m_NeighborType_m131A87D5E4473C89CB8EC9741EEECA5C3D9E1AFE_gshared (IsometricRuleTile_1_t8986F1B760D96C4D918EABD0ECC4FDB3B4505593* __this, const RuntimeMethod* method) 
 {
 	{
@@ -34644,7 +34644,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Type_t* IsometricRuleTile_1_get_m_NeighborTyp
 		return L_1;
 	}
 }
-// Method Definition Index: 75365
+// Method Definition Index: 75372
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void IsometricRuleTile_1__ctor_m96C47CD5ED59AE9BFE7B1268BC95BDFD9C0FCFAD_gshared (IsometricRuleTile_1_t8986F1B760D96C4D918EABD0ECC4FDB3B4505593* __this, const RuntimeMethod* method) 
 {
 	{

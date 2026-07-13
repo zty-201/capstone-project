@@ -19,31 +19,45 @@ MonoBehaviour:
   - It hard to catch any fish nowadays!
   actualRootCause: 'The rubbish blocked the upstrean of the river, causing a lack
     of water downstream and thus no fish. '
-  who: The village fishermen
-  what: Rubbish is blocking the river upstream
-  where: Upstream, at the blockage
-  when: Continuously, as waste piles up
-  why: Villagers dump waste with no collection system
-  whoDistractors:
-  - The village merchants
-  - The town blacksmith
-  - The traveling bards
-  whatDistractors:
-  - The fish swam to another river
-  - The river water turned undrinkable
-  - A drought dried up the riverbed
-  whereDistractors:
-  - Downstream near the fishing docks
-  - At the village well
-  - In the nearby lake
-  whenDistractors:
-  - Only during the rainy season
-  - Once every few years
-  - After the harvest festival
-  whyDistractors:
-  - The fish dislike village noise
-  - The river naturally changed course
-  - Overfishing depleted the fish
+  fiveWhys:
+  - question: Why is it hard to catch fish nowadays?
+    correctAnswer: There isn't enough water flowing downstream.
+    distractors:
+    - The fish swam to another river.
+    - A drought dried up the riverbed.
+    - The river water turned undrinkable.
+    hint: The fish didn't leave on their own. Something changed about the water
+      itself.
+  - question: Why isn't enough water flowing downstream?
+    correctAnswer: The river is blocked upstream.
+    distractors:
+    - Overfishing depleted the fish.
+    - The river naturally changed course.
+    - The village is using too much water.
+    hint: Something is stopping the water before it even reaches downstream.
+  - question: Why is the river blocked upstream?
+    correctAnswer: Rubbish has piled up in the riverbed.
+    distractors:
+    - Beavers built a dam.
+    - Rocks fell from the hillside.
+    - The riverbed silted up naturally.
+    hint: Think about what villagers might be leaving behind near the water.
+  - question: Why has rubbish piled up in the river?
+    correctAnswer: Villagers dump waste with no collection system in place.
+    distractors:
+    - The rubbish washed in from another village.
+    - It's left over from a festival last week.
+    - Animals dragged it into the water.
+    hint: Consider where the waste is coming from and whether anyone is managing
+      it.
+  - question: Why does the lack of a collection system keep causing this?
+    correctAnswer: Without an automatic way to collect waste, it will keep building
+      up and blocking the river again.
+    distractors:
+    - The village needs to pray for cleaner water.
+    - The fish need to be relocated.
+    - The riverbank needs higher walls.
+    hint: Think about what kind of system would stop rubbish from piling up again.
   trivialSolutionName: Clear the rubbish
   optimalSolutionName: Setup a automatic rubbish collector
   trivialReflectionText: The rubbish has been cleared, but the root cause hasnt be

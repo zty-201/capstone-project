@@ -59,8 +59,4 @@ public static class EventBus
     public static event Action<int, SolutionType> OnSolutionSelected;
     public static void RaiseSolutionSelected(int missionID, SolutionType type)
         => OnSolutionSelected?.Invoke(missionID, type);
-
-    public static event Action<Vector3> OnWellClicked;
-    public static void RaiseWellClicked(Vector3 worldPos)
-        => OnWellClicked?.Invoke(worldPos);
 }

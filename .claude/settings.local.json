@@ -15,7 +15,10 @@
       "Bash(grep -rli \"patrol\" Assets/)",
       "Bash(awk 'BEGIN{RS=\"--- !u!1 &\"} /Pipe_/')",
       "Bash(grep -n \"^--- !u!1 &1227439110\\\\|^--- !u!1 &1227439110$\" SampleScene.unity)",
-      "Bash(awk ' *)"
+      "Bash(awk ' *)",
+      "Bash(awk '/m_Name: Canvas$/{print NR\": \"$0; for\\(i=1;i<=15;i++\\){getline; print NR\": \"$0}}' \"Assets/Scenes/SampleScene.unity\")",
+      "Bash(sed -n \"/^--- !u!1 \\\\&1688243887\\\\$/,/^--- !u!/p\" \"Assets/Scenes/SampleScene.unity\")",
+      "Bash(sed -n \"/^--- !u!224 \\\\&1688243888\\\\$/,/^--- !u!/p\" \"Assets/Scenes/SampleScene.unity\")"
     ]
   }
 }

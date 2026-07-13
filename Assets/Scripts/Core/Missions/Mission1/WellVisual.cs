@@ -1,22 +1,14 @@
 using System.Collections;
 using UnityEngine;
 
-public class WellVisual : MonoBehaviour
+public class WellVisual : MonoBehaviour, IInteractable
 {
     [Header("Mission Identity")]
     public int missionID = 1;
 
-    private BoxCollider2D col;
-
-    private void Awake() => col = GetComponent<BoxCollider2D>();
-
-    private void OnEnable() => EventBus.OnWellClicked += HandleWellClicked;
-    private void OnDisable() => EventBus.OnWellClicked -= HandleWellClicked;
-
-    private void HandleWellClicked(Vector3 worldPos)
+    public void Interact()
     {
-        if (GameManager.Instance.StateManager.CurrentStateType != GameStateType.PatchWell) return;
-        if (col.OverlapPoint(worldPos)) StartCoroutine(HandlePatchVictory());
+        StartCoroutine(HandlePatchVictory());
     }
 
     private IEnumerator HandlePatchVictory()

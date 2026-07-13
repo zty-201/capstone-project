@@ -4,8 +4,8 @@ public enum GameStateType
     Dialogue,
     Planning,
     Puzzle,
-    PatchWell,
     Reflection,
     MissionBoard,
-    DayComplete
+    DayComplete,
+    InfoBoard
 }

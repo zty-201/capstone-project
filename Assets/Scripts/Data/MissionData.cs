@@ -14,19 +14,19 @@ public class MissionData : ScriptableObject
     [TextArea(2, 4)]
     public string actualRootCause;
 
-    [Header("5W Model Data (Investigation)")]
-    public string who;
-    public string what;
-    public string where;
-    public string when;
-    public string why;
+    [System.Serializable]
+    public class WhyStage
+    {
+        [TextArea(1, 2)]
+        public string question;
+        public string correctAnswer;
+        public string[] distractors;
+        [TextArea(1, 2)]
+        public string hint;
+    }
 
-    [Header("5W Distractor Options (wrong answers shown alongside the correct one)")]
-    public string[] whoDistractors;
-    public string[] whatDistractors;
-    public string[] whereDistractors;
-    public string[] whenDistractors;
-    public string[] whyDistractors;
+    [Header("5 Whys Investigation — must reach 5/5 for the optimal path")]
+    public WhyStage[] fiveWhys = new WhyStage[5];
 
     [Header("Action Phase (Do)")]
     public string trivialSolutionName;
