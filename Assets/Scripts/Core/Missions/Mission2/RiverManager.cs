@@ -7,8 +7,17 @@ public class RiverManager : MonoBehaviour
     [SerializeField] private GameObject animatedRiverTilemap;
     [SerializeField] private GameObject[] wastePieces;
 
-    private void OnEnable() => EventBus.OnMissionCompleted += HandleMissionCompleted;
-    private void OnDisable() => EventBus.OnMissionCompleted -= HandleMissionCompleted;
+    private void OnEnable()
+    {
+        EventBus.OnMissionCompleted += HandleMissionCompleted;
+        EventBus.OnMissionsNeedReview += HandleMissionsNeedReview;
+    }
+
+    private void OnDisable()
+    {
+        EventBus.OnMissionCompleted -= HandleMissionCompleted;
+        EventBus.OnMissionsNeedReview -= HandleMissionsNeedReview;
+    }
 
     private void HandleMissionCompleted(int id, bool wasOptimal)
     {
@@ -18,5 +27,15 @@ public class RiverManager : MonoBehaviour
 
         foreach (var piece in wastePieces)
             if (piece != null) piece.SetActive(false);
+    }
+
+    private void HandleMissionsNeedReview(int[] missionIDs)
+    {
+        if (System.Array.IndexOf(missionIDs, missionID) < 0) return;
+        if (blockageVisual != null) blockageVisual.SetActive(true);
+        if (animatedRiverTilemap != null) animatedRiverTilemap.SetActive(false);
+
+        foreach (var piece in wastePieces)
+            if (piece != null) piece.SetActive(true);
     }
 }

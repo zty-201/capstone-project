@@ -113,7 +113,7 @@ public class PlanningUI : MonoBehaviour
                 stage = Stage.Why;
                 whyIndex = 0;
                 correctCount = 0;
-                if (hintText != null) hintText.gameObject.SetActive(true);
+                if (hintText != null) hintText.gameObject.SetActive(StageManager.Instance.IsMissionUnderReview(currentMission.missionID));
                 BeginWhyStage();
                 break;
 
@@ -148,7 +148,17 @@ public class PlanningUI : MonoBehaviour
 
         currentCorrectAnswer = data.correctAnswer;
         currentOptions.Clear();
-        currentOptions.AddRange(data.distractors ?? System.Array.Empty<string>());
+
+        var distractors = data.distractors ?? System.Array.Empty<string>();
+        var excluded = StageManager.Instance.GetExcludedDistractors(currentMission.missionID, whyIndex);
+        foreach (string distractor in distractors)
+            if (excluded == null || !excluded.Contains(distractor))
+                currentOptions.Add(distractor);
+
+        // Floor guard: never let a redo collapse a question down to just the correct answer.
+        if (currentOptions.Count == 0 && distractors.Length > 0)
+            currentOptions.Add(distractors[0]);
+
         currentOptions.Add(data.correctAnswer);
         Shuffle(currentOptions);
 
@@ -192,8 +202,15 @@ public class PlanningUI : MonoBehaviour
             choice.button.interactable = false;
 
         bool isCorrect = currentOptions[optionIndex] == currentCorrectAnswer;
-        if (isCorrect) correctCount++;
-        else AudioManager.Instance.PlaySFX(wrongChoiceClip);
+        if (isCorrect)
+        {
+            correctCount++;
+        }
+        else
+        {
+            AudioManager.Instance.PlaySFX(wrongChoiceClip);
+            StageManager.Instance.RecordWrongAnswer(currentMission.missionID, whyIndex, currentOptions[optionIndex]);
+        }
 
         StartCoroutine(FlashChoiceThenAdvance(choiceButton.label, isCorrect));
     }

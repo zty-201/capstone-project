@@ -6,8 +6,17 @@ public class NPCController : MonoBehaviour, IInteractable
 
     private bool missionCompleted;
 
-    private void OnEnable() => EventBus.OnSolutionSelected += HandleSolutionSelected;
-    private void OnDisable() => EventBus.OnSolutionSelected -= HandleSolutionSelected;
+    private void OnEnable()
+    {
+        EventBus.OnSolutionSelected += HandleSolutionSelected;
+        EventBus.OnMissionsNeedReview += HandleMissionsNeedReview;
+    }
+
+    private void OnDisable()
+    {
+        EventBus.OnSolutionSelected -= HandleSolutionSelected;
+        EventBus.OnMissionsNeedReview -= HandleMissionsNeedReview;
+    }
 
     public void Interact()
     {
@@ -23,5 +32,12 @@ public class NPCController : MonoBehaviour, IInteractable
         if (missionID != associatedMission.missionID) return;
         missionCompleted = true;
         GetComponent<InteractionIndicator>()?.Hide();
+    }
+
+    private void HandleMissionsNeedReview(int[] missionIDs)
+    {
+        if (System.Array.IndexOf(missionIDs, associatedMission.missionID) < 0) return;
+        missionCompleted = false;
+        GetComponent<InteractionIndicator>()?.ResetVisibility();
     }
 }

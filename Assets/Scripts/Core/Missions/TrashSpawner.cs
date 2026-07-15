@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class TrashSpawner : MonoBehaviour
 {
+    public static TrashSpawner Instance { get; private set; }
+
     [Header("Prefab & Spawn Points")]
     [SerializeField] private GameObject trashPrefab;
     [SerializeField] private Transform[] spawnPoints;
@@ -20,7 +22,29 @@ public class TrashSpawner : MonoBehaviour
     private float spawnTimer;
     private float nextSpawnInterval;
 
-    private void Awake() => nextSpawnInterval = Random.Range(minSpawnInterval, maxSpawnInterval);
+    public bool HasLiveTrash => occupied.Count > 0;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
+
+        nextSpawnInterval = Random.Range(minSpawnInterval, maxSpawnInterval);
+    }
+
+    private void OnEnable() => EventBus.OnDayCompleted += HandleDayCompleted;
+    private void OnDisable() => EventBus.OnDayCompleted -= HandleDayCompleted;
+
+    // Trash is town-wide, not mission-scoped. It only needs clearing when satisfaction is about
+    // to be force-reset to the next stage's baseline (a real stage pass) — with no refund, since
+    // that reset already wipes out whatever a live piece's accumulatedLoss was tracked against.
+    // A mission being flagged for review no longer resets satisfaction, so trash is untouched then.
+    private void HandleDayCompleted(int day)
+    {
+        foreach (var piece in occupied.Values)
+            if (piece != null) Destroy(piece.gameObject);
+        occupied.Clear();
+    }
 
     private void Update()
     {

@@ -49,4 +49,10 @@ public class InteractionIndicator : MonoBehaviour
         forcedHidden = true;
         if (indicator != null) indicator.SetActive(false);
     }
+
+    // Call this when the owning interactable becomes interactable again (e.g. a stage reset)
+    public void ResetVisibility()
+    {
+        forcedHidden = false;
+    }
 }

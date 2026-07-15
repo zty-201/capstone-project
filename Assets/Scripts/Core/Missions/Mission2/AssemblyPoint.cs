@@ -11,4 +11,11 @@ public class AssemblyPoint : MonoBehaviour, IInteractable
         gameObject.SetActive(false);
         if (placementPoint != null) placementPoint.gameObject.SetActive(true);
     }
+
+    public void ResetPoint()
+    {
+        gameObject.SetActive(true);
+        if (machineVisual != null) machineVisual.SetActive(false);
+        placementPoint?.ResetPoint();
+    }
 }

@@ -11,4 +11,10 @@ public class WastePiece : MonoBehaviour, IInteractable
         pickupSystem.OnWasteRemoved();
         gameObject.SetActive(false);
     }
+
+    public void ResetPiece()
+    {
+        if (wasteVisual != null) wasteVisual.SetActive(true);
+        gameObject.SetActive(true);
+    }
 }

@@ -11,4 +11,10 @@ public class PlacementPoint : MonoBehaviour, IInteractable
         gameObject.SetActive(false);
         EventBus.RaiseMissionCompleted(missionID, true);
     }
+
+    public void ResetPoint()
+    {
+        gameObject.SetActive(false);
+        if (placedMachineVisual != null) placedMachineVisual.SetActive(false);
+    }
 }

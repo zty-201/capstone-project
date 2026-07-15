@@ -23,14 +23,36 @@ public class DayCompleteUI : MonoBehaviour
         HidePanel();
     }
 
-    private void OnEnable() => EventBus.OnDayCompleted += HandleDayCompleted;
-    private void OnDisable() => EventBus.OnDayCompleted -= HandleDayCompleted;
+    private void OnEnable()
+    {
+        EventBus.OnDayCompleted += HandleDayCompleted;
+        EventBus.OnMissionsNeedReview += HandleMissionsNeedReview;
+    }
+
+    private void OnDisable()
+    {
+        EventBus.OnDayCompleted -= HandleDayCompleted;
+        EventBus.OnMissionsNeedReview -= HandleMissionsNeedReview;
+    }
 
     private void HandleDayCompleted(int day)
     {
         int satisfaction = TownSatisfactionSystem.Instance.CurrentSatisfaction;
         titleText.text = $"Day {day} Complete!";
         subtitleText.text = BuildSubtitle(satisfaction);
+        ShowPanel();
+        GameManager.Instance.StateManager.ChangeState(GameStateType.DayComplete);
+    }
+
+    // StageManager raises this BEFORE retracting any newly-flagged mission's trivial reward, so
+    // CurrentSatisfaction here reflects the score the player actually earned this attempt — the
+    // retraction (dropping the trivial mission's credit until it's redone) happens right after.
+    private void HandleMissionsNeedReview(int[] missionIDs)
+    {
+        int satisfaction = TownSatisfactionSystem.Instance.CurrentSatisfaction;
+        string missionWord = missionIDs.Length == 1 ? "mission needs" : "missions need";
+        titleText.text = "Needs Review";
+        subtitleText.text = $"Town Satisfaction: {satisfaction}/100\n{missionIDs.Length} {missionWord} another look — its credit is on hold until it's resolved.";
         ShowPanel();
         GameManager.Instance.StateManager.ChangeState(GameStateType.DayComplete);
     }

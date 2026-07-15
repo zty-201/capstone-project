@@ -13,16 +13,25 @@ public class PipePuzzleSystem : MonoBehaviour
 
     private PipeNode[,] grid;
     private PipeVisual[] visuals;
+    private PipeDirection[,] originalBits;
+    private float[,] originalRotationZ;
 
     [Header("Win Conditions")]
     public Vector2Int startPos = new Vector2Int(0, 0);
     public Vector2Int endPos = new Vector2Int(2, 2);
 
+    // OnMissionsNeedReview is subscribed here (not OnEnable/OnDisable): if this ever ends up
+    // living inside a container that gets disabled after this path's mission completes, an
+    // OnEnable/OnDisable subscription would already be gone by the time a review request —
+    // which can only happen after the mission is complete — needs to reach it.
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+        EventBus.OnMissionsNeedReview += HandleMissionsNeedReview;
     }
+
+    private void OnDestroy() => EventBus.OnMissionsNeedReview -= HandleMissionsNeedReview;
 
     private void Start()
     {
@@ -32,14 +41,40 @@ public class PipePuzzleSystem : MonoBehaviour
     private void InitializeGridFromScene()
     {
         grid = new PipeNode[width, height];
+        originalBits = new PipeDirection[width, height];
+        originalRotationZ = new float[width, height];
 
-        visuals = FindObjectsByType<PipeVisual>(FindObjectsInactive.Exclude);
+        // Include inactive pipes too: this mission may be completed via the trivial (well) path
+        // instead, in which case the optimal-path container holding these pipes never activates,
+        // but a later stage reset still needs their original state cached.
+        visuals = FindObjectsByType<PipeVisual>(FindObjectsInactive.Include);
 
         foreach (PipeVisual pipe in visuals)
         {
             PipeDirection startingBits = pipe.GetStartingBits();
+            originalBits[pipe.gridX, pipe.gridY] = startingBits;
+            originalRotationZ[pipe.gridX, pipe.gridY] = pipe.transform.eulerAngles.z;
             grid[pipe.gridX, pipe.gridY] = new PipeNode(pipe.gridX, pipe.gridY, startingBits);
         }
+    }
+
+    public void ResetPuzzle()
+    {
+        if (visuals == null) return;
+
+        foreach (PipeVisual pipe in visuals)
+        {
+            pipe.ResetRotation(originalRotationZ[pipe.gridX, pipe.gridY]);
+            grid[pipe.gridX, pipe.gridY] = new PipeNode(pipe.gridX, pipe.gridY, originalBits[pipe.gridX, pipe.gridY]);
+        }
+
+        UpdateVisuals();
+    }
+
+    private void HandleMissionsNeedReview(int[] missionIDs)
+    {
+        if (System.Array.IndexOf(missionIDs, missionID) < 0) return;
+        ResetPuzzle();
     }
 
     public void RotatePipeAt(int x, int y)

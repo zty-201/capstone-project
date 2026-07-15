@@ -9,4 +9,6 @@ public class MachinePart : MonoBehaviour, IInteractable
         collectionSystem.OnPartCollected();
         gameObject.SetActive(false);
     }
+
+    public void ResetPart() => gameObject.SetActive(true);
 }

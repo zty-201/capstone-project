@@ -49,4 +49,27 @@ public class TownSatisfactionSystem : MonoBehaviour
         EventBus.RaiseSatisfactionChanged(CurrentSatisfaction);
         return CurrentSatisfaction - before;
     }
+
+    // Called directly by StageManager after OnDayCompleted has already been raised and read
+    // by display subscribers — never wired as an event subscriber itself, so the reset can't
+    // race the score it's resetting.
+    public void ResetToBaseline()
+    {
+        CurrentSatisfaction = startingSatisfaction;
+        EventBus.RaiseSatisfactionChanged(CurrentSatisfaction);
+    }
+
+    // Called directly by StageManager the first time a mission is flagged for review, to undo
+    // the trivial reward it earned until it's redone optimally.
+    public void RetractTrivialReward(int missionID)
+    {
+        MissionData data = missionRegistry.GetByID(missionID);
+        if (data == null)
+        {
+            Debug.LogError($"[TownSatisfactionSystem] No MissionData found for ID {missionID}");
+            return;
+        }
+
+        ApplyDelta(-data.trivialSatisfactionReward);
+    }
 }

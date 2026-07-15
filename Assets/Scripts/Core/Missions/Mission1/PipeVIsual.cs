@@ -47,6 +47,11 @@ public class PipeVisual : MonoBehaviour
         EventBus.OnPuzzleClicked -= HandlePuzzleClick;
     }
 
+    public void ResetRotation(float originalZ)
+    {
+        transform.eulerAngles = new Vector3(0f, 0f, originalZ);
+    }
+
     public PipeDirection GetStartingBits()
     {
         PipeDirection bits = PipeDirection.None;

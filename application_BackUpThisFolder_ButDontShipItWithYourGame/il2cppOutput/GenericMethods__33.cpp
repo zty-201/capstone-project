@@ -16223,7 +16223,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void PathVisitor_VisitPath_TisIl2CppFullyShar
 		return;
 	}
 }
-// Method Definition Index: 74117
+// Method Definition Index: 74142
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void PlanningUI_Shuffle_TisRuntimeObject_mB6F8DECA179001833542E33DDA2838099F220235_gshared (RuntimeObject* ___0_list, const RuntimeMethod* method) 
 {
 	il2cpp_rgctx_method_init(method);
@@ -16236,7 +16236,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void PlanningUI_Shuffle_TisRuntimeObject_mB6F
 	RuntimeObject* V_6 = NULL;
 	RuntimeObject* V_7 = NULL;
 	{
-		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:231>
+		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:248>
 		RuntimeObject* L_0 = ___0_list;
 		NullCheck((RuntimeObject*)L_0);
 		int32_t L_1;
@@ -16247,12 +16247,12 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void PlanningUI_Shuffle_TisRuntimeObject_mB6F
 
 IL_000b:
 	{
-		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:233>
+		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:250>
 		int32_t L_2 = V_0;
 		int32_t L_3;
 		L_3 = Random_Range_m6763D9767F033357F88B6637F048F4ACA4123B68(0, ((int32_t)il2cpp_codegen_add(L_2, 1)), NULL);
 		V_1 = L_3;
-		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:234>
+		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:251>
 		RuntimeObject* L_4 = ___0_list;
 		int32_t L_5 = V_0;
 		V_2 = L_5;
@@ -16285,14 +16285,14 @@ IL_000b:
 		V_7 = L_20;
 		NullCheck(L_17);
 		InterfaceActionInvoker2< int32_t, RuntimeObject* >::Invoke(1, il2cpp_rgctx_data(method->rgctx_data, 0), L_17, L_18, L_20);
-		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:231>
+		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:248>
 		int32_t L_21 = V_0;
 		V_0 = ((int32_t)il2cpp_codegen_subtract(L_21, 1));
 	}
 
 IL_004b:
 	{
-		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:231>
+		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:248>
 		int32_t L_22 = V_0;
 		if ((((int32_t)L_22) > ((int32_t)0)))
 		{
@@ -16300,11 +16300,11 @@ IL_004b:
 		}
 	}
 	{
-		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:236>
+		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:253>
 		return;
 	}
 }
-// Method Definition Index: 74117
+// Method Definition Index: 74142
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void PlanningUI_Shuffle_TisIl2CppFullySharedGenericAny_mE616876F045AA35B3E5EF5D07B9C288A2E0C53CB_gshared (RuntimeObject* ___0_list, const RuntimeMethod* method) 
 {
 	il2cpp_rgctx_method_init(method);
@@ -16327,7 +16327,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void PlanningUI_Shuffle_TisIl2CppFullySharedG
 	Il2CppFullySharedGenericAny V_7 = alloca(SizeOf_T_t51D643D74DE574357F4DD3A0C0123FD77670D3EB);
 	memset(V_7, 0, SizeOf_T_t51D643D74DE574357F4DD3A0C0123FD77670D3EB);
 	{
-		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:231>
+		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:248>
 		RuntimeObject* L_0 = ___0_list;
 		NullCheck((RuntimeObject*)L_0);
 		int32_t L_1;
@@ -16338,12 +16338,12 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void PlanningUI_Shuffle_TisIl2CppFullySharedG
 
 IL_000b:
 	{
-		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:233>
+		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:250>
 		int32_t L_2 = V_0;
 		int32_t L_3;
 		L_3 = Random_Range_m6763D9767F033357F88B6637F048F4ACA4123B68(0, ((int32_t)il2cpp_codegen_add(L_2, 1)), NULL);
 		V_1 = L_3;
-		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:234>
+		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:251>
 		RuntimeObject* L_4 = ___0_list;
 		int32_t L_5 = V_0;
 		V_2 = L_5;
@@ -16374,14 +16374,14 @@ IL_000b:
 		il2cpp_codegen_memcpy(V_7, L_20, SizeOf_T_t51D643D74DE574357F4DD3A0C0123FD77670D3EB);
 		NullCheck(L_17);
 		InterfaceActionInvoker2Invoker< int32_t, Il2CppFullySharedGenericAny >::Invoke(1, il2cpp_rgctx_data(method->rgctx_data, 0), L_17, L_18, (il2cpp_codegen_class_is_value_type(il2cpp_rgctx_data_no_init(method->rgctx_data, 4)) ? L_20: *(void**)L_20));
-		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:231>
+		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:248>
 		int32_t L_21 = V_0;
 		V_0 = ((int32_t)il2cpp_codegen_subtract(L_21, 1));
 	}
 
 IL_004b:
 	{
-		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:231>
+		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:248>
 		int32_t L_22 = V_0;
 		if ((((int32_t)L_22) > ((int32_t)0)))
 		{
@@ -16389,7 +16389,7 @@ IL_004b:
 		}
 	}
 	{
-		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:236>
+		//<source_info:D:/Capstone/Capstone Project/Assets/Scripts/Core/Missions/PlanningUI.cs:253>
 		return;
 	}
 }
@@ -29702,7 +29702,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayableHandle_t5D6A01EF94382EFED
 		return L_0;
 	}
 }
-// Method Definition Index: 76268
+// Method Definition Index: 76321
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayableHandle_t5D6A01EF94382EFEDC047202F71DF882769654D4 AudioClipPlayable_GetHandle_mEA1D664328FF9B08E4F7D5EBCD4B51A754D97C44_inline (AudioClipPlayable_tD4B758E68CAE03CB0CD31F90C8A3E603B97143A0* __this, const RuntimeMethod* method) 
 {
 	{
@@ -29710,7 +29710,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayableHandle_t5D6A01EF94382EFED
 		return L_0;
 	}
 }
-// Method Definition Index: 75280
+// Method Definition Index: 75333
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayableHandle_t5D6A01EF94382EFEDC047202F71DF882769654D4 AnimationLayerMixerPlayable_GetHandle_m324A98D0B0BFC0441377D65CAE93C914F828721F_inline (AnimationLayerMixerPlayable_tAD8D28A1E2FB76567E9748CDD11699AEF0B4317D* __this, const RuntimeMethod* method) 
 {
 	{
@@ -29718,7 +29718,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayableHandle_t5D6A01EF94382EFED
 		return L_0;
 	}
 }
-// Method Definition Index: 75293
+// Method Definition Index: 75346
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayableHandle_t5D6A01EF94382EFEDC047202F71DF882769654D4 AnimationMixerPlayable_GetHandle_mBA6CEB1579A713A985D474E75BC282728318882F_inline (AnimationMixerPlayable_t2984697B87B8719A34519FCF2130545D6D7AB6C0* __this, const RuntimeMethod* method) 
 {
 	{
@@ -29726,7 +29726,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayableHandle_t5D6A01EF94382EFED
 		return L_0;
 	}
 }
-// Method Definition Index: 75302
+// Method Definition Index: 75355
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayableHandle_t5D6A01EF94382EFEDC047202F71DF882769654D4 AnimationMotionXToDeltaPlayable_GetHandle_m09F605E78AD7F0135C7F57EB048031091A50E3A2_inline (AnimationMotionXToDeltaPlayable_t3946605ADB0B4C054A27B3D65A59F8EB75B6BE18* __this, const RuntimeMethod* method) 
 {
 	{
@@ -29734,7 +29734,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayableHandle_t5D6A01EF94382EFED
 		return L_0;
 	}
 }
-// Method Definition Index: 75313
+// Method Definition Index: 75366
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayableHandle_t5D6A01EF94382EFEDC047202F71DF882769654D4 AnimationOffsetPlayable_GetHandle_m769BEFF90379AEAB0C579F7800953458CE3EBA78_inline (AnimationOffsetPlayable_t39A1B1103995D63650F606BA2EA4ABDF9484AFB4* __this, const RuntimeMethod* method) 
 {
 	{
@@ -29742,7 +29742,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayableHandle_t5D6A01EF94382EFED
 		return L_0;
 	}
 }
-// Method Definition Index: 75343
+// Method Definition Index: 75396
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayableHandle_t5D6A01EF94382EFEDC047202F71DF882769654D4 AnimationRemoveScalePlayable_GetHandle_mFFA58B879F31327187A20ED30E1C814B7BEAA9C6_inline (AnimationRemoveScalePlayable_t915611F6D3CC150DDCAF56412AC3E5ACB518A9DD* __this, const RuntimeMethod* method) 
 {
 	{
@@ -29750,7 +29750,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayableHandle_t5D6A01EF94382EFED
 		return L_0;
 	}
 }
-// Method Definition Index: 76286
+// Method Definition Index: 76339
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayableHandle_t5D6A01EF94382EFEDC047202F71DF882769654D4 AudioMixerPlayable_GetHandle_m6C182D9794E901D123223BB57738A302BEAB41FD_inline (AudioMixerPlayable_t6AADDF0C53DF1B4C17969EC24B3B4E4975F3A56C* __this, const RuntimeMethod* method) 
 {
 	{
@@ -29766,7 +29766,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayableOutputHandle_tEB217645A8C
 		return L_0;
 	}
 }
-// Method Definition Index: 75327
+// Method Definition Index: 75380
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR PlayableOutputHandle_tEB217645A8C0356A3AC6F964F283003B9740E883 AnimationPlayableOutput_GetHandle_m2A8E2A9CBD12EDCF48FC946445AB42802083338D_inline (AnimationPlayableOutput_t753AC95DC826789BC537D18449E93114777DDF4E* __this, const RuntimeMethod* method) 
 {
 	{

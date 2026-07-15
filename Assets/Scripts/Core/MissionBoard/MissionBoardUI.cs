@@ -30,8 +30,17 @@ public class MissionBoardUI : MonoBehaviour
         canvasGroup.blocksRaycasts = true;
     }
 
-    private void OnEnable() => EventBus.OnMissionCompleted += HandleMissionCompleted;
-    private void OnDisable() => EventBus.OnMissionCompleted -= HandleMissionCompleted;
+    private void OnEnable()
+    {
+        EventBus.OnMissionCompleted += HandleMissionCompleted;
+        EventBus.OnMissionsNeedReview += HandleMissionsNeedReview;
+    }
+
+    private void OnDisable()
+    {
+        EventBus.OnMissionCompleted -= HandleMissionCompleted;
+        EventBus.OnMissionsNeedReview -= HandleMissionsNeedReview;
+    }
 
     public void Show() => ShowPanel();
     public void Hide() => HidePanel();
@@ -46,6 +55,15 @@ public class MissionBoardUI : MonoBehaviour
                 entry.MarkCompleted(wasOptimal);
                 return;
             }
+        }
+    }
+
+    private void HandleMissionsNeedReview(int[] missionIDs)
+    {
+        foreach (var entry in missionEntries)
+        {
+            if (System.Array.IndexOf(missionIDs, entry.missionData.missionID) >= 0)
+                entry.ResetVisual();
         }
     }
 }

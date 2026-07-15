@@ -59,4 +59,13 @@ public static class EventBus
     public static event Action<int, SolutionType> OnSolutionSelected;
     public static void RaiseSolutionSelected(int missionID, SolutionType type)
         => OnSolutionSelected?.Invoke(missionID, type);
+
+    // ==========================================
+    // STAGE GATE EVENTS
+    // ==========================================
+    /// int[]: IDs of missions that resolved trivially and need to be redone.
+    /// Missions not in this array (already optimal) are untouched.
+    public static event Action<int[]> OnMissionsNeedReview;
+    public static void RaiseMissionsNeedReview(int[] missionIDs)
+        => OnMissionsNeedReview?.Invoke(missionIDs);
 }
