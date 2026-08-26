@@ -13,9 +13,6 @@ public class TrashSpawner : MonoBehaviour
     [SerializeField] private float minSpawnInterval = 25f;
     [SerializeField] private float maxSpawnInterval = 45f;
 
-    [Header("Penalty On Spawn")]
-    [SerializeField] private int satisfactionPenaltyPerTrash = 5;
-
     private readonly Dictionary<Transform, TrashPiece> occupied = new Dictionary<Transform, TrashPiece>();
     private readonly List<Transform> freePointsBuffer = new List<Transform>();
 
@@ -35,10 +32,10 @@ public class TrashSpawner : MonoBehaviour
     private void OnEnable() => EventBus.OnDayCompleted += HandleDayCompleted;
     private void OnDisable() => EventBus.OnDayCompleted -= HandleDayCompleted;
 
-    // Trash is town-wide, not mission-scoped. It only needs clearing when satisfaction is about
-    // to be force-reset to the next stage's baseline (a real stage pass) — with no refund, since
-    // that reset already wipes out whatever a live piece's accumulatedLoss was tracked against.
-    // A mission being flagged for review no longer resets satisfaction, so trash is untouched then.
+    // Trash is town-wide, not mission-scoped. It only needs clearing when a stage actually
+    // passes — any piece still sitting on the ground unpicked at that point is destroyed outright
+    // rather than carried into the next stage. A mission being flagged for review doesn't clear
+    // trash, so it's untouched then.
     private void HandleDayCompleted(int day)
     {
         foreach (var piece in occupied.Values)
@@ -74,9 +71,6 @@ public class TrashSpawner : MonoBehaviour
         TrashPiece piece = instance.GetComponent<TrashPiece>();
         piece.Init(this, chosen);
         occupied[chosen] = piece;
-
-        int actualDelta = TownSatisfactionSystem.Instance.ApplyDelta(-satisfactionPenaltyPerTrash);
-        piece.TrackLoss(-actualDelta);
     }
 
     public void RemoveTrash(Transform spawnPoint) => occupied.Remove(spawnPoint);

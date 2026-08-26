@@ -27,6 +27,7 @@ public class MinigameActivator : MonoBehaviour
         if (selectedMissionID != missionID || type != solutionType) return;
 
         container.SetActive(true);
+        EventBus.RaisePDCAPhaseChanged(PDCAPhase.Do);
         GameManager.Instance.StateManager.ChangeState(targetState);
     }
 

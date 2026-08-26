@@ -47,7 +47,7 @@ Open the project in the Unity Editor (Unity 6). There are no CLI build or test c
 ### Event Bus
 `EventBus` is a static class of C# events. Systems subscribe in `OnEnable`/`OnDisable` and raise via the `Raise*` helpers. This is the only coupling layer between systems — no direct references across domains.
 
-Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionSelected`, `OnMissionCompleted`, `OnDayCompleted`, `OnSatisfactionChanged`.
+Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionSelected`, `OnMissionCompleted`, `OnMissionsNeedReview`, `OnDayCompleted`, `OnInventoryChanged`, `OnTrustChanged`, `OnPDCAPhaseChanged`.
 
 ### Mission Flow (complete happy path)
 1. Player clicks NPC (`IInteractable.Interact()`) → `DialogueState`
@@ -58,15 +58,78 @@ Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionS
 6. `ReflectionPopupUI` listens, shows feedback text from `MissionData`, changes state to `Reflection`
 7. Player clicks to dismiss → `Exploration`; `MissionBoardUI` listens to grey out the entry
 
+A trivial resolution isn't necessarily final — see Stage Gate System below for how submitting a stage at Town Hall with any trivial mission still outstanding reopens it for a redo.
+
+### PDCA Phase Indicator
+A HUD element (`PDCAIndicatorUI`) makes the Plan-Do-Check-Act framing visible while playing,
+driven entirely by `EventBus.OnPDCAPhaseChanged(PDCAPhase)` rather than `GameStateType` — most of
+the "Do" minigames (well patch, waste pickup, part collection) run inside plain `Exploration`
+state with no dedicated `GameStateType` of their own, so the indicator can't be state-driven the
+way `GameStateManager` is. `PDCAPhase` is `{ None, Plan, Do, Check }` — "Act" is deliberately not
+a distinct visible phase; the indicator just hides (`None`) on return to Exploration, standing in
+for "go apply what you learned" without a dedicated screen to anchor a 4th label to. Four
+single-line raise points, chosen as the exact mission-scoped moment each phase begins:
+`PlanningUI.Show(mission)` → `Plan`; `MinigameActivator.HandleSolutionSelected` (right after
+activating `container` — the universal entry point for all four trivial/optimal paths across both
+missions) → `Do`; `ReflectionPopupUI.HandleMissionCompleted` → `Check`;
+`ReflectionPopupUI.OnDismiss()` → `None`.
+
+### NPC Trust Meter
+`TrustSystem` (singleton) tracks a `0..maxTrust` (default 5, starting at 2) trust value per
+`missionID`, listening to `OnMissionCompleted`: `+trustGainOnOptimal` if optimal,
+`-trustLossOnTrivial` if trivial, clamped, raising `EventBus.OnTrustChanged(missionID, newTrust)`.
+It's intentionally **visual-only** — trust reflects mission outcome history but doesn't gate
+anything; reattempting a trivial mission is still handled entirely by the Stage Gate System above.
+Trust also persists across stages/days (not reset by `SubmitStage()`), since it's a standing
+relationship signal rather than per-stage bookkeeping. `NPCTrustUI` is a companion component
+(same "attach alongside, don't couple to" pattern as `InteractionIndicator`) on `NPCController`
+(mission 1) and `RiverInteractable` (mission 2), rendering trust as a row of pip `SpriteRenderer`s
+(toggled via `.enabled`, not UI `Image`s — see World-Attached NPC UI below). It reads
+`TrustSystem.Instance.GetTrust(missionID)` in `Start()` rather than `OnEnable()` — Unity
+guarantees every object's `Awake` runs before any object's `Start`, so this is safe without the
+`OnEnable`-ordering workaround `NPCPatrol` needs for `GameManager.Instance`.
+
+### World-Attached NPC UI
+World-attached indicators (the prompt icon, trust pips) default to `SpriteRenderer` + sorting
+layer, the same rendering system every other world object in the scene already uses — not a
+World Space `Canvas`. Escalate to a World Space `Canvas` only when an element needs a genuine
+UI-only capability `SpriteRenderer` can't do (`Image.fillAmount`, layout groups, interactive
+widgets); floating dynamic text uses mesh-based `TextMeshPro`, not `TextMeshProUGUI`, so text
+alone isn't a reason to escalate either. This keeps "how do I show something above an object in
+the world" answered one way, consistent with the One Way convention above, rather than splitting
+world-attached visuals across two parallel rendering systems.
+
 ### 5 Whys Quiz (PlanningUI)
-After typing both solution names, `PlanningUI` runs 5 sequential "Why" stages sourced from `MissionData.fiveWhys` (a `WhyStage[5]`, each with `question`, `correctAnswer`, `distractors[]`, `hint`). Picking any option always advances to the next stage — there is no blocking retry on a wrong pick — but `PlanningUI` tallies `correctCount` across the 5 stages. After the last stage, `outcomeIsOptimal = correctCount >= 5`, and that's what gets passed to `RaiseSolutionSelected`; hitting all 5 is intentionally hard, so each stage optionally shows `WhyStage.hint` via a subtle `hintText` element to nudge the player toward the correct answer without giving it away.
+After typing both solution names, `PlanningUI` runs 5 sequential "Why" stages sourced from `MissionData.fiveWhys` (a `WhyStage[5]`, each with `question`, `correctAnswer`, `distractors[]`, `hint`). Picking any option always advances to the next stage — there is no blocking retry on a wrong pick — but `PlanningUI` tallies `correctCount` across the 5 stages. After the last stage, `outcomeIsOptimal = correctCount >= 5`, and that's what gets passed to `RaiseSolutionSelected`; hitting all 5 is intentionally hard.
+
+The quiz behaves differently on a redo (see Stage Gate System below): `hintText` only shows `WhyStage.hint` when `StageManager.IsMissionUnderReview(missionID)` is true, so a first attempt gets no hint but a review redo does; and each stage's distractor pool excludes whatever the player already picked wrong on a prior attempt at that stage (`StageManager.RecordWrongAnswer`/`GetExcludedDistractors`), with a floor guard so a question never collapses down to just the correct answer alone.
 
 ### Mission Board
-`MissionBoardUI` holds one `MissionEntryUI` per mission (assigned in Inspector). On `OnMissionCompleted`, the matching entry greys out (`alpha = 0.4`) and its status label reads "Resolved" (optimal) or "Needs Review" (trivial). Note: this label does not currently imply a working revisit flow — on `OnSolutionSelected`, `NPCController.HandleSolutionSelected` sets an internal `missionCompleted` flag (so `Interact()` becomes a no-op) and hides its `InteractionIndicator`, but the NPC's GameObject itself stays active — it remains visible (and keeps patrolling, if it has an `NPCPatrol`) rather than disappearing. So a "Needs Review" (trivial) mission still cannot currently be reopened in-game, it's just that the NPC no longer vanishes when it's reached that state.
+`MissionBoardUI` holds one `MissionEntryUI` per mission (assigned in Inspector). On `OnMissionCompleted`, the matching entry greys out (`alpha = 0.4`) and its status label reads "Resolved" (optimal) or "Needs Review" (trivial). On `OnSolutionSelected`, `NPCController.HandleSolutionSelected` sets an internal `missionCompleted` flag (so `Interact()` becomes a no-op) and hides its `InteractionIndicator`, but the NPC's GameObject itself stays active — it remains visible (and keeps patrolling, if it has an `NPCPatrol`) rather than disappearing.
+
+A "Needs Review" (trivial) mission *can* now be reopened, but only through the Stage Gate System (see below) rejecting a stage submission at Town Hall — there's no way to manually revisit a trivial mission before then. Once `OnMissionsNeedReview` fires for it, `MissionEntryUI.ResetVisual()` un-greys the entry and the mission's own interactable/minigame resets itself so it can be replayed.
 
 ### Data Layer (ScriptableObjects)
 - **`MissionData`** — all text content for one mission: complaint, root cause, 5 Whys quiz data (`fiveWhys: WhyStage[5]`, each with `question`/`correctAnswer`/`distractors[]`/`hint`), solution names, reflection texts. Create via `Kaizen Systems/Mission Data`. `M1_ParchedCrops` and `M2_CleaningRiver` have their 5 Whys chains populated, each one ending at the mission's `actualRootCause`.
 - **`MissionRegistry`** — array of `MissionData`, looked up by `missionID`. Create via `Kaizen Systems/Mission Registry`. Assign in Inspector on `ReflectionPopupUI`.
+- **`StageData`** — one stage's `stageNumber`, `stageName`, and `missionIDs[]` (the missions that must all be resolved optimally before the stage can be submitted). Create via `Kaizen Systems/Stage Data`.
+- **`StageRegistry`** — array of `StageData`, looked up by index (`GetByIndex`). Create via `Kaizen Systems/Stage Registry`. Assign in Inspector on `StageManager`.
+- **`ItemData`** — one inventory item's `itemID`, `itemName`, `icon`, and stacking rules (`stackable`, `maxStack`). Create via `Kaizen Systems/Item Data`. Two assets exist: **Gold Coin** (stackable) and **Trash** (not stackable, so litter piles up one slot per piece). Assigned in Inspector on `CoinRewardSystem`, `TrashPiece`, `TrashCollectionSite`, and `StageManager`.
+
+### Stage Gate System
+`StageManager` (singleton) groups missions into stages via `StageData`, tracks each mission's most recent outcome (`missionOutcomes: Dictionary<int, bool>`), and gates day advancement on every mission in the current stage having been resolved *optimally* — resolving a mission trivially no longer quietly counts toward finishing the day.
+
+**Town Hall interact routes through the gate**, not straight to `RaiseDayCompleted` anymore. `TownHallInteractable.Interact()` checks, in order: `StageManager.AllStagesComplete` (shows a closing-out dialogue and stops), `StageManager.AllMissionsCompleteForCurrentStage()` (shows an "outstanding problems" dialogue if any mission in the stage hasn't been completed at all yet), `TrashSpawner.Instance.HasLiveTrash` (shows a "clear the streets" dialogue if any trash piece is currently on the ground), `StageManager.AllMissionsOptimalForCurrentStage() && !StageManager.HasEnoughCoins()` (shows a "bring two gold coins" dialogue if every mission is optimal but the player isn't carrying enough — see Gold Coin Economy below) — and only calls `StageManager.SubmitStage()` once all four pass.
+
+**`SubmitStage()`** partitions the stage's missions into those completed optimally and those still flagged trivial:
+- **All optimal** → consumes `coinsRequiredToSubmit` Gold Coins from `InventorySystem` (guaranteed to succeed — `TownHallInteractable` already confirmed there are enough before calling in), advances `currentDay`, raises `OnDayCompleted`, clears `missionOutcomes`/`excludedDistractors`, and advances `currentStageIndex` (or sets `AllStagesComplete` once the registry is exhausted).
+- **Some still trivial** → raises `OnMissionsNeedReview(int[] missionIDs)`. Trivial completions never earned a Gold Coin in the first place (see below), so there's nothing to retract on a failed redo — the coin count simply reflects however many missions have been solved optimally so far.
+
+**`OnMissionsNeedReview` reopens the flagged missions in place.** Every mission-specific system listens for it and resets itself to pre-completion state: `NPCController` (Mission 1's NPC) clears `missionCompleted` and calls `InteractionIndicator.ResetVisibility()`; `RiverInteractable` (Mission 2's trigger) re-`SetActive(true)`s itself; `PipePuzzleSystem` resets every `PipeVisual` to its cached original rotation/bitmask (`ResetPuzzle()`); `PartCollectionSystem`/`WastePickupSystem` reset their collected counts and re-show their pieces (`MachinePart.ResetPart()`, `WastePiece.ResetPiece()`, `AssemblyPoint.ResetPoint()`, `PlacementPoint.ResetPoint()`); `MissionBoardUI`/`MissionEntryUI` un-grey the entry (`ResetVisual()`). Components living inside a container `MinigameActivator` disables after mission completion (`PartCollectionSystem`, `WastePickupSystem`) or that disable themselves on completion (`RiverInteractable`, `PipePuzzleSystem`) subscribe to `OnMissionsNeedReview` in `Awake`/`OnDestroy` rather than `OnEnable`/`OnDisable`, since an `OnEnable`/`OnDisable` subscription would already be torn down by the time a review request — which can only happen after the mission is complete — needs to reach it.
+
+**A redo runs through the same 5 Whys quiz** with hint/distractor differences from a first attempt — see 5 Whys Quiz above.
+
+**`TrashSpawner`** is a singleton (`Instance`) exposing `HasLiveTrash`; it also listens for `OnDayCompleted` and destroys every live *ground* trash piece (litter never picked up). It does not touch trash already sitting in the player's inventory — that only clears at the Trash Collection Site, see Gold Coin Economy & Inventory below. A mission being flagged for review does *not* clear trash — only a full stage pass does.
 
 ### Pathfinding & Grid
 - **`GridSystem`** (pure C#) — 2D array of `GridNode`; converts between world positions and grid coordinates.
@@ -89,13 +152,13 @@ The interactable that starts the mission is `RiverInteractable` on the waste blo
 **Optimal — Pipe Puzzle:** `PipeDirection` is a `[Flags]` bitmask enum (Up=1, Right=2, Down=4, Left=8). `PipeNode` holds the current connection bitmask and rotates clockwise via a left bit-shift with wrap-around (`(bits << 1 | bits >> 3) & 15`). `PipeVisual` (MonoBehaviour) reads its `PipeShape` and inspector transform rotation to compute starting bits, then delegates clicks to `PipePuzzleSystem.RotatePipeAt` via the dedicated `Puzzle` state/`RaisePuzzleClicked` event (no adjacency requirement — a precise click on a pipe tile rotates it regardless of player position). The puzzle system runs a DFS flood-fill from `startPos` to `endPos` to check for a valid water path after every rotation, and raises `RaiseMissionCompleted(id, true)` once solved.
 
 ### Singletons
-`GameManager`, `DialogueManager`, `PlanningUI`, `MissionBoardUI`, `ReflectionPopupUI`, `DayCompleteUI`, `TownSatisfactionSystem`, `InfoBoardUI` all follow the same pattern: static `Instance`, destroyed if a duplicate exists in `Awake`.
+`GameManager`, `DialogueManager`, `PlanningUI`, `MissionBoardUI`, `ReflectionPopupUI`, `DayCompleteUI`, `InventorySystem`, `TrustSystem`, `InfoBoardUI`, `StageManager`, `TrashSpawner` all follow the same pattern: static `Instance`, destroyed if a duplicate exists in `Awake`.
 
 ### IInteractable
-`NPCController`, `MissionBoardInteractable`, `RiverInteractable`, `WastePiece`, `MachinePart`, `AssemblyPoint`, `PlacementPoint`, `TrashPiece`, `TownHallInteractable`, `ContextInteractable`, `WellVisual`, and `InfoBoardInteractable` all implement `IInteractable`. `InputManager` detects them via `Physics2D.OverlapPoint` and calls `Interact()` when the player is within 1 grid cell (or routes the player adjacent first). `ContextInteractable` is the odd one out: it's narrative-only (dialogue with no associated `MissionData`), so `DialogueManager` returns straight to `Exploration` afterward instead of opening `PlanningUI` — it never starts or resolves a mission.
+`NPCController`, `MissionBoardInteractable`, `RiverInteractable`, `WastePiece`, `MachinePart`, `AssemblyPoint`, `PlacementPoint`, `TrashPiece`, `TrashCollectionSite`, `TownHallInteractable`, `ContextInteractable`, `WellVisual`, and `InfoBoardInteractable` all implement `IInteractable`. `InputManager` detects them via `Physics2D.OverlapPoint` and calls `Interact()` when the player is within 1 grid cell (or routes the player adjacent first). `ContextInteractable` is the odd one out: it's narrative-only (dialogue with no associated `MissionData`), so `DialogueManager` returns straight to `Exploration` afterward instead of opening `PlanningUI` — it never starts or resolves a mission.
 
 ### Info Board
-A walk-up-and-interact help/tutorial panel, architecturally a clone of the Mission Board: `InfoBoardInteractable` (`IInteractable`) shows `InfoBoardUI` and changes state to `InfoBoard`; `InfoBoardState` is ESC-only, same shape as `MissionBoardState`. `InfoBoardUI` isn't dialogue-typed — it's a static paged reference (`InfoPage[] pages`, each a `title`/`body`), navigated with Next/Previous buttons wired directly to `ShowNextPage()`/`ShowPreviousPage()` in the Inspector, covering movement, the 5 Whys mechanic, satisfaction, trash, town hall, and a catalog of interactable types. The default page content is a C# field initializer on `InfoBoardUI.pages`, not scene-authored data.
+A walk-up-and-interact help/tutorial panel, architecturally a clone of the Mission Board: `InfoBoardInteractable` (`IInteractable`) shows `InfoBoardUI` and changes state to `InfoBoard`; `InfoBoardState` is ESC-only, same shape as `MissionBoardState`. `InfoBoardUI` isn't dialogue-typed — it's a static paged reference (`InfoPage[] pages`, each a `title`/`body`), navigated with Next/Previous buttons wired directly to `ShowNextPage()`/`ShowPreviousPage()` in the Inspector, covering movement, the 5 Whys mechanic, the PDCA cycle, gold coins & trust, trash & inventory, town hall, and a catalog of interactable types. The default page content is a C# field initializer on `InfoBoardUI.pages`, not scene-authored data.
 
 ### Minimap
 `MinimapCamera` (on a dedicated second `Camera` in the scene) follows the `Player`-tagged object every `LateUpdate`, using the same tag-lookup pattern as `InteractionIndicator`. That camera renders to a RenderTexture displayed by a `RawImage` anchored top-right on the main Canvas — it's a live zoomed-out view of the same scene, not a separate icon-based map.
@@ -107,15 +170,51 @@ A walk-up-and-interact help/tutorial panel, architecturally a clone of the Missi
 
 NPCs that should block the player's path (and be avoided by the reroute-on-block logic in `PlayerController`) need a `Collider2D` on a dedicated `NPC` Unity layer, with `PlayerController.npcLayerMask` including that layer. The collider should be a trigger — the avoidance is handled by path-rerouting, not physics collision response.
 
-### Town Satisfaction System
-`TownSatisfactionSystem` (singleton, on `ProgressManager` GameObject) owns a single `CurrentSatisfaction` value (0..`MaxSatisfaction`, starts at `startingSatisfaction`). It listens to `OnMissionCompleted`, looks up the completed mission via its `MissionRegistry` reference, and applies `MissionData.optimalSatisfactionReward` or `.trivialSatisfactionReward` (defaults 25 / 10) through its public `ApplyDelta(int)` method, clamping and raising `RaiseSatisfactionChanged(CurrentSatisfaction)` on every change. `SatisfactionBarUI` (always-visible HUD element, no `CanvasGroup` show/hide) subscribes to `OnSatisfactionChanged` and drives a `Filled`-type `Image.fillAmount`.
+### Gold Coin Economy & Inventory
+There is no abstract progress meter — `TownSatisfactionSystem`/`SatisfactionBarUI` were removed
+outright and replaced with a real inventory the player carries.
 
-`TrashSpawner` periodically instantiates a `trashPrefab` at a random unoccupied point from its `spawnPoints` array, and applies a single fixed `-satisfactionPenaltyPerTrash` hit via `TownSatisfactionSystem.ApplyDelta` at the moment each piece spawns — there is no ongoing decay while a piece sits uncleaned. The spawn timer lives in `Update()`, gated by `GameManager.Instance.StateManager.CurrentStateType != GameStateType.Exploration` (early return), so spawning pauses during any non-Exploration state (dialogue, minigames, mission board, day-complete, etc.) and resumes only in `Exploration`. Each `TrashPiece` tracks its own `accumulatedLoss` — `ApplyDelta`'s actual (post-clamp) return value from that one spawn-time hit — and refunds that exact amount on `Interact()` before removing itself from the spawner's occupied set and destroying its GameObject, so cleaning up a piece fully undoes its impact on the bar without over-refunding at the 0/max clamp edges.
+**`InventorySystem`** (singleton) owns a fixed array of 8 `InventorySlot` (plain `ItemData item` +
+`int count`, not a `MonoBehaviour`). `TryAddItem(ItemData, amount)` stacks into an existing slot
+if `item.stackable` and there's room, otherwise claims the first empty slot; returns `false` if
+nothing fits. `CountItem`, `TryRemoveItem`, and `RemoveAllOfItem` round out the API. Every
+mutation raises `EventBus.OnInventoryChanged` (no payload — subscribers just re-read `Slots`).
+`InventoryUI` (HUD element, occupies the screen position the satisfaction bar used to) is a fixed
+array of slot `Image`/count-text pairs that refresh on that event — the same fixed-array pattern
+as `MissionBoardUI.missionEntries`.
+
+**`CoinRewardSystem`** listens to `OnMissionCompleted` and calls
+`InventorySystem.TryAddItem(goldCoinItem, 1)` only when `wasOptimal` — a trivial completion earns
+no coin at all, so there's nothing to claw back if that mission later gets reattempted. The Gold
+Coin `ItemData` is stackable, so every coin the player is carrying lives in a single inventory
+slot.
+
+**Trash** is now something the player physically carries rather than a satisfaction penalty.
+`TrashSpawner` periodically instantiates a `trashPrefab` at a random unoccupied point from its
+`spawnPoints` array — spawning is purely presence-based now, no numeric penalty on spawn. The
+spawn timer lives in `Update()`, gated by
+`GameManager.Instance.StateManager.CurrentStateType != GameStateType.Exploration` (early return),
+so spawning pauses during any non-Exploration state and resumes only in `Exploration`.
+`TrashPiece.Interact()` tries `InventorySystem.TryAddItem(trashItem, 1)` (the Trash `ItemData` is
+**not** stackable, so every piece claims its own slot — letting litter pile up meaningfully
+crowds out Gold Coins); on success it removes itself from the spawner's occupied set and destroys
+its GameObject exactly as before, on failure (inventory full) it's left on the ground untouched.
+**`TrashCollectionSite`** is a plain `IInteractable` (same shape as `WellVisual`/
+`RiverInteractable`) placed in the village — one interact calls
+`InventorySystem.RemoveAllOfItem(trashItem)`, clearing every trash slot at once.
+
+**Spending coins**: see Stage Gate System above — `StageManager` requires
+`coinsRequiredToSubmit` (2) Gold Coins on hand, on top of every mission being optimal, before
+`TownHallInteractable` will let `SubmitStage()` run.
 
 ### Day Progression & Town Hall Upgrade
-Day-end is player-controlled, not automatic. `TownHallInteractable` (on the `TownHall` GameObject, alongside `TownHallUpgrade`) fires `RaiseDayCompleted(currentDay)` directly from `Interact()` whenever the player walks up and interacts with Town Hall — there is no mission-completion gating on this trigger.
+Day-end is player-controlled, and now gated by the Stage Gate System above: `TownHallInteractable` (on the `TownHall` GameObject, alongside `TownHallUpgrade`) routes `Interact()` through `StageManager.SubmitStage()` instead of firing `RaiseDayCompleted` unconditionally. Only a full stage pass (every mission in the current stage resolved optimally, no live trash) actually advances the day; walking up to Town Hall before that just shows a dialogue explaining what's still outstanding.
 
-`DayCompleteUI` reads `TownSatisfactionSystem.Instance.CurrentSatisfaction` in its `OnDayCompleted` handler and picks a tiered subtitle (`>= 80` thriving / `50-79` mixed progress / `< 50` struggling) — the satisfaction bar is now the actual measure of how the day went, not mission optimality tracking.
+`DayCompleteUI` handles two distinct outcomes:
+- `OnDayCompleted` (stage passed): shows a flat congratulatory subtitle — passing already implies every mission was optimal and both Gold Coins were paid in, so there's no separate score left to tier.
+- `OnMissionsNeedReview` (stage rejected): shows a distinct "Needs Review" panel instead, reporting the count of missions still flagged.
+
+Both handlers change state to `GameStateType.DayComplete`.
 
 `TownHallUpgrade` (on the town hall entity) listens to `OnDayCompleted(int day)` and activates the matching index in its `stages` array, deactivating all others. Index 0 = default, index 1 = Day 1 upgrade, index 2 = Day 2 upgrade. The town hall is built as a multi-child SpriteRenderer GameObject (not tilemaps) so each stage can have a Base sprite (EntityTilemap sorting layer) and a Roof sprite (ForeGroundTilemap sorting layer) to preserve player depth layering.
 

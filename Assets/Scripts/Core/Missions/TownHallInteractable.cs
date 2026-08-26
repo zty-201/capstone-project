@@ -23,6 +23,13 @@ public class TownHallInteractable : MonoBehaviour, IInteractable
         "Clear every last scrap of litter before I can sign off on this stage."
     };
 
+    [TextArea(2, 4)]
+    [SerializeField] private string[] notEnoughCoinsLines = new[]
+    {
+        "The streets are clean and every problem's been solved at the root - well done.",
+        "But the ledger isn't just signatures. Bring two gold coins before I can close out this stage."
+    };
+
     public void Interact()
     {
         if (StageManager.Instance.AllStagesComplete)
@@ -40,6 +47,12 @@ public class TownHallInteractable : MonoBehaviour, IInteractable
         if (TrashSpawner.Instance.HasLiveTrash)
         {
             ShowLines(trashOnGroundLines);
+            return;
+        }
+
+        if (StageManager.Instance.AllMissionsOptimalForCurrentStage() && !StageManager.Instance.HasEnoughCoins())
+        {
+            ShowLines(notEnoughCoinsLines);
             return;
         }
 

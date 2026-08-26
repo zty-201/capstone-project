@@ -62,23 +62,32 @@ public class InfoBoardUI : MonoBehaviour
         },
         new InfoPage
         {
-            title = "Town Satisfaction",
-            body = "The bar at the top of the screen tracks how the village feels. Resolving missions raises " +
-                   "it - solving the root cause raises it more than a quick patch. Litter piling up around " +
-                   "town lowers it, so keep it clean."
+            title = "The PDCA Cycle",
+            body = "Every mission runs through Plan, Do, and Check: Plan while you dig through the 5 Whys and " +
+                   "choose a fix, Do while you carry that fix out, and Check when you see the outcome and read " +
+                   "what it means. Watch the tracker near the top of the screen to see which phase you're in."
         },
         new InfoPage
         {
-            title = "Trash",
-            body = "Rubbish appears randomly around town and drags satisfaction down the moment it spawns. " +
-                   "Click a piece to clean it up and recover exactly the satisfaction it cost you."
+            title = "Gold Coins & Trust",
+            body = "Solve a mission's true root cause and you'll earn a Gold Coin, kept in your inventory. Town " +
+                   "Hall needs two Gold Coins on hand - one earned from each of this stage's missions solved " +
+                   "optimally - before it will let the day move on. Villagers also remember how you helped " +
+                   "them: a trivial fix costs you their trust, while finding the real root cause earns it back."
+        },
+        new InfoPage
+        {
+            title = "Trash & Your Inventory",
+            body = "Rubbish appears randomly around town. Click a piece to pick it up - it'll take a slot in " +
+                   "your inventory until you drop it off at the Trash Collection Site. Let it pile up and " +
+                   "it'll crowd out the Gold Coins you're trying to carry, so don't let litter sit too long."
         },
         new InfoPage
         {
             title = "Town Hall & New Days",
-            body = "When you're ready to end the day, visit Town Hall. How satisfied the village is when you " +
-                   "do determines how the day is remembered - and the Town Hall itself grows and upgrades the " +
-                   "better the village is doing."
+            body = "When every mission in the current stage is solved optimally, the streets are clear, and " +
+                   "you're carrying two Gold Coins, visit Town Hall to close out the stage and move to the " +
+                   "next day - the Town Hall itself grows and upgrades as the village progresses."
         },
         new InfoPage
         {
@@ -86,9 +95,10 @@ public class InfoBoardUI : MonoBehaviour
             body = "- Villagers (NPCs): talk to them to start a mission.\n" +
                    "- Wells, rivers, and other mission sites: where a mission's minigame plays out once you've " +
                    "chosen a path.\n" +
-                   "- Trash piles: clean these up to protect town satisfaction.\n" +
+                   "- Trash piles: pick these up before they crowd your inventory.\n" +
+                   "- Trash Collection Site: empty every trash item out of your inventory at once.\n" +
                    "- Mission Board: check the status of every mission.\n" +
-                   "- Town Hall: end the day and see the village grow."
+                   "- Town Hall: submit your Gold Coins to end the day and see the village grow."
         },
     };
 

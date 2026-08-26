@@ -37,33 +37,19 @@ public class DayCompleteUI : MonoBehaviour
 
     private void HandleDayCompleted(int day)
     {
-        int satisfaction = TownSatisfactionSystem.Instance.CurrentSatisfaction;
         titleText.text = $"Day {day} Complete!";
-        subtitleText.text = BuildSubtitle(satisfaction);
+        subtitleText.text = "Every problem this stage was solved at the root, and the treasury's ledger is settled.";
         ShowPanel();
         GameManager.Instance.StateManager.ChangeState(GameStateType.DayComplete);
     }
 
-    // StageManager raises this BEFORE retracting any newly-flagged mission's trivial reward, so
-    // CurrentSatisfaction here reflects the score the player actually earned this attempt — the
-    // retraction (dropping the trivial mission's credit until it's redone) happens right after.
     private void HandleMissionsNeedReview(int[] missionIDs)
     {
-        int satisfaction = TownSatisfactionSystem.Instance.CurrentSatisfaction;
         string missionWord = missionIDs.Length == 1 ? "mission needs" : "missions need";
         titleText.text = "Needs Review";
-        subtitleText.text = $"Town Satisfaction: {satisfaction}/100\n{missionIDs.Length} {missionWord} another look — its credit is on hold until it's resolved.";
+        subtitleText.text = $"{missionIDs.Length} {missionWord} another look before Town Hall will accept this stage.";
         ShowPanel();
         GameManager.Instance.StateManager.ChangeState(GameStateType.DayComplete);
-    }
-
-    private string BuildSubtitle(int satisfaction)
-    {
-        if (satisfaction >= 80)
-            return $"Town Satisfaction: {satisfaction}/100\nThe village is thriving under your care.";
-        if (satisfaction >= 50)
-            return $"Town Satisfaction: {satisfaction}/100\nProgress is being made, but there's more to improve.";
-        return $"Town Satisfaction: {satisfaction}/100\nThe village is struggling. Focus on root causes tomorrow.";
     }
 
     public void OnDismiss()

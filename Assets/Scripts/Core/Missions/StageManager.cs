@@ -8,17 +8,15 @@ public class StageManager : MonoBehaviour
     [Header("Stage Data")]
     [SerializeField] private StageRegistry stageRegistry;
 
+    [Header("Coin Requirements")]
+    [SerializeField] private ItemData goldCoinItem;
+    [SerializeField] private int coinsRequiredToSubmit = 2;
+
     private int currentStageIndex;
     private int currentDay;
 
     // missionID -> outcome of its most recent completion (true = optimal).
     private readonly Dictionary<int, bool> missionOutcomes = new Dictionary<int, bool>();
-    // Missions whose latest trivial completion hasn't had its reward retracted at a submission
-    // yet. Re-armed on every trivial completion (not just the first) — otherwise a redo attempt
-    // that's still wrong would re-earn the trivial reward via TownSatisfactionSystem's own
-    // OnMissionCompleted handler with nothing here to cancel it back out, letting the score
-    // creep up on repeated failed redos instead of staying capped at "the optimal missions only."
-    private readonly HashSet<int> pendingRetraction = new HashSet<int>();
     private readonly Dictionary<(int missionID, int whyIndex), HashSet<string>> excludedDistractors
         = new Dictionary<(int, int), HashSet<string>>();
 
@@ -45,8 +43,6 @@ public class StageManager : MonoBehaviour
         if (System.Array.IndexOf(CurrentStage.missionIDs, missionID) < 0) return;
 
         missionOutcomes[missionID] = wasOptimal;
-        if (wasOptimal) pendingRetraction.Remove(missionID);
-        else pendingRetraction.Add(missionID);
     }
 
     public bool AllMissionsCompleteForCurrentStage()
@@ -56,6 +52,17 @@ public class StageManager : MonoBehaviour
             if (!missionOutcomes.ContainsKey(id)) return false;
         return true;
     }
+
+    public bool AllMissionsOptimalForCurrentStage()
+    {
+        if (AllStagesComplete) return false;
+        foreach (int id in CurrentStage.missionIDs)
+            if (!missionOutcomes.TryGetValue(id, out bool wasOptimal) || !wasOptimal) return false;
+        return true;
+    }
+
+    public bool HasEnoughCoins() =>
+        InventorySystem.Instance.CountItem(goldCoinItem) >= coinsRequiredToSubmit;
 
     public bool IsMissionUnderReview(int missionID) =>
         missionOutcomes.TryGetValue(missionID, out bool wasOptimal) && !wasOptimal;
@@ -68,11 +75,11 @@ public class StageManager : MonoBehaviour
 
         if (needsReview.Count == 0)
         {
+            InventorySystem.Instance.TryRemoveItem(goldCoinItem, coinsRequiredToSubmit);
+
             currentDay++;
             EventBus.RaiseDayCompleted(currentDay);
-            TownSatisfactionSystem.Instance.ResetToBaseline();
             missionOutcomes.Clear();
-            pendingRetraction.Clear();
             excludedDistractors.Clear();
 
             if (currentStageIndex + 1 < stageRegistry.stages.Length)
@@ -82,14 +89,7 @@ public class StageManager : MonoBehaviour
         }
         else
         {
-            // Raise first so the summary panel reads the score the player actually earned this
-            // attempt (e.g. 85 for one optimal + one trivial mission), then retract afterward so
-            // the trivial mission's reward is no longer banked for the redo that follows.
             EventBus.RaiseMissionsNeedReview(needsReview.ToArray());
-
-            foreach (int id in needsReview)
-                if (pendingRetraction.Remove(id))
-                    TownSatisfactionSystem.Instance.RetractTrivialReward(id);
         }
     }
 

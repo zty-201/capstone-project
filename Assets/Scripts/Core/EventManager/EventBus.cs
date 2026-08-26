@@ -44,10 +44,6 @@ public static class EventBus
     // ==========================================
     // KAIZEN / UI EVENTS
     // ==========================================
-    public static event Action<int> OnSatisfactionChanged;
-    public static void RaiseSatisfactionChanged(int newValue)
-        => OnSatisfactionChanged?.Invoke(newValue);
-
     public static event Action<Vector3> OnMapClicked;
     public static void RaiseMapClicked(Vector3 worldPos)
         => OnMapClicked?.Invoke(worldPos);
@@ -68,4 +64,26 @@ public static class EventBus
     public static event Action<int[]> OnMissionsNeedReview;
     public static void RaiseMissionsNeedReview(int[] missionIDs)
         => OnMissionsNeedReview?.Invoke(missionIDs);
+
+    // ==========================================
+    // INVENTORY EVENTS
+    // ==========================================
+    public static event Action OnInventoryChanged;
+    public static void RaiseInventoryChanged() => OnInventoryChanged?.Invoke();
+
+    // ==========================================
+    // NPC TRUST EVENTS
+    // ==========================================
+    /// int: Mission ID
+    /// int: New trust value
+    public static event Action<int, int> OnTrustChanged;
+    public static void RaiseTrustChanged(int missionID, int newTrust)
+        => OnTrustChanged?.Invoke(missionID, newTrust);
+
+    // ==========================================
+    // PDCA PHASE EVENTS
+    // ==========================================
+    public static event Action<PDCAPhase> OnPDCAPhaseChanged;
+    public static void RaisePDCAPhaseChanged(PDCAPhase phase)
+        => OnPDCAPhaseChanged?.Invoke(phase);
 }
