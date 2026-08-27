@@ -13,54 +13,56 @@ MonoBehaviour:
   m_Name: M2_CleaningRiver
   m_EditorClassIdentifier: Assembly-CSharp::MissionData
   missionID: 2
-  missionName: Clogged River
+  missionName: The Stagnant Pond
   isAdvancedMission: 0
   villagerComplaint:
-  - It hard to catch any fish nowadays!
-  actualRootCause: 'The rubbish blocked the upstrean of the river, causing a lack
-    of water downstream and thus no fish. '
+  - "The pond's gone still and green \u2014 hasn't looked like that in years."
+  - A few folks have taken sick after drinking from it. Something's choking the flow
+    up at the falls.
+  actualRootCause: "The cliff face above the falls has been quietly eroding for seasons,
+    and every past slide has\njust been shoved aside by hand \u2014 nothing was ever
+    built that could clear one safely and keep the\nchannel clear, so the next slide
+    always jams it right back up, leaving the pond stagnant."
   fiveWhys:
-  - question: Why is it hard to catch fish nowadays?
-    correctAnswer: There isn't enough water flowing downstream.
+  - question: Why is the villagers' pond water making people sick?
+    correctAnswer: The water has gone stagnant, and with no fresh water flowing in, it's grown bacteria.
     distractors:
-    - The fish swam to another river.
-    - A drought dried up the riverbed.
-    - The river water turned undrinkable.
-    hint: The fish didn't leave on their own. Something changed about the water
-      itself.
-  - question: Why isn't enough water flowing downstream?
-    correctAnswer: The river is blocked upstream.
+    - Someone dumped waste directly into the pond.
+    - The well pump has rusted and tainted the pipes.
+    - A dead animal fell into the water upstream.
+    hint: Think about what happens to water that stops moving, not what's been added to it.
+  - question: Why has no fresh water been flowing into the pond?
+    correctAnswer: The waterfall that normally feeds it has slowed to barely a trickle.
     distractors:
-    - Overfishing depleted the fish.
-    - The river naturally changed course.
-    - The village is using too much water.
-    hint: Something is stopping the water before it even reaches downstream.
-  - question: Why is the river blocked upstream?
-    correctAnswer: Rubbish has piled up in the riverbed.
+    - The dry season has reduced the river's volume.
+    - The pond's inlet has silted shut over the years.
+    - Upstream fields are diverting the river for irrigation.
+    hint: Look at where the water comes from, not the pond itself.
+  - question: Why has the waterfall slowed to a trickle?
+    correctAnswer: A rockslide has jammed a boulder right at the lip of the falls.
     distractors:
-    - Beavers built a dam.
-    - Rocks fell from the hillside.
-    - The riverbed silted up naturally.
-    hint: Think about what villagers might be leaving behind near the water.
-  - question: Why has rubbish piled up in the river?
-    correctAnswer: Villagers dump waste with no collection system in place.
+    - Beavers have dammed it further upstream.
+    - Fallen trees are blocking the channel higher up.
+    - The riverbed above the falls has cracked and is leaking elsewhere.
+    hint: Something is physically blocking the channel at one specific point.
+  - question: Why did a rockslide come down right at the falls?
+    correctAnswer: The cliff face above the falls has been eroding and giving way.
     distractors:
-    - The rubbish washed in from another village.
-    - It's left over from a festival last week.
-    - Animals dragged it into the water.
-    hint: Consider where the waste is coming from and whether anyone is managing
-      it.
-  - question: Why does the lack of a collection system keep causing this?
-    correctAnswer: Without an automatic way to collect waste, it will keep building
-      up and blocking the river again.
+    - Miners are blasting rock further up the mountain.
+    - The village dug into the hillside for a new well.
+    - Heavy foot traffic has worn away the cliff path.
+    hint: What's been happening to the cliff itself over time?
+  - question: Why hasn't this kind of blockage ever been dealt with properly?
+    correctAnswer: Every past slide was just shoved aside by hand, and nothing was ever built to clear one safely and keep it clear.
     distractors:
-    - The village needs to pray for cleaner water.
-    - The fish need to be relocated.
-    - The riverbank needs higher walls.
-    hint: Think about what kind of system would stop rubbish from piling up again.
-  trivialSolutionName: Clear the rubbish
-  optimalSolutionName: Setup a automatic rubbish collector
-  trivialReflectionText: The rubbish has been cleared, but the root cause hasnt be
-    solved ...
-  optimalReflectionText: Good! You demostrated Jidoka in this mission choice by creating
-    the automatic rubbish cleaner and solving the root cause.
+    - Nobody in the village drinks from the pond anyway.
+    - The village has never had a rockslide before.
+    - Clearing it isn't considered anyone's job.
+    hint: What's actually been done about it before, versus what's actually needed?
+  trivialReflectionText: "You've cleared enough loose rock for a trickle to get through
+    \u2014 the pond stirs a\nlittle, but nowhere near enough to flush out the green,
+    stagnant water villagers have been\nforced to use. This will happen again."
+  optimalReflectionText: "With the rig anchored at the lip, you finally lever the
+    wedged stone free. The falls\nroar back to full flow, flushing the pond clean
+    within the day \u2014 and the rig stays bolted in\nplace to catch whatever comes
+    down next, so the water stays safe."

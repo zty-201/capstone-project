@@ -4,6 +4,10 @@ public class NPCController : MonoBehaviour, IInteractable
 {
     public MissionData associatedMission;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip interactSfx;
+    public AudioClip InteractSfx => interactSfx;
+
     private bool missionCompleted;
 
     private void OnEnable()

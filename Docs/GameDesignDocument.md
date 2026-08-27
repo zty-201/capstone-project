@@ -14,7 +14,7 @@ The core rhetorical trick of the design: **the player never picks trivial vs. op
 
 1. **Diagnose, don't choose.** The 5 Whys quiz *is* the decision point. There is no separate "pick a solution" UI.
 2. **Consequences persist, but aren't punitive dead ends.** A trivial fix isn't a fail state — it's a deferred one. The Stage Gate System (§6) resurfaces it for a redo instead of blocking progress silently or permanently penalizing the player.
-3. **Everything is diegetic where possible.** Satisfaction is a bar tied to the village, not an abstract score; trash is a physical, clickable nuisance; upgrades are visible town-hall sprites, not a menu screen.
+3. **Everything is diegetic where possible.** Progress is a real inventory of Gold Coins the player earns and physically carries to Town Hall, not an abstract score; trash is a physical nuisance that has to be picked up and carried to a collection site, not a number that just decays; upgrades are visible town-hall sprites, not a menu screen.
 4. **One state, one responsibility.** Every mode of play (exploring, talking, planning, puzzling, reading a reflection) is an explicit state so input routing never has to guess what the player is currently doing.
 5. **No dead-ends from imperfect play.** A wrong 5-Whys answer doesn't block progress mid-quiz (it always advances) and a wrong overall outcome doesn't block the day (it just withholds full credit and reopens later).
 
@@ -30,7 +30,7 @@ Explore village → find NPC/problem site → Dialogue → 5 Whys quiz (Planning
    → visit Town Hall → gate checks (see §6) → Day Complete / send player back to fix trivial work
 ```
 
-A session-level loop wraps this: **Stage → Day → next Stage**, with the town hall's sprite literally upgrading as stages clear, so architectural progress is the visible reward layer on top of the satisfaction number.
+A session-level loop wraps this: **Stage → Day → next Stage**, with the town hall's sprite literally upgrading as stages clear, so architectural progress is the visible reward layer on top of the Gold Coin economy (§8).
 
 ## 4. Core Systems
 
@@ -49,7 +49,7 @@ A session-level loop wraps this: **Stage → Day → next Stage**, with the town
 | `InfoBoard` | In-game tutorial/reference pages; ESC to close |
 
 ### 4.2 Event Bus
-A static `EventBus` class of C# events is the *only* coupling mechanism between systems — no domain references another domain's concrete type. Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionSelected`, `OnMissionCompleted`, `OnMissionsNeedReview`, `OnDayCompleted`, `OnSatisfactionChanged`. This is what lets, e.g., the river visuals, the satisfaction bar, and the mission board all react to a single `OnMissionCompleted` firing without knowing about each other.
+A static `EventBus` class of C# events is the *only* coupling mechanism between systems — no domain references another domain's concrete type. Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionSelected`, `OnMissionCompleted`, `OnMissionsNeedReview`, `OnDayCompleted`, `OnInventoryChanged`, `OnTrustChanged`, `OnPDCAPhaseChanged`. This is what lets, e.g., the river visuals, the inventory HUD, the trust pips, and the mission board all react to a single `OnMissionCompleted` firing without knowing about each other.
 
 ### 4.3 Pathfinding & Movement
 A* over a `GridSystem` built from a collision `Tilemap`, using a binary min-heap for the open set. `PlayerController` walks paths via coroutine and reroutes around moving NPCs by waiting exactly one frame before recomputing — long enough to avoid a same-frame recursive stack overflow if the NPC is still blocking the new path's first step. NPCs that should physically block a route sit on a dedicated `NPC` trigger layer so they're avoided without ragdoll-style physics response.
@@ -59,10 +59,11 @@ A* over a `GridSystem` built from a collision `Tilemap`, using a binary min-heap
 ### 4.4 Data Layer
 All mission and stage content is authored as ScriptableObjects, not hardcoded — a content designer can add a Mission 3 without touching a state machine or minigame script:
 
-- **`MissionData`** — complaint text, root cause, the 5-Whys chain (`WhyStage[5]`: question/correctAnswer/distractors/hint), both solution names, both reflection texts, and per-outcome satisfaction rewards (default trivial +10 / optimal +25).
+- **`MissionData`** — complaint text, root cause, the 5-Whys chain (`WhyStage[5]`: question/correctAnswer/distractors/hint), both solution names, both reflection texts. No longer carries any reward numbers — see §8, Gold Coins are a flat, mission-agnostic reward now.
 - **`MissionRegistry`** — flat array of `MissionData`, looked up by `missionID`.
 - **`StageData`** — a stage number/name and the `missionIDs[]` that must all resolve optimally before the stage can close.
 - **`StageRegistry`** — array of `StageData`, indexed sequentially.
+- **`ItemData`** — one inventory item's identity (`itemID`/`itemName`/`icon`) and stacking rules (`stackable`/`maxStack`). Two assets exist: **Gold Coin** (stackable) and **Trash** (not stackable, so litter piles up one slot per piece instead of quietly stacking away).
 
 ## 5. The 5 Whys Mechanic (the game's signature system)
 
@@ -98,16 +99,17 @@ This is the mechanism that keeps a "good enough" trivial fix from quietly counti
 
 `StageManager` groups missions by `StageData` and tracks each mission's most recent outcome. **Only a fully-optimal stage submits.**
 
-**Town Hall gates `Interact()` through three checks, in order, before allowing submission:**
+**Town Hall gates `Interact()` through four checks, in order, before allowing submission:**
 1. `AllStagesComplete` → shows a closing dialogue, stops (game is content-complete).
 2. `AllMissionsCompleteForCurrentStage()` → if any mission hasn't been touched at all yet, shows an "outstanding problems" dialogue.
 3. `TrashSpawner.HasLiveTrash` → if any trash piece is on the ground, shows a "clear the streets first" dialogue.
+4. `AllMissionsOptimalForCurrentStage() && !HasEnoughCoins()` → every mission is solved optimally but the player isn't carrying enough Gold Coins yet, shows a "bring two gold coins" dialogue.
 
-Only once all three pass does `SubmitStage()` run.
+Only once all four pass does `SubmitStage()` run.
 
 **`SubmitStage()` branches on the stage's mission outcomes:**
-- **All optimal** → advances `currentDay`, fires `OnDayCompleted`, resets satisfaction to baseline directly (bypassing the event bus so `DayCompleteUI` can't race-read the score before the reset), clears per-stage tracking state, advances to the next `StageData` (or flips `AllStagesComplete`).
-- **Any still trivial** → fires `OnMissionsNeedReview(missionIDs[])` *first* (so the day-complete panel shows the satisfaction the player actually earned this attempt, before anything is clawed back), then retracts each flagged mission's trivial reward via `RetractTrivialReward` — gated by a `pendingRetraction` flag so a still-wrong redo can't double-dip credit.
+- **All optimal** → consumes `coinsRequiredToSubmit` (2) Gold Coins from `InventorySystem` (guaranteed to succeed — Town Hall already confirmed there were enough before calling in), advances `currentDay`, fires `OnDayCompleted`, clears per-stage tracking state, advances to the next `StageData` (or flips `AllStagesComplete`).
+- **Any still trivial** → fires `OnMissionsNeedReview(missionIDs[])`. There's nothing to claw back on a failed redo: trivial completions never earned a Gold Coin in the first place (see §8), so the coin count already reflects exactly what the player has actually earned — no separate retraction step needed, unlike the old satisfaction system this replaced.
 
 **`OnMissionsNeedReview` puts the flagged mission back to its pre-completion state in place** — no scene reload, no re-walking to a checkpoint:
 - `NPCController` clears its completed flag and re-shows its interaction indicator.
@@ -120,15 +122,42 @@ Components that live inside a `MinigameActivator` container that gets *disabled*
 
 The redo then runs through the *same* 5 Whys quiz, with the hint/distractor-exclusion scaffolding from §5 active. This is the design's actual "Check → Act" loop made mechanical: fail the check, get a scaffolded second attempt, re-submit.
 
-## 8. Town Satisfaction System
+## 8. Gold Coin Economy & Inventory
 
-A single visible resource that stands in for "is Kaizen actually working here." `TownSatisfactionSystem` (singleton) starts at **50 / 100**.
+There's no abstract progress meter anymore — `TownSatisfactionSystem`/`SatisfactionBarUI` were
+removed outright and replaced with a real inventory the player physically carries, in service of
+Pillar 3 (diegetic feedback over HUD abstraction).
 
-- **Missions add to it.** `+25` for an optimal resolution, `+10` for trivial (both are per-`MissionData`, tunable per mission) — applied once, on `OnMissionCompleted`.
-- **Trash subtracts from it.** `TrashSpawner` periodically spawns a piece at a random unoccupied point and applies a flat **-5** the instant it spawns (not ongoing decay). Spawning is paused outside `Exploration`, so nothing punishes the player for being mid-dialogue or mid-minigame.
-- **Cleaning up trash refunds exactly what that piece cost.** Each `TrashPiece` remembers its own actual post-clamp delta and reverses precisely that amount on pickup — so the bar can't be gamed by farming spawn/clamp edges, and can't over-refund.
-- **Only a full stage pass resets it to baseline.** A mission being sent back for review does *not* touch satisfaction or trash — those are consequences of *day advancement*, not of catching a bad diagnosis.
-- Drives a single always-visible `SatisfactionBarUI` fill bar; also drives `DayCompleteUI`'s tiered subtitle on a real stage pass (≥80 thriving / 50–79 mixed progress / <50 struggling) — satisfaction, not mission-optimality count, is the stated read on "how the day went."
+**`InventorySystem`** (singleton) owns a fixed array of 8 `InventorySlot` (plain `ItemData item` +
+`int count`, not a `MonoBehaviour`). `TryAddItem` stacks into an existing slot when the item is
+stackable and there's room, otherwise claims the first empty slot, and returns `false` if nothing
+fits. Every mutation fires `OnInventoryChanged` (no payload — subscribers just re-read `Slots`).
+`InventoryUI` is a fixed array of slot `Image`/count-text pairs that refresh on that event,
+occupying the screen position the old satisfaction bar used to hold.
+
+**Earning coins:** `CoinRewardSystem` listens to `OnMissionCompleted` and awards exactly 1 Gold
+Coin — but only when `wasOptimal`. A trivial completion earns nothing, which is deliberate: it
+means there's nothing to claw back later if that mission gets flagged for review and reattempted
+(see §7) — the coin count is always an honest, un-gameable record of missions actually solved at
+the root cause. The Gold Coin `ItemData` is stackable, so every coin the player is carrying lives
+in a single slot.
+
+**Spending coins:** Town Hall requires `coinsRequiredToSubmit` (2) Gold Coins on hand — on top of
+every mission in the stage being resolved optimally — before a stage submission is allowed to go
+through (§7). This is the game's one hard, numeric gate; everything else about "how the day went"
+is legible directly from the mission board and the village itself rather than a summarized score.
+
+**Trash** is now something the player physically carries rather than a satisfaction penalty.
+`TrashSpawner` periodically spawns a piece at a random unoccupied point — spawning is purely
+presence-based now, no numeric penalty on spawn, and it still pauses outside `Exploration` so
+nothing punishes the player for being mid-dialogue or mid-minigame. `TrashPiece.Interact()` tries
+to add itself to the inventory (the Trash `ItemData` is **not** stackable, so every piece claims
+its own slot — letting litter pile up meaningfully crowds out Gold Coins and other items); on
+success it's removed from the ground, on failure (inventory full) it's left untouched rather than
+lost. **`TrashCollectionSite`** is a plain interactable placed in the village — one interact clears
+every Trash slot in the inventory at once. A mission being sent back for review does *not* touch
+trash or the player's coins — those are consequences of *day advancement*, not of catching a bad
+diagnosis, exactly as satisfaction/trash used to work under the old system.
 
 ## 9. Missions
 
@@ -146,21 +175,33 @@ A single visible resource that stands in for "is Kaizen actually working here." 
 
 **Design note:** the well used to have a bespoke `PatchWellState` that blocked player movement entirely. It was removed because the triggering NPC can wander (via `NPCPatrol`) away from the well before the player finishes dialogue, which could strand the player in a state where nothing was reachable. Folding the trivial path into ordinary `Exploration` + `InputManager`'s walk-then-interact routing fixed that for free, since a click on `WellVisual` doesn't need the puzzle's no-adjacency click model anyway.
 
-### Mission 2 — "Clogged River" (`missionID: 2`)
-**Complaint:** *"It's hard to catch any fish nowadays!"*
-**Root cause:** rubbish has piled up upstream with no collection system, starving the downstream flow (and the fish with it).
+### Mission 2 — "The Stagnant Pond" (`missionID: 2`)
+**Complaint:** *"The pond's gone still and green — we wash and draw drinking water from there, and some of us have gotten sick."*
+**Root cause:** the cliff face above the falls has been quietly eroding for seasons; a rockslide has jammed a boulder at the lip of the falls, and every past slide has only ever been shoved aside by hand — nothing was ever built to clear one safely and keep the channel clear, so the pond keeps losing its fresh inflow and stagnating.
 
-Unlike Mission 1, the trigger is **not** an NPC — it's `RiverInteractable` sitting directly on the waste blockage in the world. Two additional `ContextInteractable` points nearby (a dried riverbed, complaining villagers) are pure narrative flavor: they show dialogue and return straight to Exploration without touching any `MissionData` or mission state, giving the player context before they ever open the 5 Whys quiz.
+The map's river now runs from a cliff-top source down a waterfall into the village pond — a
+rework of the original "clogged river" fiction to match the renovated map art (cliff → falls →
+pond, not a flat riverside blockage). The underlying mechanics are unchanged; only the fiction and
+`MissionData` content were re-skinned, per the "match existing structure" convention (see
+`CLAUDE.md`) — reuse what already works rather than build a parallel system for what is fictively
+a new scenario.
+
+Unlike Mission 1, the trigger is **not** an NPC — it's `RiverInteractable` sitting directly on the
+boulder wedged at the lip of the falls (a natural rockslide, not litter or a human cause). Two
+additional `ContextInteractable` points nearby (the thinned-out riverbed below the falls,
+villagers warning that the pond water is unsafe to drink or wash in) are pure narrative flavor:
+they show dialogue and return straight to Exploration without touching any `MissionData` or
+mission state, giving the player context before they ever open the 5 Whys quiz.
 
 | | Trivial | Optimal |
 |---|---|---|
-| Name | *Clear the rubbish* | *Set up an automatic rubbish collector* |
-| Mechanic | `WastePickupSystem` + N `WastePiece` interactables overlapping the blockage art; each click hides its visual and decrements a counter | `PartCollectionSystem` + 3 fixed `MachinePart` pickups → `AssemblyPoint` (assemble) → `PlacementPoint` at the riverbank (install) |
-| Reflection | *"The rubbish has been cleared, but the root cause hasn't been solved..."* | *"Good! You demonstrated Jidoka in this mission choice by creating the automatic rubbish cleaner and solving the root cause."* |
+| Name | *Clear the loose rubble* | *Rig a cliffside winch* |
+| Mechanic | `WastePickupSystem` + N `WastePiece` interactables overlapping rubble shaken loose by the slide; each click hides its visual and decrements a counter | `PartCollectionSystem` + 3 fixed `MachinePart` pickups → `AssemblyPoint` (assemble the winch) → `PlacementPoint` at the cliff lip (anchor it) |
+| Reflection | *"You've cleared enough loose rock for a trickle to get through — the pond stirs a little, but nowhere near enough to flush out the stagnant water. This will happen again."* | *"With the rig anchored at the lip, you finally lever the wedged stone free. The falls roar back to full flow, flushing the pond clean — and the rig stays bolted in place to catch whatever comes down next."* |
 
-Both paths ultimately fire `RaiseMissionCompleted(2, wasOptimal)`, which `RiverManager` listens for regardless of which path was taken: it disables the `blockageVisual` and enables `animatedRiverTilemap` either way — the *visual* payoff (river flowing again) is identical, deliberately, so the game doesn't spoil "this was the wrong fix" before the reflection text says so.
+Both paths ultimately fire `RaiseMissionCompleted(2, wasOptimal)`, which `RiverManager` listens for regardless of which path was taken: it disables the `blockageVisual` (the wedged boulder) and enables `animatedRiverTilemap` either way — the *visual* payoff (falls flowing again) is identical, deliberately, so the game doesn't spoil "this was the wrong fix" before the reflection text says so.
 
-**Optimal path is the game's clearest Jidoka example** (a machine that keeps the fix running automatically instead of a human repeating the same manual chore) — the reflection text names the Lean principle explicitly, tying the fiction back to the pedagogy.
+**Optimal path is still the game's clearest Jidoka example** (a mechanism that keeps the fix running automatically instead of a human repeating the same manual chore — here, literally standing guard against the *next* rockslide) — the reflection text implies the Lean principle through what the rig actually does, even without naming it outright, tying the fiction back to the pedagogy.
 
 ## 10. Ancillary Systems
 
@@ -168,7 +209,45 @@ Both paths ultimately fire `RaiseMissionCompleted(2, wasOptimal)`, which `RiverM
 One `MissionEntryUI` per mission, Inspector-assigned. On completion, the entry greys (`alpha 0.4`) and reads **"Resolved"** (optimal) or **"Needs Review"** (trivial). `NPCController.HandleSolutionSelected` sets a `missionCompleted` no-op flag and hides the NPC's `InteractionIndicator` on selection — but the NPC GameObject stays active and, if it has `NPCPatrol`, keeps wandering. A "Needs Review" entry can *only* be reopened via the Stage Gate System rejecting a stage submission — there's no manual "redo mission" button, which keeps the Check/Act step tied to the Town Hall checkpoint rather than something the player can trivially spam.
 
 ### Info Board
-A walk-up tutorial panel (architectural clone of the Mission Board: `InfoBoardInteractable` → `InfoBoardUI` + `InfoBoardState`, ESC-only). A static, paged reference (`InfoPage[]`, Next/Previous buttons) covering: Welcome, Getting Around, Talking to Villagers, The 5 Whys, Missions & the Mission Board, Town Satisfaction, Trash, Town Hall & New Days, What You'll Find Around Town. Exists so the game can explain its own mechanics diegetically instead of a forced onboarding sequence.
+A walk-up tutorial panel (architectural clone of the Mission Board: `InfoBoardInteractable` → `InfoBoardUI` + `InfoBoardState`, ESC-only). A static, paged reference (`InfoPage[]`, Next/Previous buttons) covering: Welcome, Getting Around, Talking to Villagers, The 5 Whys, Missions & the Mission Board, The PDCA Cycle, Gold Coins & Trust, Trash & Your Inventory, Town Hall & New Days, What You'll Find Around Town. Exists so the game can explain its own mechanics diegetically instead of a forced onboarding sequence.
+
+### NPC Trust Meter
+`TrustSystem` (singleton) tracks a `0..maxTrust` (default 5, starting at 2) trust value per
+`missionID`: `+1` on an optimal resolution, `-1` on a trivial one, clamped, firing
+`OnTrustChanged(missionID, newTrust)`. It's intentionally **visual-only** — trust reflects mission
+outcome history but doesn't gate anything; reattempting a trivial mission is still handled
+entirely by the Stage Gate System (§7). Trust also persists across stages/days, since it's a
+standing relationship signal rather than per-stage bookkeeping. `NPCTrustUI` renders it as a row
+of pip `SpriteRenderer`s (not UI `Image`s — see below) on the mission-giving object for each
+mission, reading the starting value in `Start()` and then listening for updates.
+
+### World-Attached NPC UI
+World-attached indicators (the prompt icon, trust pips) default to `SpriteRenderer` + sorting
+layer — the same rendering system every other world object in the scene already uses — rather
+than a World Space `Canvas`. This is a direct instance of the "match existing structure" design
+principle (§12): a Canvas would technically work, but it would mean two parallel answers to "how
+do I show something above an object in the world" instead of one. Escalate to a World Space
+`Canvas` only when an element needs a genuine UI-only capability `SpriteRenderer` can't do
+(`Image.fillAmount`, layout groups, interactive widgets); floating dynamic text uses mesh-based
+`TextMeshPro`, not `TextMeshProUGUI`, so text alone isn't a reason to escalate either.
+
+### PDCA Phase Indicator
+A HUD element (`PDCAIndicatorUI`) makes the Plan-Do-Check-Act framing visible while playing,
+driven by `OnPDCAPhaseChanged(PDCAPhase)` rather than `GameStateType` — most of the "Do" minigames
+(well patch, waste pickup, part collection) run inside plain `Exploration` with no dedicated state
+of their own, so the indicator can't be state-driven the way the state machine is. `PDCAPhase` is
+`{ None, Plan, Do, Check }` — "Act" is deliberately not a distinct visible phase; the indicator
+just hides (`None`) on return to Exploration, standing in for "go apply what you learned" without
+a dedicated screen to anchor a 4th label to. Four single-line raise points mark the exact
+mission-scoped moment each phase begins: `PlanningUI.Show` → `Plan`; `MinigameActivator`
+activating its container → `Do`; `ReflectionPopupUI` showing the popup → `Check`;
+`ReflectionPopupUI.OnDismiss` → `None`.
+
+### Interact SFX
+Every `IInteractable` exposes an `AudioClip InteractSfx` — `InputManager` plays it via
+`AudioManager.PlaySFX` immediately after calling `Interact()`, so there's exactly one call site for
+interact audio across all 13 interactable types, and each type can carry its own distinct clip (or
+none, silently) without duplicating playback logic per script.
 
 ### Day Progression & Town Hall Upgrade
 `TownHallUpgrade` listens for `OnDayCompleted(day)` and swaps the active sprite set by index (0 = default, 1 = Day-1 upgrade, 2 = Day-2 upgrade). The town hall is built from separate Base/Roof sprites on `EntityTilemap`/`ForeGroundTilemap` sorting layers specifically so the roof can still render in front of the player while the base renders behind — i.e. stage progress is legible from across the map without breaking depth sorting.
@@ -182,14 +261,15 @@ A second camera (`MinimapCamera`) tracks the `Player` tag every `LateUpdate` and
 ## 11. Content Inventory (current scene)
 
 - **Stage 1** (`Stage1.asset`): missions `[1, 2]` — both must resolve optimally to submit.
-- **Missions authored:** `M1_ParchedCrops` (well/farm), `M2_CleaningRiver` (river/waste) — both have complete 5-Whys chains and both solution paths implemented and wired in-scene.
-- **Notable scene objects:** `Farmer_NPC` (Mission 1 trigger, patrols), `RiverBlockagePoint`/`VIllagerComplaintPoint`/`RiverDryPoint` (Mission 2 trigger + 2 context points), `Container_Trivial_M1`/`Container_Optimal_M1`, `Container_Trivial_M2`/`Container_Optimal_M2`, `TownHall` (with `blackSmithBase_1`/`blackSmithRoof_1`-style stage sprites), `ProgressManager` (satisfaction + trash), `MissionBoard`, `InfoBoard`, `MinimapCamera`.
-- **Tuned values:** starting satisfaction 50/100; trash penalty -5/spawn; trash spawn interval randomized 25–45s, paused outside Exploration; mission rewards default +10 trivial / +25 optimal (both overridable per-`MissionData`).
+- **Missions authored:** `M1_ParchedCrops` (well/farm), `M2_CleaningRiver` (asset name predates the "Stagnant Pond" rework in §9 — content and 5-Whys chain updated in place, filename unchanged) — both have complete 5-Whys chains and both solution paths implemented and wired in-scene.
+- **Notable scene objects:** `Farmer_NPC` (Mission 1 trigger, patrols), `RiverBlockagePoint`/`VIllagerComplaintPoint`/`RiverDryPoint` (Mission 2 trigger + 2 context points, reworked fiction — see §9), `Container_Trivial_M1`/`Container_Optimal_M1`, `Container_Trivial_M2`/`Container_Optimal_M2`, `TownHall` (with `blackSmithBase_1`/`blackSmithRoof_1`-style stage sprites), `TrashManager` (hosts `TrashSpawner`), `TrashCollectionSite`, `CoinRewardSystem`, `TrustSystem`, `InventorySystem`/`InventoryUI`, `MissionBoard`, `InfoBoard`, `MinimapCamera`. `PDCAIndicatorUI` is implemented (§10) but not yet wired into this scene.
+- **Tuned values:** 8 inventory slots; 2 Gold Coins required to submit a stage; trash spawn interval randomized 25–45s, paused outside Exploration, no numeric penalty on spawn; trust starts at 2/5 per mission, ±1 per outcome; Gold Coin reward is a flat 1 per optimal mission (no per-mission tuning, unlike the old satisfaction rewards).
 
 ## 12. Design Rationale Notes (why it's built this way)
 
 - **Quiz-drives-outcome instead of a solution picker** removes the "just pick optimal, it sounds better" meta-strategy a menu invites — the player has to actually reason through causality to earn it, which is the whole point of teaching 5 Whys.
 - **All-5-or-trivial (no partial credit tiers)** was a deliberate design choice, not a missed nuance — the note in `PlanningUI`'s design ("hitting all 5 is intentionally hard") signals the team wants root-causing to feel genuinely hard to nail, not a coin-flip.
 - **Rejection reopens in place rather than restarting the mission** keeps the loop's cost proportional to the mistake — the player doesn't replay dialogue or re-walk across the map, only re-answers the quiz (now scaffolded) and, for Mission 1, re-solves a puzzle that's been reset to its original layout.
-- **Satisfaction only resets on a full stage pass, not on a review flag** — this means limping a stage through with a mixed record and then failing to fix it before Town Hall doesn't erase the satisfaction the player *did* earn from other missions; only forward progress (a full pass) is what "banks" a fresh baseline.
+- **Gold Coins only ever reward optimal work, never trivial** — this is what makes the Stage Gate's review flow (§7) simple: there's no reward to retract when a trivial mission gets sent back, because it never earned one. The old satisfaction system needed a `pendingRetraction` flag to avoid double-dipping on a redo; the coin economy doesn't need an equivalent at all, since a wrong outcome just banks nothing instead of banking something that then has to be clawed back.
 - **Event bus as the sole coupling layer** is what makes the Stage Gate reset (§7) tractable at all: `OnMissionsNeedReview` reaches five-plus unrelated systems (NPC, river, puzzle, part/waste collection, mission board) without any of them referencing each other or the `StageManager` directly.
+- **Match existing structure over "more correct" in the abstract** — when a new feature could reasonably be built more than one way, the codebase prefers whichever way is consistent with how similar things already work, even over an option that's more textbook-correct. The clearest example: NPC trust pips could have used a UI `Image` + World Space `Canvas` (the generically "proper" way to float UI over a world object), but every other world-attached visual in this game is a `SpriteRenderer` on a sorting layer — so trust pips are `SpriteRenderer`s too (§10), keeping "how do I show something above an object in the world" answered one way instead of two. Consistency for future maintainers outranks architectural purity.

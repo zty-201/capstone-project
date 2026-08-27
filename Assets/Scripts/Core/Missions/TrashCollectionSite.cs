@@ -6,6 +6,10 @@ public class TrashCollectionSite : MonoBehaviour, IInteractable
 {
     [SerializeField] private ItemData trashItem;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip interactSfx;
+    public AudioClip InteractSfx => interactSfx;
+
     public void Interact()
     {
         InventorySystem.Instance.RemoveAllOfItem(trashItem);

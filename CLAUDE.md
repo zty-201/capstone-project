@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Unity 6 2D educational game built around Kaizen/PDCA methodology. Players explore a village, talk to NPCs with problems, choose between a trivial or optimal solution, complete a minigame, and receive reflective feedback. All game scripts live under `Assets/Scripts/`.
 
+See `Docs/GameDesignDocument.md` for the full design rationale and `Docs/TODO.md` for planned/not-yet-implemented features.
+
 ## Development
 
 Open the project in the Unity Editor (Unity 6). There are no CLI build or test commands — all iteration happens inside the Editor. Scripts are compiled automatically on save.
@@ -15,6 +17,7 @@ Open the project in the Unity Editor (Unity 6). There are no CLI build or test c
 - Don't overengineer: Simple beats complex
 - No fallbacks: One correct path, no alternatives
 - One way: One way to do things, not many
+- Match existing structure: When a new feature could reasonably be built more than one way, prefer whichever way is consistent with how similar things already work in this codebase — even over an option that's more "correct" in the abstract. Consistency for future maintainers outranks textbook-ideal architecture.
 - Clarity over compatibility: Clear code beats backward compatibility
 - Throw errors: Fail fast when preconditions aren't met
 - No backups: Trust the primary mechanism
@@ -137,14 +140,35 @@ A "Needs Review" (trivial) mission *can* now be reopened, but only through the S
 - **`InputManager`** — converts `OnMapClicked` world positions to grid coords; if an `IInteractable` is adjacent it calls `Interact()`, otherwise fires `RaisePathRequested`.
 - **`PlayerController`** — listens to `OnPathGenerated`, walks the path via a coroutine, flips the `SpriteRenderer` on horizontal movement. Before each step checks the next cell via `Physics2D.OverlapPoint` against an `npcLayerMask`; if blocked, it `yield return null`s once before re-requesting the path from the current position, so the player reroutes around moving entities. That single-frame wait is load-bearing, not cosmetic: re-requesting synchronously can recurse into `StartCoroutine(FollowPath(...))` again within the same call stack, and if the newly computed path is blocked at its own first step too (e.g. a patrol NPC parked on the only route), it recurses without ever yielding and overflows the native stack.
 
-### Mission 2: Clogged River
-The interactable that starts the mission is `RiverInteractable` on the waste blockage (not an NPC). Both solutions run inside `ExplorationState` — no new game states needed. Two additional `ContextInteractable` points sit nearby (river running dry, villagers complaining) purely to give the player narrative context before they attempt the 5 Whys quiz — they show dialogue and return straight to `Exploration`; they don't reference a `MissionData` or touch mission state at all.
+### Mission 2: The Stagnant Pond
+The map's river now runs from a cliff-top source down a waterfall into a village pond. The
+interactable that starts the mission is `RiverInteractable`, positioned on the boulder wedged at
+the lip of the falls (not an NPC) — a natural rockslide, not litter or a human cause. Both
+solutions run inside `ExplorationState` — no new game states needed. Two additional
+`ContextInteractable` points sit nearby (the thinned-out riverbed below the falls, villagers
+complaining that the pond has gone stagnant and unsafe to drink/wash in) purely to give the
+player narrative context before they attempt the 5 Whys quiz — they show dialogue and return
+straight to `Exploration`; they don't reference a `MissionData` or touch mission state at all.
 
-**Trivial — Pickup Waste:** `MinigameActivator` activates `TrivialContainer`, which holds `WastePickupSystem` and a set of `WastePiece` IInteractables overlapping the blockage visuals. Each `WastePiece.Interact()` hides its paired `wasteVisual` and calls `WastePickupSystem.OnWasteRemoved()`. When remaining count hits zero, fires `RaiseMissionCompleted(2, false)`.
+**Trivial — Clear the Loose Rubble:** `MinigameActivator` activates `TrivialContainer`, which
+holds `WastePickupSystem` and a set of `WastePiece` IInteractables overlapping loose rubble shaken
+free by the rockslide (not litter). Each `WastePiece.Interact()` hides its paired `wasteVisual`
+and calls `WastePickupSystem.OnWasteRemoved()`. When remaining count hits zero, fires
+`RaiseMissionCompleted(2, false)` — enough rubble clears for a trickle, but the wedged boulder
+itself stays put, so the pond keeps stagnating.
 
-**Optimal — Build Auto Collector:** `MinigameActivator` activates `OptimalContainer`, which holds `PartCollectionSystem` and 3 `MachinePart` IInteractables placed at fixed positions in the editor. Each `MachinePart.Interact()` collects itself and calls `PartCollectionSystem.OnPartCollected()`. At 3/3, `PartCollectionSystem` activates `AssemblyPoint` near the river bank. `AssemblyPoint.Interact()` shows the machine visual and activates `PlacementPoint` at the river bank. `PlacementPoint.Interact()` shows the placed machine visual and fires `RaiseMissionCompleted(2, true)`.
+**Optimal — Rig a Cliffside Winch:** `MinigameActivator` activates `OptimalContainer`, which holds
+`PartCollectionSystem` and 3 `MachinePart` IInteractables placed at fixed positions in the editor.
+Each `MachinePart.Interact()` collects itself and calls `PartCollectionSystem.OnPartCollected()`.
+At 3/3, `PartCollectionSystem` activates `AssemblyPoint` near the cliff lip. `AssemblyPoint.Interact()`
+shows the assembled winch visual and activates `PlacementPoint` at the falls. `PlacementPoint.Interact()`
+shows the anchored winch visual and fires `RaiseMissionCompleted(2, true)` — the winch levers the
+boulder free and stays bolted in place to catch whatever comes down next.
 
-**River reveal:** `RiverManager` listens to `OnMissionCompleted` for missionID 2. On either solution: disables `blockageVisual`, enables `animatedRiverTilemap`.
+**River reveal:** `RiverManager` listens to `OnMissionCompleted` for missionID 2. On either
+solution: disables `blockageVisual` (the wedged boulder), enables `animatedRiverTilemap` — the
+falls resume flowing into the pond either way, since the visual payoff is identical regardless of
+path; only the reflection text (and whether a future slide gets caught automatically) differs.
 
 ### Mission 1: Well & Pipe Puzzle
 **Trivial — Patch the Well:** `WellVisual` is a plain `IInteractable` (like `RiverInteractable`/`WastePiece`) — its `Interact()` runs a short coroutine and raises `RaiseMissionCompleted(id, false)`. It runs entirely inside `ExplorationState`, no dedicated state needed — same pattern as Mission 2. (There used to be a separate `PatchWellState` gating this via a bespoke `RaiseWellClicked` event; it was removed because that state never allowed player movement, so if the mission-triggering NPC — see NPC Patrol below — had wandered away from the well before dialogue started, the player could get stranded unable to reach it. Since `WellVisual` doesn't need adjacency-free clicking the way the pipe puzzle does, folding it into normal `Exploration` + `InputManager`'s walk-then-interact routing fixed that for free.)

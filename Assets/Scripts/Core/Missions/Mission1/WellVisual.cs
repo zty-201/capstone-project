@@ -6,6 +6,10 @@ public class WellVisual : MonoBehaviour, IInteractable
     [Header("Mission Identity")]
     public int missionID = 1;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip interactSfx;
+    public AudioClip InteractSfx => interactSfx;
+
     public void Interact()
     {
         StartCoroutine(HandlePatchVictory());

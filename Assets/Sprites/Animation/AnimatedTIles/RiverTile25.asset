@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13b75c95f34a00d4e8c04f76b73312e6, type: 3}
+  m_Name: RiverTile25
+  m_EditorClassIdentifier: Unity.2D.Tilemap.Extras::UnityEngine.Tilemaps.AnimatedTile
+  m_AnimatedSprites:
+  - {fileID: 908676868, guid: 20b7df38f2e57eb42a2f298c07c53573, type: 3}
+  - {fileID: -240711034, guid: 20b7df38f2e57eb42a2f298c07c53573, type: 3}
+  - {fileID: -1032269901, guid: 20b7df38f2e57eb42a2f298c07c53573, type: 3}
+  - {fileID: -1724744359, guid: 20b7df38f2e57eb42a2f298c07c53573, type: 3}
+  - {fileID: -2086602015, guid: 20b7df38f2e57eb42a2f298c07c53573, type: 3}
+  - {fileID: 2132257424, guid: 20b7df38f2e57eb42a2f298c07c53573, type: 3}
+  - {fileID: 1107893415, guid: 20b7df38f2e57eb42a2f298c07c53573, type: 3}
+  - {fileID: -1174916953, guid: 20b7df38f2e57eb42a2f298c07c53573, type: 3}
+  - {fileID: -1231716351, guid: 20b7df38f2e57eb42a2f298c07c53573, type: 3}
+  - {fileID: -1358140951, guid: 20b7df38f2e57eb42a2f298c07c53573, type: 3}
+  - {fileID: 847214191, guid: 20b7df38f2e57eb42a2f298c07c53573, type: 3}
+  - {fileID: -1989213121, guid: 20b7df38f2e57eb42a2f298c07c53573, type: 3}
+  - {fileID: 1560831267, guid: 20b7df38f2e57eb42a2f298c07c53573, type: 3}
+  - {fileID: 1431667523, guid: 20b7df38f2e57eb42a2f298c07c53573, type: 3}
+  - {fileID: 510396261, guid: 20b7df38f2e57eb42a2f298c07c53573, type: 3}
+  - {fileID: -1235768146, guid: 20b7df38f2e57eb42a2f298c07c53573, type: 3}
+  m_MinSpeed: 16
+  m_MaxSpeed: 16
+  m_AnimationStartTime: 0
+  m_AnimationStartFrame: 0
+  m_TileColliderType: 0
+  m_TileAnimationFlags: 0

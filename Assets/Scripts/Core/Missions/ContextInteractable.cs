@@ -7,6 +7,10 @@ public class ContextInteractable : MonoBehaviour, IInteractable
     [TextArea(2, 4)]
     public string[] dialogueLines;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip interactSfx;
+    public AudioClip InteractSfx => interactSfx;
+
     public void Interact()
     {
         DialogueManager.Instance.gameObject.SetActive(true);

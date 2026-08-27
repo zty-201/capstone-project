@@ -7,9 +7,6 @@ public class InputManager : MonoBehaviour
     public PathfindingSystem pathfindingSystem;
     public float cellSize = 1f;
 
-    [Header("Audio")]
-    [SerializeField] private AudioClip interactClip;
-
     private void Awake()
     {
         if (playerTransform == null) Debug.LogError($"[{name}] playerTransform is not assigned!", this);
@@ -34,7 +31,7 @@ public class InputManager : MonoBehaviour
             if (distance <= 1)
             {
                 interactable.Interact();
-                AudioManager.Instance.PlaySFX(interactClip);
+                AudioManager.Instance.PlaySFX(interactable.InteractSfx);
                 return;
             }
             else

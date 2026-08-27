@@ -46,7 +46,7 @@ public class PlanningUI : MonoBehaviour
     private int correctCount;
     private bool outcomeIsOptimal;
 
-    private enum Stage { Trivial, Optimal, Why, Outcome }
+    private enum Stage { Why, Outcome }
     private Stage stage;
 
     private void Awake()
@@ -72,11 +72,13 @@ public class PlanningUI : MonoBehaviour
         canvasGroup.blocksRaycasts = true;
 
         fiveWChoiceGroup.SetActive(false);
-        if (hintText != null) hintText.gameObject.SetActive(false);
         nextArrow.SetActive(false);
 
-        stage = Stage.Trivial;
-        StartTyping(currentMission.trivialSolutionName);
+        stage = Stage.Why;
+        whyIndex = 0;
+        correctCount = 0;
+        if (hintText != null) hintText.gameObject.SetActive(StageManager.Instance.IsMissionUnderReview(currentMission.missionID));
+        BeginWhyStage();
     }
 
     public void Hide()
@@ -102,26 +104,8 @@ public class PlanningUI : MonoBehaviour
 
         nextArrow.SetActive(false);
 
-        switch (stage)
-        {
-            case Stage.Trivial:
-                stage = Stage.Optimal;
-                displayText.text = "";
-                StartTyping(currentMission.optimalSolutionName);
-                break;
-
-            case Stage.Optimal:
-                stage = Stage.Why;
-                whyIndex = 0;
-                correctCount = 0;
-                if (hintText != null) hintText.gameObject.SetActive(StageManager.Instance.IsMissionUnderReview(currentMission.missionID));
-                BeginWhyStage();
-                break;
-
-            case Stage.Outcome:
-                SelectSolution(outcomeIsOptimal ? SolutionType.Optimal : SolutionType.Trivial);
-                break;
-        }
+        if (stage == Stage.Outcome)
+            SelectSolution(outcomeIsOptimal ? SolutionType.Optimal : SolutionType.Trivial);
     }
 
     private void FinishTyping()

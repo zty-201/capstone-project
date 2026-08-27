@@ -4,6 +4,10 @@ public class TrashPiece : MonoBehaviour, IInteractable
 {
     [SerializeField] private ItemData trashItem;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip interactSfx;
+    public AudioClip InteractSfx => interactSfx;
+
     private TrashSpawner spawner;
     private Transform spawnPoint;
 

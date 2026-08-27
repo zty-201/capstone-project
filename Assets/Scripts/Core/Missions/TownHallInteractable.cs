@@ -30,6 +30,10 @@ public class TownHallInteractable : MonoBehaviour, IInteractable
         "But the ledger isn't just signatures. Bring two gold coins before I can close out this stage."
     };
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip interactSfx;
+    public AudioClip InteractSfx => interactSfx;
+
     public void Interact()
     {
         if (StageManager.Instance.AllStagesComplete)

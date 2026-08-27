@@ -5,6 +5,10 @@ public class AssemblyPoint : MonoBehaviour, IInteractable
     [SerializeField] private GameObject machineVisual;
     [SerializeField] private PlacementPoint placementPoint;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip interactSfx;
+    public AudioClip InteractSfx => interactSfx;
+
     public void Interact()
     {
         if (machineVisual != null) machineVisual.SetActive(true);

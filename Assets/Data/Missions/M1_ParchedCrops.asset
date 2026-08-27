@@ -59,8 +59,6 @@ MonoBehaviour:
     - The bucket is the wrong size.
     hint: Think about what kind of system upgrade would actually stop this from
       recurring.
-  trivialSolutionName: Patch the bucket and rope
-  optimalSolutionName: Rebuild the pulley and pipe filter system
   trivialReflectionText: The patch worked for now, but the root cause remains. The
     well will fail again soon...
   optimalReflectionText: Great work! Rebuilding the pulley system fixed the root

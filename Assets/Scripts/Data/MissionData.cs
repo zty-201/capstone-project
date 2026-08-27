@@ -29,9 +29,6 @@ public class MissionData : ScriptableObject
     public WhyStage[] fiveWhys = new WhyStage[5];
 
     [Header("Action Phase (Do)")]
-    public string trivialSolutionName;
-    public string optimalSolutionName;
-
     [TextArea(2, 4)]
     public string trivialReflectionText;
     [TextArea(2, 4)]

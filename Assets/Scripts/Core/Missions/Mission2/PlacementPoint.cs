@@ -5,6 +5,10 @@ public class PlacementPoint : MonoBehaviour, IInteractable
     [SerializeField] private int missionID = 2;
     [SerializeField] private GameObject placedMachineVisual;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip interactSfx;
+    public AudioClip InteractSfx => interactSfx;
+
     public void Interact()
     {
         if (placedMachineVisual != null) placedMachineVisual.SetActive(true);

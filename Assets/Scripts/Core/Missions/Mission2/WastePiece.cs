@@ -5,6 +5,10 @@ public class WastePiece : MonoBehaviour, IInteractable
     [SerializeField] private WastePickupSystem pickupSystem;
     [SerializeField] private GameObject wasteVisual;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip interactSfx;
+    public AudioClip InteractSfx => interactSfx;
+
     public void Interact()
     {
         if (wasteVisual != null) wasteVisual.SetActive(false);

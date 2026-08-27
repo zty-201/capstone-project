@@ -4,6 +4,10 @@ public class RiverInteractable : MonoBehaviour, IInteractable
 {
     public MissionData associatedMission;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip interactSfx;
+    public AudioClip InteractSfx => interactSfx;
+
     // OnMissionsNeedReview is subscribed in Awake/OnDestroy, not OnEnable/OnDisable: this
     // object disables itself in HandleSolutionSelected below, and an OnEnable/OnDisable
     // subscription would unsubscribe right then — leaving nothing listening to hear the
