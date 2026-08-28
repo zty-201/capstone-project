@@ -26,6 +26,10 @@ public class MinigameActivator : MonoBehaviour
     {
         if (selectedMissionID != missionID || type != solutionType) return;
 
+        // Raised before container.SetActive(true): a counted first stage (e.g.
+        // PartCollectionSystem) overwrites this with its real count from its own OnEnable,
+        // which fires synchronously inside SetActive below and so always runs after this line.
+        EventBus.RaiseObjectiveProgress(missionID, solutionType, 0, 0, 0);
         container.SetActive(true);
         EventBus.RaisePDCAPhaseChanged(PDCAPhase.Do);
         GameManager.Instance.StateManager.ChangeState(targetState);

@@ -17,11 +17,13 @@ public class WastePickupSystem : MonoBehaviour
     private void OnEnable()
     {
         remaining = wasteCount;
+        EventBus.RaiseObjectiveProgress(missionID, SolutionType.Trivial, 0, 0, wasteCount);
     }
 
     public void OnWasteRemoved()
     {
         remaining--;
+        EventBus.RaiseObjectiveProgress(missionID, SolutionType.Trivial, 0, wasteCount - remaining, wasteCount);
         if (remaining <= 0)
             EventBus.RaiseMissionCompleted(missionID, false);
     }

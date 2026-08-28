@@ -66,3 +66,10 @@ MonoBehaviour:
     wedged stone free. The falls\nroar back to full flow, flushing the pond clean
     within the day \u2014 and the rig stays bolted in\nplace to catch whatever comes
     down next, so the water stays safe."
+  introObjective: "There's a stench coming from the pond \u2014 go look at what happened."
+  trivialObjectives:
+  - Clear the loose rubble blocking the falls ({0}/{1})
+  optimalObjectives:
+  - Collect the parts to build the machine ({0}/{1})
+  - Go to the blacksmith to assemble the parts.
+  - Place the machine near the blocked river.

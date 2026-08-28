@@ -33,4 +33,19 @@ public class MissionData : ScriptableObject
     public string trivialReflectionText;
     [TextArea(2, 4)]
     public string optimalReflectionText;
+
+    [Header("Mission Directory HUD")]
+    // Shown before the player has picked a solution (i.e. before OnSolutionSelected fires),
+    // and again the instant a trivial completion gets reopened for review — a redo starts
+    // back at square one, so the tracker line resets to this rather than resuming mid-path.
+    [TextArea(1, 2)]
+    public string introObjective;
+    // Ordered sub-stage lines for each path, indexed by EventBus.OnObjectiveProgress's
+    // stageIndex. A line containing "{0}"/"{1}" is run through string.Format with the
+    // event's count/total (e.g. parts collected so far / parts needed) — plain lines
+    // ignore those args.
+    [TextArea(1, 2)]
+    public string[] trivialObjectives;
+    [TextArea(1, 2)]
+    public string[] optimalObjectives;
 }

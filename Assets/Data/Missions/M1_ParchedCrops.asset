@@ -63,3 +63,9 @@ MonoBehaviour:
     well will fail again soon...
   optimalReflectionText: Great work! Rebuilding the pulley system fixed the root
     cause. Water flows properly now.
+  introObjective: The crops are dying of thirst — find the farmer in town and ask
+    what's wrong.
+  trivialObjectives:
+  - Patch the well.
+  optimalObjectives:
+  - Rebuild the pulley system — rotate the pipes to route water through.

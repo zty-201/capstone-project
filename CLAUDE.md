@@ -50,7 +50,7 @@ Open the project in the Unity Editor (Unity 6). There are no CLI build or test c
 ### Event Bus
 `EventBus` is a static class of C# events. Systems subscribe in `OnEnable`/`OnDisable` and raise via the `Raise*` helpers. This is the only coupling layer between systems — no direct references across domains.
 
-Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionSelected`, `OnMissionCompleted`, `OnMissionsNeedReview`, `OnDayCompleted`, `OnInventoryChanged`, `OnTrustChanged`, `OnPDCAPhaseChanged`.
+Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionSelected`, `OnMissionCompleted`, `OnMissionsNeedReview`, `OnDayCompleted`, `OnInventoryChanged`, `OnTrustChanged`, `OnPDCAPhaseChanged`, `OnObjectiveProgress`.
 
 ### Mission Flow (complete happy path)
 1. Player clicks NPC (`IInteractable.Interact()`) → `DialogueState`
@@ -76,6 +76,41 @@ single-line raise points, chosen as the exact mission-scoped moment each phase b
 activating `container` — the universal entry point for all four trivial/optimal paths across both
 missions) → `Do`; `ReflectionPopupUI.HandleMissionCompleted` → `Check`;
 `ReflectionPopupUI.OnDismiss()` → `None`.
+
+### Mission Directory HUD
+A top-left HUD element (`MissionDirectoryUI`) shows a compressed one-line-per-active-mission
+objective tracker, tracking progress *within* a mission's Do phase (e.g. "Collect the parts to
+build the machine (0/3)") rather than just whether the mission is done — finer-grained than
+`PDCAPhase`/`OnMissionCompleted` can express, since e.g. "0/3 parts" vs. "assemble" vs. "place"
+are all still `PDCAPhase.Do` and all still the same `missionID`. Line content is authored data on
+`MissionData` (`introObjective`, `trivialObjectives[]`, `optimalObjectives[]`), matching the
+existing convention of keeping mission text out of code (villagerComplaint, fiveWhys, reflection
+texts); progress is signaled purely through `EventBus.OnObjectiveProgress(missionID, path,
+stageIndex, count, total)`, matching EventBus as the sole coupling layer — `MissionDirectoryUI`
+never holds a reference into a mission script. A line containing `{0}`/`{1}` is run through
+`string.Format` with `count`/`total`; a plain line ignores those args. The event carries its own
+`SolutionType` rather than the UI inferring the active path from a separate
+`OnSolutionSelected` subscription — that would race against `MinigameActivator` raising this same
+event on the same frame, since subscriber order between two different EventBus events isn't
+guaranteed. Every raiser is single-path by construction (e.g. `PartCollectionSystem` only ever
+runs as part of the Optimal path), so each just passes its own path literally.
+
+Raise points: `MinigameActivator.HandleSolutionSelected` raises stage 0 with no count right
+before `container.SetActive(true)` — the same universal Do-phase entry point `PDCAPhase.Do` uses
+(see above) — and a counted first stage (`PartCollectionSystem`/`WastePickupSystem`) overwrites it
+with the real count from its own `OnEnable`, which fires synchronously inside that `SetActive`
+call and so always runs after. `PartCollectionSystem.OnPartCollected` re-raises stage 0 on every
+pickup and raises stage 1 once `assemblyPoint` activates; `AssemblyPoint.Interact` raises stage 2;
+`WastePickupSystem.OnWasteRemoved` re-raises stage 0 on every pickup. Mission 1's two paths (well
+patch, pipe puzzle) have no sub-stage granularity worth tracking, so their `trivialObjectives`/
+`optimalObjectives` arrays are single-entry — `MinigameActivator`'s stage-0 raise is the only one
+they need.
+
+A resolved-optimal mission's line disappears (nothing left to track); a resolved-trivial mission's
+line reads "Needs Review" (matching `MissionEntryUI`'s exact wording for the same outstanding
+state). On `OnMissionsNeedReview`, the line resets to `introObjective` rather than resuming
+mid-path — a redo starts back at square one (re-interact to re-open dialogue), so there's no
+sub-stage state worth preserving across the reset.
 
 ### NPC Trust Meter
 `TrustSystem` (singleton) tracks a `0..maxTrust` (default 5, starting at 2) trust value per

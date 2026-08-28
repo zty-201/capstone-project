@@ -19,13 +19,18 @@ public class PartCollectionSystem : MonoBehaviour
     {
         collectedCount = 0;
         assemblyPoint.gameObject.SetActive(false);
+        EventBus.RaiseObjectiveProgress(missionID, SolutionType.Optimal, 0, collectedCount, totalParts);
     }
 
     public void OnPartCollected()
     {
         collectedCount++;
+        EventBus.RaiseObjectiveProgress(missionID, SolutionType.Optimal, 0, collectedCount, totalParts);
         if (collectedCount >= totalParts)
+        {
             assemblyPoint.gameObject.SetActive(true);
+            EventBus.RaiseObjectiveProgress(missionID, SolutionType.Optimal, 1, 0, 0);
+        }
     }
 
     private void HandleMissionsNeedReview(int[] missionIDs)

@@ -26,6 +26,23 @@ public static class EventBus
     public static void RaiseMissionCompleted(int missionID, bool wasOptimal)
         => OnMissionCompleted?.Invoke(missionID, wasOptimal);
 
+    /// <summary>
+    /// Fired at each sub-stage transition within a mission's Do phase, for the Mission
+    /// Directory HUD to track progress finer-grained than PDCAPhase/OnMissionCompleted allow.
+    /// Each raiser is single-path by construction (e.g. PartCollectionSystem only ever runs
+    /// as part of the Optimal path), so it passes its own path literally rather than the
+    /// listener inferring it from a separate OnSolutionSelected — that would race against
+    /// this event on the same frame, since subscriber order between the two isn't guaranteed.
+    /// int: Mission ID
+    /// SolutionType: which path this progress belongs to (selects trivialObjectives vs. optimalObjectives)
+    /// int: index into that path's MissionData.trivialObjectives/optimalObjectives
+    /// int: current count for a counted stage (e.g. parts collected so far), 0 if not applicable
+    /// int: total count for a counted stage, 0 if not applicable
+    /// </summary>
+    public static event Action<int, SolutionType, int, int, int> OnObjectiveProgress;
+    public static void RaiseObjectiveProgress(int missionID, SolutionType path, int stageIndex, int count, int total)
+        => OnObjectiveProgress?.Invoke(missionID, path, stageIndex, count, total);
+
     // ==========================================
     // PLAYER & MOVEMENT EVENTS
     // ==========================================
