@@ -152,7 +152,7 @@ A "Needs Review" (trivial) mission *can* now be reopened, but only through the S
 - **`MissionRegistry`** — array of `MissionData`, looked up by `missionID`. Create via `Kaizen Systems/Mission Registry`. Assign in Inspector on `ReflectionPopupUI`.
 - **`StageData`** — one stage's `stageNumber`, `stageName`, and `missionIDs[]` (the missions that must all be resolved optimally before the stage can be submitted). Create via `Kaizen Systems/Stage Data`.
 - **`StageRegistry`** — array of `StageData`, looked up by index (`GetByIndex`). Create via `Kaizen Systems/Stage Registry`. Assign in Inspector on `StageManager`.
-- **`ItemData`** — one inventory item's `itemID`, `itemName`, `icon`, and stacking rules (`stackable`, `maxStack`). Create via `Kaizen Systems/Item Data`. Two assets exist: **Gold Coin** (stackable) and **Trash** (not stackable, so litter piles up one slot per piece). Assigned in Inspector on `CoinRewardSystem`, `TrashPiece`, `TrashCollectionSite`, and `StageManager`.
+- **`ItemData`** — one inventory item's `itemID`, `itemName`, `icon`, and stacking rules (`stackable`, `maxStack`). Create via `Kaizen Systems/Item Data`. Five assets exist: **Gold Coin** (stackable) and **Trash** (not stackable, so litter piles up one slot per piece), assigned in Inspector on `CoinRewardSystem`, `TrashPiece`, `TrashCollectionSite`, and `StageManager`; **Brick** (not stackable, only ever one needed) for Mission 1's trivial fetch quest, assigned on `BrickPickup` and `WellPatchSite`; **Machine Part** (stackable) and **Winch** (not stackable) for Mission 2's optimal path, assigned on `MachinePart`, `AssemblyPoint`, and `PlacementPoint` — `AssemblyPoint.Interact()` trades 3 Machine Parts for 1 Winch, and `PlacementPoint.Interact()` consumes the Winch on final placement.
 
 ### Stage Gate System
 `StageManager` (singleton) groups missions into stages via `StageData`, tracks each mission's most recent outcome (`missionOutcomes: Dictionary<int, bool>`), and gates day advancement on every mission in the current stage having been resolved *optimally* — resolving a mission trivially no longer quietly counts toward finishing the day.
@@ -206,15 +206,58 @@ falls resume flowing into the pond either way, since the visual payoff is identi
 path; only the reflection text (and whether a future slide gets caught automatically) differs.
 
 ### Mission 1: Well & Pipe Puzzle
-**Trivial — Patch the Well:** `WellVisual` is a plain `IInteractable` (like `RiverInteractable`/`WastePiece`) — its `Interact()` runs a short coroutine and raises `RaiseMissionCompleted(id, false)`. It runs entirely inside `ExplorationState`, no dedicated state needed — same pattern as Mission 2. (There used to be a separate `PatchWellState` gating this via a bespoke `RaiseWellClicked` event; it was removed because that state never allowed player movement, so if the mission-triggering NPC — see NPC Patrol below — had wandered away from the well before dialogue started, the player could get stranded unable to reach it. Since `WellVisual` doesn't need adjacency-free clicking the way the pipe puzzle does, folding it into normal `Exploration` + `InputManager`'s walk-then-interact routing fixed that for free.)
+Like Mission 2's river, the well itself (not an NPC) is the interactable that starts the
+mission — `NPCController` (`Mission1NPCInteractble.cs`, historically written for a wandering
+villager) is attached directly to the well's `GameObject` rather than a separate Farmer NPC.
+Since two things now need to be clickable at the same world position (the dialogue trigger,
+then whatever the chosen path activates there), `HandleSolutionSelected` disables the well's
+own `Collider2D` once a solution is picked — `Physics2D.OverlapPoint` doesn't guarantee which
+of two perfectly-overlapping colliders it returns, so leaving both live would make clicks land
+on the wrong one unpredictably. `HandleMissionsNeedReview` re-enables it for a stage-gate redo.
 
-**Optimal — Pipe Puzzle:** `PipeDirection` is a `[Flags]` bitmask enum (Up=1, Right=2, Down=4, Left=8). `PipeNode` holds the current connection bitmask and rotates clockwise via a left bit-shift with wrap-around (`(bits << 1 | bits >> 3) & 15`). `PipeVisual` (MonoBehaviour) reads its `PipeShape` and inspector transform rotation to compute starting bits, then delegates clicks to `PipePuzzleSystem.RotatePipeAt` via the dedicated `Puzzle` state/`RaisePuzzleClicked` event (no adjacency requirement — a precise click on a pipe tile rotates it regardless of player position). The puzzle system runs a DFS flood-fill from `startPos` to `endPos` to check for a valid water path after every rotation, and raises `RaiseMissionCompleted(id, true)` once solved.
+**Trivial — Fetch a Brick, Patch the Well:** a two-stage fetch quest through the real
+inventory (see Gold Coin Economy & Inventory below), matching Mission 2 optimal's "collect
+physical items, bring them to one spot" shape rather than resolving in a single click.
+`BrickPickup` (`IInteractable`, placed elsewhere on the map) is the trivial container's
+stage-0 piece: same gate-on-inventory-success shape as `TrashPiece` — `Interact()` only
+removes itself and advances the objective if `InventorySystem.TryAddItem` actually succeeds.
+`WellPatchSite` (`IInteractable`, at the well, inside `Container_Trivial_M1`) is stage 1:
+`Interact()` is a no-op unless the player is carrying a Brick, otherwise it consumes one
+(`TryRemoveItem`), shows the patched-well visual, and raises `RaiseMissionCompleted(id,
+false)`. Runs entirely inside `ExplorationState`, no dedicated state needed — same pattern as
+Mission 2. (A drag-and-drop version of the patch step — dragging a brick sprite onto a hole
+with snap-to-place — was prototyped and reverted: dragging was the only interaction of its
+kind anywhere in the game and read as tonally distorted next to every other walk-up-and-click
+resolution. There also used to be a separate `PatchWellState` gating the *old* single-click
+patch via a bespoke `RaiseWellClicked` event; it was removed because that state never allowed
+player movement, so if the mission-triggering NPC had wandered away from the well before
+dialogue started, the player could get stranded unable to reach it — the fetch-quest redesign
+inherits that same "no dedicated state" reasoning.)
+
+**Optimal — Pipe Puzzle:** `PipeDirection` is a `[Flags]` bitmask enum (Up=1, Right=2, Down=4,
+Left=8). `PipeNode` holds the current connection bitmask and rotates clockwise via a left
+bit-shift with wrap-around (`(bits << 1 | bits >> 3) & 15`). `PipeVisual` (MonoBehaviour) reads
+its `PipeShape` and inspector transform rotation to compute starting bits from a hardcoded
+canonical-bits-per-shape switch (e.g. `Corner` = `Down|Right` at 0° rotation) — this must match
+what the shape's sprite actually draws at 0°, since the rotation math only ever rotates *that*
+canonical, never inspects the art; a mismatch (found and fixed for `TJunction`, whose sprite is
+`Left|Right|Down` at 0° rather than the code's original `Up|Right|Down`) desyncs the visual
+rotation from the logical connections by a fixed step at every angle rather than just being
+cosmetically wrong. `Cross` is rotation-invariant (`Up|Right|Down|Left` always) — any authored
+rotation works. Clicks delegate to `PipePuzzleSystem.RotatePipeAt` via the dedicated `Puzzle`
+state/`RaisePuzzleClicked` event (no adjacency requirement — a precise click on a pipe tile
+rotates it regardless of player position). The puzzle system runs a DFS flood-fill from
+`startPos` to `endPos` to check for a valid water path after every rotation, and raises
+`RaiseMissionCompleted(id, true)` once solved. The puzzle board is a full 5×5 grid (all four
+`PipeShape`s in play — `Straight`, `Corner`, `TJunction`, `Cross`); not every cell needs a pipe
+(`PipePuzzleSystem` only populates grid cells where a `PipeVisual` actually exists — an
+unfilled cell is just `null` and the flood-fill skips it).
 
 ### Singletons
 `GameManager`, `DialogueManager`, `PlanningUI`, `MissionBoardUI`, `ReflectionPopupUI`, `DayCompleteUI`, `InventorySystem`, `TrustSystem`, `InfoBoardUI`, `StageManager`, `TrashSpawner` all follow the same pattern: static `Instance`, destroyed if a duplicate exists in `Awake`.
 
 ### IInteractable
-`NPCController`, `MissionBoardInteractable`, `RiverInteractable`, `WastePiece`, `MachinePart`, `AssemblyPoint`, `PlacementPoint`, `TrashPiece`, `TrashCollectionSite`, `TownHallInteractable`, `ContextInteractable`, `WellVisual`, and `InfoBoardInteractable` all implement `IInteractable`. `InputManager` detects them via `Physics2D.OverlapPoint` and calls `Interact()` when the player is within 1 grid cell (or routes the player adjacent first). `ContextInteractable` is the odd one out: it's narrative-only (dialogue with no associated `MissionData`), so `DialogueManager` returns straight to `Exploration` afterward instead of opening `PlanningUI` — it never starts or resolves a mission.
+`NPCController`, `MissionBoardInteractable`, `RiverInteractable`, `WastePiece`, `MachinePart`, `AssemblyPoint`, `PlacementPoint`, `TrashPiece`, `TrashCollectionSite`, `TownHallInteractable`, `ContextInteractable`, `BrickPickup`, `WellPatchSite`, and `InfoBoardInteractable` all implement `IInteractable`. `InputManager` detects them via `Physics2D.OverlapPoint` and calls `Interact()` when the player is within 1 grid cell (or routes the player adjacent first). `ContextInteractable` is the odd one out: it's narrative-only (dialogue with no associated `MissionData`), so `DialogueManager` returns straight to `Exploration` afterward instead of opening `PlanningUI` — it never starts or resolves a mission.
 
 ### Info Board
 A walk-up-and-interact help/tutorial panel, architecturally a clone of the Mission Board: `InfoBoardInteractable` (`IInteractable`) shows `InfoBoardUI` and changes state to `InfoBoard`; `InfoBoardState` is ESC-only, same shape as `MissionBoardState`. `InfoBoardUI` isn't dialogue-typed — it's a static paged reference (`InfoPage[] pages`, each a `title`/`body`), navigated with Next/Previous buttons wired directly to `ShowNextPage()`/`ShowPreviousPage()` in the Inspector, covering movement, the 5 Whys mechanic, the PDCA cycle, gold coins & trust, trash & inventory, town hall, and a catalog of interactable types. The default page content is a C# field initializer on `InfoBoardUI.pages`, not scene-authored data.
@@ -258,7 +301,7 @@ so spawning pauses during any non-Exploration state and resumes only in `Explora
 **not** stackable, so every piece claims its own slot — letting litter pile up meaningfully
 crowds out Gold Coins); on success it removes itself from the spawner's occupied set and destroys
 its GameObject exactly as before, on failure (inventory full) it's left on the ground untouched.
-**`TrashCollectionSite`** is a plain `IInteractable` (same shape as `WellVisual`/
+**`TrashCollectionSite`** is a plain `IInteractable` (same shape as `WellPatchSite`/
 `RiverInteractable`) placed in the village — one interact calls
 `InventorySystem.RemoveAllOfItem(trashItem)`, clearing every trash slot at once.
 

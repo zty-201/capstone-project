@@ -36,6 +36,10 @@ public class NPCController : MonoBehaviour, IInteractable
         if (missionID != associatedMission.missionID) return;
         missionCompleted = true;
         GetComponent<InteractionIndicator>()?.Hide();
+        // Disable our own collider so it stops competing with the minigame container's
+        // collider at the same spot (e.g. Container_Trivial_M1's well-patch target) — see
+        // RiverInteractable, which does the same via SetActive(false) for the same reason.
+        GetComponent<Collider2D>().enabled = false;
     }
 
     private void HandleMissionsNeedReview(int[] missionIDs)
@@ -43,5 +47,6 @@ public class NPCController : MonoBehaviour, IInteractable
         if (System.Array.IndexOf(missionIDs, associatedMission.missionID) < 0) return;
         missionCompleted = false;
         GetComponent<InteractionIndicator>()?.ResetVisibility();
+        GetComponent<Collider2D>().enabled = true;
     }
 }

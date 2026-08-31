@@ -17,23 +17,26 @@ public class PipeVisual : MonoBehaviour
     public int gridX;
     public int gridY;
 
+    [Header("Visuals")]
+    [SerializeField] private Sprite filledSprite;
+
     [Header("Audio")]
     [SerializeField] private AudioClip rotateClip;
 
     private BoxCollider2D col;
     private SpriteRenderer sr;
-
-    private static readonly Color PoweredColor = new Color(0.45f, 0.85f, 1f);
+    private Sprite emptySprite;
 
     private void Awake()
     {
         col = GetComponent<BoxCollider2D>();
         sr = GetComponent<SpriteRenderer>();
+        emptySprite = sr.sprite;
     }
 
     public void SetPowered(bool powered)
     {
-        sr.color = powered ? PoweredColor : Color.white;
+        sr.sprite = powered ? filledSprite : emptySprite;
     }
 
     private void OnEnable()
@@ -61,7 +64,7 @@ public class PipeVisual : MonoBehaviour
             case PipeShape.EndPiece: bits = PipeDirection.Up; break;
             case PipeShape.Straight: bits = PipeDirection.Up | PipeDirection.Down; break;
             case PipeShape.Corner: bits = PipeDirection.Down | PipeDirection.Right; break;
-            case PipeShape.TJunction: bits = PipeDirection.Up | PipeDirection.Right | PipeDirection.Down; break;
+            case PipeShape.TJunction: bits = PipeDirection.Left | PipeDirection.Right | PipeDirection.Down; break;
             case PipeShape.Cross: bits = PipeDirection.Up | PipeDirection.Right | PipeDirection.Down | PipeDirection.Left; break;
         }
 
