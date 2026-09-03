@@ -2,8 +2,8 @@ using UnityEngine;
 using TMPro;
 
 // Compressed one-line-per-active-mission objective tracker, top-left HUD (see
-// Docs/TODO.md). Purely reactive — like PDCAIndicatorUI, it never holds a reference into a
-// mission script; it only listens to EventBus, the sole coupling layer between systems.
+// Docs/TODO.md). Purely reactive — it never holds a reference into a mission script; it only
+// listens to EventBus, the sole coupling layer between systems.
 // Line content itself lives in MissionData (introObjective/trivialObjectives/optimalObjectives),
 // matching how ReflectionPopupUI/MissionEntryUI already source their display text from data
 // rather than from event payloads. OnObjectiveProgress carries its own SolutionType rather

@@ -31,7 +31,6 @@ public class MinigameActivator : MonoBehaviour
         // which fires synchronously inside SetActive below and so always runs after this line.
         EventBus.RaiseObjectiveProgress(missionID, solutionType, 0, 0, 0);
         container.SetActive(true);
-        EventBus.RaisePDCAPhaseChanged(PDCAPhase.Do);
         GameManager.Instance.StateManager.ChangeState(targetState);
     }
 
