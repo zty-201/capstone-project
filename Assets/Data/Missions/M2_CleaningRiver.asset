@@ -13,31 +13,31 @@ MonoBehaviour:
   m_Name: M2_CleaningRiver
   m_EditorClassIdentifier: Assembly-CSharp::MissionData
   missionID: 2
-  missionName: The Stagnant Pond
+  missionName: The Blocked River
   isAdvancedMission: 0
   villagerComplaint:
-  - "The pond's gone still and green \u2014 hasn't looked like that in years."
+  - "The river's gone still and green \u2014 hasn't looked like that in years."
   - A few folks have taken sick after drinking from it. Something's choking the flow
     up at the falls.
   actualRootCause: "The cliff face above the falls has been quietly eroding for seasons,
     and every past slide has\njust been shoved aside by hand \u2014 nothing was ever
     built that could clear one safely and keep the\nchannel clear, so the next slide
-    always jams it right back up, leaving the pond stagnant."
+    always jams it right back up, leaving the river stagnant."
   fiveWhys:
-  - question: Why is the villagers' pond water making people sick?
+  - question: Why is the villagers' river water making people sick?
     correctAnswer: The water has gone stagnant, and with no fresh water flowing in, it's grown bacteria.
     distractors:
-    - Someone dumped waste directly into the pond.
+    - Someone dumped waste directly into the river.
     - The well pump has rusted and tainted the pipes.
     - A dead animal fell into the water upstream.
     hint: Think about what happens to water that stops moving, not what's been added to it.
-  - question: Why has no fresh water been flowing into the pond?
+  - question: Why has no fresh water been flowing into the river?
     correctAnswer: The waterfall that normally feeds it has slowed to barely a trickle.
     distractors:
     - The dry season has reduced the river's volume.
-    - The pond's inlet has silted shut over the years.
+    - The river's channel has silted shut over the years.
     - Upstream fields are diverting the river for irrigation.
-    hint: Look at where the water comes from, not the pond itself.
+    hint: Look at where the water comes from, not the river below the falls.
   - question: Why has the waterfall slowed to a trickle?
     correctAnswer: A rockslide has jammed a boulder right at the lip of the falls.
     distractors:
@@ -55,18 +55,18 @@ MonoBehaviour:
   - question: Why hasn't this kind of blockage ever been dealt with properly?
     correctAnswer: Every past slide was just shoved aside by hand, and nothing was ever built to clear one safely and keep it clear.
     distractors:
-    - Nobody in the village drinks from the pond anyway.
+    - Nobody in the village drinks from the river anyway.
     - The village has never had a rockslide before.
     - Clearing it isn't considered anyone's job.
     hint: What's actually been done about it before, versus what's actually needed?
   trivialReflectionText: "You've cleared enough loose rock for a trickle to get through
-    \u2014 the pond stirs a\nlittle, but nowhere near enough to flush out the green,
+    \u2014 the river stirs a\nlittle, but nowhere near enough to flush out the green,
     stagnant water villagers have been\nforced to use. This will happen again."
   optimalReflectionText: "With the rig anchored at the lip, you finally lever the
-    wedged stone free. The falls\nroar back to full flow, flushing the pond clean
+    wedged stone free. The falls\nroar back to full flow, flushing the river clean
     within the day \u2014 and the rig stays bolted in\nplace to catch whatever comes
     down next, so the water stays safe."
-  introObjective: "There's a stench coming from the pond \u2014 go look at what happened."
+  introObjective: "There's a stench coming from the river \u2014 go look at what happened."
   trivialObjectives:
   - Clear the loose rubble blocking the falls ({0}/{1})
   optimalObjectives:

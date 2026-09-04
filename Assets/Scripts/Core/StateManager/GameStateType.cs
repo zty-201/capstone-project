@@ -4,6 +4,7 @@ public enum GameStateType
     Dialogue,
     Planning,
     Puzzle,
+    BridgeBuilder,
     Reflection,
     MissionBoard,
     DayComplete,

@@ -65,7 +65,6 @@ public class PlanningUI : MonoBehaviour
     public void Show(MissionData mission)
     {
         currentMission = mission;
-        EventBus.RaisePDCAPhaseChanged(PDCAPhase.Plan);
 
         canvasGroup.alpha = 1f;
         canvasGroup.interactable = true;

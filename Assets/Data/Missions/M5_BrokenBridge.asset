@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10fc3a025822d194aad4d77cfe8095cc, type: 3}
+  m_Name: M5_BrokenBridge
+  m_EditorClassIdentifier: Assembly-CSharp::MissionData
+  missionID: 5
+  missionName: The Broken Bridge
+  isAdvancedMission: 1
+  villagerComplaint:
+  - The bridge to the eastern fields is falling apart. Nobody dares cross it anymore!
+  actualRootCause: The bridge was thrown together as a bare minimum span, with no
+    triangulated bracing to spread real loads across its planks.
+  fiveWhys:
+  - question: Why won't anyone cross the bridge to the eastern fields?
+    correctAnswer: The bridge sways and creaks under any real weight.
+    distractors:
+    - The fields on the other side are unused.
+    - The path is too muddy to walk on.
+    - Wolves have been seen near the crossing.
+    hint: Look at the bridge itself, not what's beyond it.
+  - question: Why does the bridge sway and creak under weight?
+    correctAnswer: Its planks aren't braced against each other.
+    distractors:
+    - The wood is the wrong color.
+    - It was built facing the wrong direction.
+    - Too many people cross at once.
+    hint: Think about how the boards are connected, not who's using them.
+  - question: Why were the planks never braced?
+    correctAnswer: It was thrown together quickly with just enough planks to span
+      the gap.
+    distractors:
+    - The builders ran out of nails.
+    - The river current pushed it out of shape.
+    - It was built during a storm.
+    hint: Consider what a rushed, minimum-effort build looks like next to a properly
+      engineered one.
+  - question: Why was it only ever a rushed, minimum span?
+    correctAnswer: Nobody planned for the bridge to carry real loads like carts and
+      livestock.
+    distractors:
+    - Nobody wanted to pay for lumber.
+    - The old bridge builder retired.
+    - The eastern fields were added later.
+    hint: Think about what the bridge was originally expected to hold.
+  - question: Why does a bridge nobody planned properly keep failing under real use?
+    correctAnswer: There's no triangulated support structure to spread the load across
+      multiple planks.
+    distractors:
+    - Nobody oils the ropes regularly.
+    - The riverbed keeps shifting.
+    - The bridge is simply too old to fix.
+    hint: Think about what kind of structural design would actually hold weight,
+      not just span a gap.
+  trivialReflectionText: The rope crossing holds... for now. It creaks with every
+    step, and it's only a matter of time before it gives way again.
+  optimalReflectionText: The reinforced bridge holds firm under real weight. Properly
+    braced, it'll carry carts and livestock for years to come.
+  introObjective: The bridge to the eastern fields isn't safe to cross — go take
+    a look.
+  trivialObjectives:
+  - Find some rope to lash together a quick crossing.
+  - Bring the rope back and lash the crossing.
+  optimalObjectives:
+  - Build a braced bridge across the gorge ({0}/{1} planks used).
+  - Send the test cart across to check it holds!

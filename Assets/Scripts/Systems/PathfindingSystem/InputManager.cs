@@ -18,6 +18,7 @@ public class InputManager : MonoBehaviour
 
     private void HandleMapClicked(Vector3 worldPos)
     {
+        Debug.Log(worldPos); // TEMP — remove after noting bridge cell coords
         if (pathfindingSystem == null || playerTransform == null) return;
 
         pathfindingSystem.GetGridCoordinates(worldPos, out int targetX, out int targetY);

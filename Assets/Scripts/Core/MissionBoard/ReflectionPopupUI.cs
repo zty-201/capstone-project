@@ -53,7 +53,6 @@ public class ReflectionPopupUI : MonoBehaviour
         }
 
         reflectionText.text = wasOptimal ? data.optimalReflectionText : data.trivialReflectionText;
-        EventBus.RaisePDCAPhaseChanged(PDCAPhase.Check);
         ShowPanel();
         GameManager.Instance.StateManager.ChangeState(GameStateType.Reflection);
     }
@@ -61,7 +60,6 @@ public class ReflectionPopupUI : MonoBehaviour
     public void OnDismiss()
     {
         HidePanel();
-        EventBus.RaisePDCAPhaseChanged(PDCAPhase.None);
         GameManager.Instance.StateManager.ChangeState(GameStateType.Exploration);
     }
 }
