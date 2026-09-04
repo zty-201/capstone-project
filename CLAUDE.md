@@ -175,14 +175,15 @@ A "Needs Review" (trivial) mission *can* now be reopened, but only through the S
 - **`InputManager`** — converts `OnMapClicked` world positions to grid coords; if an `IInteractable` is adjacent it calls `Interact()`, otherwise fires `RaisePathRequested`.
 - **`PlayerController`** — listens to `OnPathGenerated`, walks the path via a coroutine, flips the `SpriteRenderer` on horizontal movement. Before each step checks the next cell via `Physics2D.OverlapPoint` against an `npcLayerMask`; if blocked, it `yield return null`s once before re-requesting the path from the current position, so the player reroutes around moving entities. That single-frame wait is load-bearing, not cosmetic: re-requesting synchronously can recurse into `StartCoroutine(FollowPath(...))` again within the same call stack, and if the newly computed path is blocked at its own first step too (e.g. a patrol NPC parked on the only route), it recurses without ever yielding and overflows the native stack.
 
-### Mission 2: The Stagnant Pond
-The map's river now runs from a cliff-top source down a waterfall into a village pond. The
-interactable that starts the mission is `RiverInteractable`, positioned on the boulder wedged at
-the lip of the falls (not an NPC) — a natural rockslide, not litter or a human cause. Both
-solutions run inside `ExplorationState` — no new game states needed. Two additional
-`ContextInteractable` points sit nearby (the thinned-out riverbed below the falls, villagers
-complaining that the pond has gone stagnant and unsafe to drink/wash in) purely to give the
-player narrative context before they attempt the 5 Whys quiz — they show dialogue and return
+### Mission 2: The Blocked River
+The map's river now runs from a cliff-top source down a waterfall and on through the village,
+jammed to a trickle below the falls — there's no pond; it's the river itself, blocked at its
+source, that's gone stagnant. The interactable that starts the mission is `RiverInteractable`,
+positioned on the boulder wedged at the lip of the falls (not an NPC) — a natural rockslide, not
+litter or a human cause. Both solutions run inside `ExplorationState` — no new game states needed.
+Two additional `ContextInteractable` points sit nearby (the thinned-out riverbed below the falls,
+villagers complaining that the river has gone stagnant and unsafe to drink/wash in) purely to give
+the player narrative context before they attempt the 5 Whys quiz — they show dialogue and return
 straight to `Exploration`; they don't reference a `MissionData` or touch mission state at all.
 
 **Trivial — Clear the Loose Rubble:** `MinigameActivator` activates `TrivialContainer`, which
@@ -190,7 +191,7 @@ holds `WastePickupSystem` and a set of `WastePiece` IInteractables overlapping l
 free by the rockslide (not litter). Each `WastePiece.Interact()` hides its paired `wasteVisual`
 and calls `WastePickupSystem.OnWasteRemoved()`. When remaining count hits zero, fires
 `RaiseMissionCompleted(2, false)` — enough rubble clears for a trickle, but the wedged boulder
-itself stays put, so the pond keeps stagnating.
+itself stays put, so the river keeps stagnating.
 
 **Optimal — Rig a Cliffside Winch:** `MinigameActivator` activates `OptimalContainer`, which holds
 `PartCollectionSystem` and 3 `MachinePart` IInteractables placed at fixed positions in the editor.
@@ -202,7 +203,7 @@ boulder free and stays bolted in place to catch whatever comes down next.
 
 **River reveal:** `RiverManager` listens to `OnMissionCompleted` for missionID 2. On either
 solution: disables `blockageVisual` (the wedged boulder), enables `animatedRiverTilemap` — the
-falls resume flowing into the pond either way, since the visual payoff is identical regardless of
+falls resume flowing downstream either way, since the visual payoff is identical regardless of
 path; only the reflection text (and whether a future slide gets caught automatically) differs.
 
 ### Mission 1: Well & Pipe Puzzle

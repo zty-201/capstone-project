@@ -175,13 +175,14 @@ diagnosis, exactly as satisfaction/trash used to work under the old system.
 
 **Design note:** the well used to have a bespoke `PatchWellState` that blocked player movement entirely. It was removed because the triggering NPC can wander (via `NPCPatrol`) away from the well before the player finishes dialogue, which could strand the player in a state where nothing was reachable. Folding the trivial path into ordinary `Exploration` + `InputManager`'s walk-then-interact routing fixed that for free, since a click on `WellVisual` doesn't need the puzzle's no-adjacency click model anyway.
 
-### Mission 2 — "The Stagnant Pond" (`missionID: 2`)
-**Complaint:** *"The pond's gone still and green — we wash and draw drinking water from there, and some of us have gotten sick."*
-**Root cause:** the cliff face above the falls has been quietly eroding for seasons; a rockslide has jammed a boulder at the lip of the falls, and every past slide has only ever been shoved aside by hand — nothing was ever built to clear one safely and keep the channel clear, so the pond keeps losing its fresh inflow and stagnating.
+### Mission 2 — "The Blocked River" (`missionID: 2`)
+**Complaint:** *"The river's gone still and green — we wash and draw drinking water from there, and some of us have gotten sick."*
+**Root cause:** the cliff face above the falls has been quietly eroding for seasons; a rockslide has jammed a boulder at the lip of the falls, and every past slide has only ever been shoved aside by hand — nothing was ever built to clear one safely and keep the channel clear, so the river keeps losing its fresh inflow and stagnating.
 
-The map's river now runs from a cliff-top source down a waterfall into the village pond — a
-rework of the original "clogged river" fiction to match the renovated map art (cliff → falls →
-pond, not a flat riverside blockage). The underlying mechanics are unchanged; only the fiction and
+The map's river now runs from a cliff-top source down a waterfall and on through the village —
+there's no pond; it's the river itself, jammed at the falls, that's gone stagnant. This is a
+rework of the original flat-riverside "clogged river" fiction to match the renovated map art
+(cliff → falls → river channel). The underlying mechanics are unchanged; only the fiction and
 `MissionData` content were re-skinned, per the "match existing structure" convention (see
 `CLAUDE.md`) — reuse what already works rather than build a parallel system for what is fictively
 a new scenario.
@@ -189,7 +190,7 @@ a new scenario.
 Unlike Mission 1, the trigger is **not** an NPC — it's `RiverInteractable` sitting directly on the
 boulder wedged at the lip of the falls (a natural rockslide, not litter or a human cause). Two
 additional `ContextInteractable` points nearby (the thinned-out riverbed below the falls,
-villagers warning that the pond water is unsafe to drink or wash in) are pure narrative flavor:
+villagers warning that the river water is unsafe to drink or wash in) are pure narrative flavor:
 they show dialogue and return straight to Exploration without touching any `MissionData` or
 mission state, giving the player context before they ever open the 5 Whys quiz.
 
@@ -197,7 +198,7 @@ mission state, giving the player context before they ever open the 5 Whys quiz.
 |---|---|---|
 | Name | *Clear the loose rubble* | *Rig a cliffside winch* |
 | Mechanic | `WastePickupSystem` + N `WastePiece` interactables overlapping rubble shaken loose by the slide; each click hides its visual and decrements a counter | `PartCollectionSystem` + 3 fixed `MachinePart` pickups → `AssemblyPoint` (assemble the winch) → `PlacementPoint` at the cliff lip (anchor it) |
-| Reflection | *"You've cleared enough loose rock for a trickle to get through — the pond stirs a little, but nowhere near enough to flush out the stagnant water. This will happen again."* | *"With the rig anchored at the lip, you finally lever the wedged stone free. The falls roar back to full flow, flushing the pond clean — and the rig stays bolted in place to catch whatever comes down next."* |
+| Reflection | *"You've cleared enough loose rock for a trickle to get through — the river stirs a little, but nowhere near enough to flush out the stagnant water. This will happen again."* | *"With the rig anchored at the lip, you finally lever the wedged stone free. The falls roar back to full flow, flushing the river clean — and the rig stays bolted in place to catch whatever comes down next."* |
 
 Both paths ultimately fire `RaiseMissionCompleted(2, wasOptimal)`, which `RiverManager` listens for regardless of which path was taken: it disables the `blockageVisual` (the wedged boulder) and enables `animatedRiverTilemap` either way — the *visual* payoff (falls flowing again) is identical, deliberately, so the game doesn't spoil "this was the wrong fix" before the reflection text says so.
 
@@ -261,7 +262,7 @@ A second camera (`MinimapCamera`) tracks the `Player` tag every `LateUpdate` and
 ## 11. Content Inventory (current scene)
 
 - **Stage 1** (`Stage1.asset`): missions `[1, 2]` — both must resolve optimally to submit.
-- **Missions authored:** `M1_ParchedCrops` (well/farm), `M2_CleaningRiver` (asset name predates the "Stagnant Pond" rework in §9 — content and 5-Whys chain updated in place, filename unchanged) — both have complete 5-Whys chains and both solution paths implemented and wired in-scene.
+- **Missions authored:** `M1_ParchedCrops` (well/farm), `M2_CleaningRiver` (asset name predates the "Blocked River" rework in §9 — content and 5-Whys chain updated in place, filename unchanged) — both have complete 5-Whys chains and both solution paths implemented and wired in-scene.
 - **Notable scene objects:** `Farmer_NPC` (Mission 1 trigger, patrols), `RiverBlockagePoint`/`VIllagerComplaintPoint`/`RiverDryPoint` (Mission 2 trigger + 2 context points, reworked fiction — see §9), `Container_Trivial_M1`/`Container_Optimal_M1`, `Container_Trivial_M2`/`Container_Optimal_M2`, `TownHall` (with `blackSmithBase_1`/`blackSmithRoof_1`-style stage sprites), `TrashManager` (hosts `TrashSpawner`), `TrashCollectionSite`, `CoinRewardSystem`, `TrustSystem`, `InventorySystem`/`InventoryUI`, `MissionBoard`, `InfoBoard`, `MinimapCamera`. `PDCAIndicatorUI` is implemented (§10) but not yet wired into this scene.
 - **Tuned values:** 8 inventory slots; 2 Gold Coins required to submit a stage; trash spawn interval randomized 25–45s, paused outside Exploration, no numeric penalty on spawn; trust starts at 2/5 per mission, ±1 per outcome; Gold Coin reward is a flat 1 per optimal mission (no per-mission tuning, unlike the old satisfaction rewards).
 
