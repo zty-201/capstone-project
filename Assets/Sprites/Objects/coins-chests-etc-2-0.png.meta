@@ -1645,7 +1645,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: coins-chests-etc-2-0_67
+      name: cable
       rect:
         serializedVersion: 2
         x: 304
@@ -3581,7 +3581,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: coins-chests-etc-2-0_155
+      name: steel
       rect:
         serializedVersion: 2
         x: 304
@@ -4549,7 +4549,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: coins-chests-etc-2-0_199
+      name: wood
       rect:
         serializedVersion: 2
         x: 304
@@ -51248,6 +51248,7 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":16.0,"y":16.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
+      cable: -2030540823
       coins-chests-etc-2-0_0: -1110126541007599292
       coins-chests-etc-2-0_1: 6677371199585168653
       coins-chests-etc-2-0_10: 5781152556637011241
@@ -51861,7 +51862,6 @@ TextureImporter:
       coins-chests-etc-2-0_1547: 962676165
       coins-chests-etc-2-0_1548: 1186201911
       coins-chests-etc-2-0_1549: 1550305483
-      coins-chests-etc-2-0_155: -93557289
       coins-chests-etc-2-0_1550: -2091961997
       coins-chests-etc-2-0_1551: -1765357611
       coins-chests-etc-2-0_1552: -1944891997
@@ -52349,7 +52349,6 @@ TextureImporter:
       coins-chests-etc-2-0_1987: -674459049
       coins-chests-etc-2-0_1988: -923987601
       coins-chests-etc-2-0_1989: -1782749259
-      coins-chests-etc-2-0_199: 1319864186
       coins-chests-etc-2-0_1990: -1717509934
       coins-chests-etc-2-0_1991: 1723672087
       coins-chests-etc-2-0_1992: 1726068451
@@ -53203,7 +53202,6 @@ TextureImporter:
       coins-chests-etc-2-0_667: 1670161299
       coins-chests-etc-2-0_668: -996585509
       coins-chests-etc-2-0_669: 1146994315
-      coins-chests-etc-2-0_67: -2030540823
       coins-chests-etc-2-0_670: 1473731630
       coins-chests-etc-2-0_671: 1972082440
       coins-chests-etc-2-0_672: 2058382253
@@ -53569,6 +53567,8 @@ TextureImporter:
       coins-chests-etc-2-0_997: 705540443
       coins-chests-etc-2-0_998: 2005630808
       coins-chests-etc-2-0_999: 1501223570
+      steel: -93557289
+      wood: 1319864186
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

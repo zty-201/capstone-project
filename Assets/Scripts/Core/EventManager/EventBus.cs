@@ -69,12 +69,6 @@ public static class EventBus
     public static void RaisePuzzleClicked(Vector3 worldPos)
         => OnPuzzleClicked?.Invoke(worldPos);
 
-    // Bridge builder (Mission 5 optimal path): same decentralized hit-testing shape as
-    // OnPuzzleClicked — each BridgeNode subscribes and checks its own collider.
-    public static event Action<Vector3> OnBridgeClicked;
-    public static void RaiseBridgeClicked(Vector3 worldPos)
-        => OnBridgeClicked?.Invoke(worldPos);
-
     public static event Action<int, SolutionType> OnSolutionSelected;
     public static void RaiseSolutionSelected(int missionID, SolutionType type)
         => OnSolutionSelected?.Invoke(missionID, type);

@@ -1054,6 +1054,19 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -1278,7 +1291,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sprite sheet for Basic Pack_10
+      name: NodeSprite
       rect:
         serializedVersion: 2
         x: 343
@@ -1300,7 +1313,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sprite sheet for Basic Pack_11
+      name: BridgeNodeSprite
       rect:
         serializedVersion: 2
         x: 375
@@ -5018,7 +5031,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sprite sheet for Basic Pack_180
+      name: Plank
       rect:
         serializedVersion: 2
         x: 277
@@ -7893,9 +7906,11 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
+      BridgeNodeSprite: 8320191559072506858
+      NodeSprite: 7936792504525602602
+      Plank: 2292737356795794705
       Sprite sheet for Basic Pack_0: -6947281443083930522
       Sprite sheet for Basic Pack_1: 5893398131277028864
-      Sprite sheet for Basic Pack_10: 7936792504525602602
       Sprite sheet for Basic Pack_100: 4354597444368450274
       Sprite sheet for Basic Pack_101: 1238510776156901596
       Sprite sheet for Basic Pack_102: -3866555188209838272
@@ -7906,7 +7921,6 @@ TextureImporter:
       Sprite sheet for Basic Pack_107: -1246839516492621960
       Sprite sheet for Basic Pack_108: -4192277156809882313
       Sprite sheet for Basic Pack_109: -5240161011774420054
-      Sprite sheet for Basic Pack_11: 8320191559072506858
       Sprite sheet for Basic Pack_110: -3066516127117905888
       Sprite sheet for Basic Pack_111: 1879057722361675263
       Sprite sheet for Basic Pack_112: 304479829508535066
@@ -7984,7 +7998,6 @@ TextureImporter:
       Sprite sheet for Basic Pack_178: -2226422057100512107
       Sprite sheet for Basic Pack_179: 5036685658253292073
       Sprite sheet for Basic Pack_18: 3278128074454824905
-      Sprite sheet for Basic Pack_180: 2292737356795794705
       Sprite sheet for Basic Pack_181: 5227837289880610353
       Sprite sheet for Basic Pack_182: -8888099350658994196
       Sprite sheet for Basic Pack_183: 7459592602318247444

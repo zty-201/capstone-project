@@ -57,6 +57,8 @@ Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionS
 2. `DialogueManager` exhausts all lines → opens `PlanningUI` → `PlanningState`
 3. `PlanningUI` type-animates trivial solution name, then optimal solution name, then runs the 5 Whys quiz (see below), which determines the outcome — the player no longer manually picks trivial vs. optimal
 4. On the 5th why, `PlanningUI` itself calls `RaiseSolutionSelected(missionID, type)` (5/5 correct → Optimal, anything less → Trivial) → `MinigameActivator` activates the right container and changes to its inspector-assigned `targetState`
+
+(Advanced missions — `MissionData.isAdvancedMission`, e.g. Mission 5 — diverge starting at step 3: the quiz no longer picks the path. See 5 Whys Quiz below and Mission 5: Bridge Building.)
 5. Puzzle solved / well patched → `RaiseMissionCompleted(missionID, wasOptimal)`
 6. `ReflectionPopupUI` listens, shows feedback text from `MissionData`, changes state to `Reflection`
 7. Player clicks to dismiss → `Exploration`; `MissionBoardUI` listens to grey out the entry
@@ -142,6 +144,8 @@ After typing both solution names, `PlanningUI` runs 5 sequential "Why" stages so
 
 The quiz behaves differently on a redo (see Stage Gate System below): `hintText` only shows `WhyStage.hint` when `StageManager.IsMissionUnderReview(missionID)` is true, so a first attempt gets no hint but a review redo does; and each stage's distractor pool excludes whatever the player already picked wrong on a prior attempt at that stage (`StageManager.RecordWrongAnswer`/`GetExcludedDistractors`), with a floor guard so a question never collapses down to just the correct answer alone.
 
+**Advanced missions** (`MissionData.isAdvancedMission`, e.g. Mission 5) don't use `correctCount` for path selection at all: `PlanningUI.SelectAdvancedMission()` runs instead of the block above, always raising `OnSolutionSelected(missionID, SolutionType.Optimal)` — a routing placeholder into that mission's single container, not a claim about the eventual result — then `OnFiveWhysCompleted(missionID, correctCount)` so the minigame itself can spend the score on something else (Mission 5 turns it into bonus test attempts; see Mission 5: Bridge Building). `OnSolutionSelected` has to fire first: it's what activates the until-now-inactive container, synchronously running that object's `OnEnable` before the next line executes — only after that does the container's own `OnFiveWhysCompleted` subscription actually exist.
+
 ### Mission Board
 `MissionBoardUI` holds one `MissionEntryUI` per mission (assigned in Inspector). On `OnMissionCompleted`, the matching entry greys out (`alpha = 0.4`) and its status label reads "Resolved" (optimal) or "Needs Review" (trivial). On `OnSolutionSelected`, `NPCController.HandleSolutionSelected` sets an internal `missionCompleted` flag (so `Interact()` becomes a no-op) and hides its `InteractionIndicator`, but the NPC's GameObject itself stays active — it remains visible (and keeps patrolling, if it has an `NPCPatrol`) rather than disappearing.
 
@@ -153,6 +157,7 @@ A "Needs Review" (trivial) mission *can* now be reopened, but only through the S
 - **`StageData`** — one stage's `stageNumber`, `stageName`, and `missionIDs[]` (the missions that must all be resolved optimally before the stage can be submitted). Create via `Kaizen Systems/Stage Data`.
 - **`StageRegistry`** — array of `StageData`, looked up by index (`GetByIndex`). Create via `Kaizen Systems/Stage Registry`. Assign in Inspector on `StageManager`.
 - **`ItemData`** — one inventory item's `itemID`, `itemName`, `icon`, and stacking rules (`stackable`, `maxStack`). Create via `Kaizen Systems/Item Data`. Five assets exist: **Gold Coin** (stackable) and **Trash** (not stackable, so litter piles up one slot per piece), assigned in Inspector on `CoinRewardSystem`, `TrashPiece`, `TrashCollectionSite`, and `StageManager`; **Brick** (not stackable, only ever one needed) for Mission 1's trivial fetch quest, assigned on `BrickPickup` and `WellPatchSite`; **Machine Part** (stackable) and **Winch** (not stackable) for Mission 2's optimal path, assigned on `MachinePart`, `AssemblyPoint`, and `PlacementPoint` — `AssemblyPoint.Interact()` trades 3 Machine Parts for 1 Winch, and `PlacementPoint.Interact()` consumes the Winch on final placement.
+- **`BridgeMaterialData`** — one bridge-plank material's `materialID`/`materialName`/`icon`, plus the actual cost-vs-strength tradeoff: `costPerUnitLength` (spent from `BridgeBuilderSystem.budget`), `breakForce` (that plank's `HingeJoint2D.breakForce`), `plankColor`. Create via `Kaizen Systems/Bridge Material Data`. No registry asset — low cardinality (2-3 materials), so `BridgeBuilderSystem.materials` just holds the array directly, referenced only within Mission 5's own minigame. See Mission 5: Bridge Building.
 
 ### Stage Gate System
 `StageManager` (singleton) groups missions into stages via `StageData`, tracks each mission's most recent outcome (`missionOutcomes: Dictionary<int, bool>`), and gates day advancement on every mission in the current stage having been resolved *optimally* — resolving a mission trivially no longer quietly counts toward finishing the day.
@@ -254,11 +259,89 @@ rotates it regardless of player position). The puzzle system runs a DFS flood-fi
 (`PipePuzzleSystem` only populates grid cells where a `PipeVisual` actually exists — an
 unfilled cell is just `null` and the flood-fill skips it).
 
+### Mission 5: Bridge Building (Full Poly Bridge)
+
+Like Missions 1 and 2, the broken thing itself — not an NPC — is what starts the mission:
+`BridgeInteractable` sits on the bridge GameObject in the world (same role as `RiverInteractable`
+on the boulder). Unlike Missions 1 and 2, Mission 5 is an **advanced mission**
+(`MissionData.isAdvancedMission` — see 5 Whys Quiz above): there is no separate trivial-path
+container, and the 5 Whys quiz doesn't pick `SolutionType` at all — `PlanningUI` always routes
+into the single `Container_Optimal_M5`, spending the quiz score as bonus test attempts instead.
+The container's own build/test result decides `wasOptimal` directly: a passed test raises
+`RaiseMissionCompleted(id, true)`; running out of test attempts raises `RaiseMissionCompleted(id,
+false)` — the "quick, unreinforced bridge" outcome — with no separate fetch-quest ever played.
+`MinigameActivator.singleContainerForMission` is what lets this one container close correctly on
+either outcome, since the usual solutionType-vs-wasOptimal match can't otherwise tell whether it's
+"the" container that resolved the mission (it's the only one, always).
+
+**The minigame itself (`BridgeBuilderSystem`) is a full Poly Bridge**, not a simplified one — the
+player freely places joints and beams within a cost budget, rather than connecting a fixed,
+Editor-authored grid:
+- **Free placement.** Only anchor nodes (`BridgeNode.isAnchor`) are Editor-authored; every deck
+  node is created at runtime by a drag (`HandleDragStart/Update/End`) that resolves each end to
+  either an already-existing point (`FindNearestNode`, a plain distance scan over the small
+  tracked node list — no `Collider2D`/physics query needed) or a snapped, brand-new one
+  (`SnapToGrid`, clamped to `playgroundBounds`) — never both new in one drag; at least one end
+  must already exist. Node/beam resolution is centralized here rather than decentralized like
+  `PipeVisual`/the old fixed-grid `BridgeNode` — grid-snap resolution ("nearest point within
+  radius, existing node or empty space") isn't something any single node's own collider could
+  ever answer about itself, so `BridgeNode` carries no collider or click-handling of its own, and
+  there's no `EventBus.OnBridgeClicked` the way there's an `OnPuzzleClicked`.
+- **Materials.** `BridgeMaterialData` is cost vs. strength per plank (see Data Layer above). The
+  player picks one via `BridgeBuilderSystem.SelectMaterial(index)` before dragging; it's baked
+  into the plank's cost/`breakForce`/color at placement (`BridgePlank.Setup`) and never changes
+  afterward.
+- **Stress visualization.** During the Testing phase, `Update()` drives
+  `BridgePlank.UpdateStressVisual()` on every placed plank each frame — it color-lerps from its
+  own material color toward a shared `breakingColor` (red) based on
+  `max(jointA, jointB).reactionForce.magnitude / breakForce`, a cheap read of the physics
+  engine's already-solved joint state.
+- **Undo/redo.** `BridgeActions.cs` defines `IBridgeAction` (`PlaceBeamAction`, `DeleteNodeAction`)
+  — small reversible commands on two `Stack<IBridgeAction>` (`Undo`/`Redo`), cleared on every
+  `ResetBridge()` — a stale entry referencing an already-destroyed node/plank would corrupt state
+  otherwise, and since `HandleTestFailed` already routes through `ResetBridge()`, "don't persist
+  history across a failed test" falls out for free rather than needing separate handling. A
+  recreated node's index is always reused verbatim on redo, never reallocated, so a later action's
+  captured index can't go stale across an undo/redo cycle.
+- **Node deletion** is a dedicated action, not overloaded onto the drag gesture: a press+release
+  below a small movement threshold is treated as a click (selects the node) rather than a
+  placement attempt; Delete/Backspace or the Delete button then removes the selected node,
+  cascading to every plank touching it (refunding each one's stored `Cost`) — anchors can't be
+  deleted.
+
+**Presented as a popup, reached the opposite way round from the pipe puzzle.** The pipe puzzle's
+`Container_Optimal_M1` can carry a `CameraFollower` (re-centers itself on the camera every frame)
+because it has zero `Rigidbody2D` anywhere in it. `Container_Optimal_M5` is nothing *but*
+`Rigidbody2D`-driven objects (nodes, planks, the cart) — Unity does not carry a moving
+non-physics parent's motion into a `Rigidbody2D` child (the child's transform gets corrected back
+to hold its world position), so a `CameraFollower` here would strand the physics playground while
+only a background sprite moved. So the container never moves — it stays at its authored map
+location like every other minigame container — and `BridgeBuilderState.Enter()`/`Exit()` instead
+swap between the scene's normal player-tracking Cinemachine camera and a second, dedicated one
+(`BridgeBuilderSystem.playerCamera`/`.bridgeViewCamera`) framing that fixed spot, handing tracking
+back on Exit. Because the container stays active for the entire build/test session — only
+deactivated on actual mission completion, not on an Esc-out mid-build — everything under it
+(anchors, the node/plank prefabs, the cart, the preview line, the background sprite) sits on a
+dedicated `Bridge` layer (a genuinely free/editable slot — Unity locks the names of layers 0, 1,
+2, 4, and 5 even though slots 3, 6, and 7 sit in that same reserved 0-7 range and remain editable,
+same as how `NPC` got its own layer earlier in the project), excluded from Main Camera's and
+`MinimapCamera`'s Culling Mask *by default*, so the playground can't leak into normal Exploration.
+That default has to be toggled at runtime, not left static, because a `CinemachineCamera` (like
+`bridgeViewCamera`) has no Culling Mask of its own — Cinemachine 3 only blends
+position/rotation/lens into the one real `Camera` (Main Camera), never the Culling Mask (verified:
+Cinemachine 3 replaced its old per-vcam layer filtering with an unrelated Channels system
+specifically because it moved away from Unity layers/culling for this). A permanent static
+exclusion would hide `Bridge` even while `bridgeViewCamera` is supposed to be showing it, so
+`BridgeBuilderSystem.ShowBridgeLayer()`/`HideBridgeLayer()` flip the bit directly on
+`Camera.main.cullingMask` from `BridgeBuilderState.Enter()`/`Exit()`, alongside the camera-active
+swap. `MinimapCamera` needs no such toggle — it's a real `Camera` with its own Culling Mask, and
+never needs to show the playground in any state, so its exclusion stays a permanent Editor setting.
+
 ### Singletons
-`GameManager`, `DialogueManager`, `PlanningUI`, `MissionBoardUI`, `ReflectionPopupUI`, `DayCompleteUI`, `InventorySystem`, `TrustSystem`, `InfoBoardUI`, `StageManager`, `TrashSpawner` all follow the same pattern: static `Instance`, destroyed if a duplicate exists in `Awake`.
+`GameManager`, `DialogueManager`, `PlanningUI`, `MissionBoardUI`, `ReflectionPopupUI`, `DayCompleteUI`, `InventorySystem`, `TrustSystem`, `InfoBoardUI`, `StageManager`, `TrashSpawner`, `BridgeBuilderSystem` all follow the same pattern: static `Instance`, destroyed if a duplicate exists in `Awake`.
 
 ### IInteractable
-`NPCController`, `MissionBoardInteractable`, `RiverInteractable`, `WastePiece`, `MachinePart`, `AssemblyPoint`, `PlacementPoint`, `TrashPiece`, `TrashCollectionSite`, `TownHallInteractable`, `ContextInteractable`, `BrickPickup`, `WellPatchSite`, and `InfoBoardInteractable` all implement `IInteractable`. `InputManager` detects them via `Physics2D.OverlapPoint` and calls `Interact()` when the player is within 1 grid cell (or routes the player adjacent first). `ContextInteractable` is the odd one out: it's narrative-only (dialogue with no associated `MissionData`), so `DialogueManager` returns straight to `Exploration` afterward instead of opening `PlanningUI` — it never starts or resolves a mission.
+`NPCController`, `MissionBoardInteractable`, `RiverInteractable`, `WastePiece`, `MachinePart`, `AssemblyPoint`, `PlacementPoint`, `TrashPiece`, `TrashCollectionSite`, `TownHallInteractable`, `ContextInteractable`, `BrickPickup`, `WellPatchSite`, `InfoBoardInteractable`, and `BridgeInteractable` all implement `IInteractable`. `InputManager` detects them via `Physics2D.OverlapPoint` and calls `Interact()` when the player is within 1 grid cell (or routes the player adjacent first). `ContextInteractable` is the odd one out: it's narrative-only (dialogue with no associated `MissionData`), so `DialogueManager` returns straight to `Exploration` afterward instead of opening `PlanningUI` — it never starts or resolves a mission.
 
 ### Info Board
 A walk-up-and-interact help/tutorial panel, architecturally a clone of the Mission Board: `InfoBoardInteractable` (`IInteractable`) shows `InfoBoardUI` and changes state to `InfoBoard`; `InfoBoardState` is ESC-only, same shape as `MissionBoardState`. `InfoBoardUI` isn't dialogue-typed — it's a static paged reference (`InfoPage[] pages`, each a `title`/`body`), navigated with Next/Previous buttons wired directly to `ShowNextPage()`/`ShowPreviousPage()` in the Inspector, covering movement, the 5 Whys mechanic, the PDCA cycle, gold coins & trust, trash & inventory, town hall, and a catalog of interactable types. The default page content is a C# field initializer on `InfoBoardUI.pages`, not scene-authored data.
