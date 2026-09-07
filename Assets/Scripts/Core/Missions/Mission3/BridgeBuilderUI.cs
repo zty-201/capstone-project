@@ -24,7 +24,9 @@ public class BridgeBuilderUI : MonoBehaviour
         bool building = system.Phase == BridgeBuilderSystem.BuildPhase.Building;
         testButton.interactable = building;
         resetButton.interactable = building;
-        statusText.text = building ? "Connect the nodes, then test the bridge." : "Testing...";
+        statusText.text = building
+            ? $"Connect the nodes, then test the bridge. Attempts left: {system.RemainingAttempts}"
+            : "Testing...";
     }
 
     // Wired to the Test button's OnClick in the Inspector.

@@ -10,6 +10,14 @@ public class MinigameActivator : MonoBehaviour
     public GameObject container;
     public GameStateType targetState;
 
+    [Header("Advanced Missions")]
+    // Advanced missions (MissionData.isAdvancedMission) route every attempt through this one
+    // container regardless of quiz outcome — the container's own minigame simulation decides
+    // wasOptimal, not which container got activated (see PlanningUI.SelectAdvancedMission), so
+    // the usual solutionType-vs-wasOptimal match below can't tell whether this is "the"
+    // container for the completed mission. Check this instead when true.
+    public bool singleContainerForMission;
+
     private void OnEnable()
     {
         EventBus.OnSolutionSelected += HandleSolutionSelected;
@@ -38,7 +46,8 @@ public class MinigameActivator : MonoBehaviour
     {
         if (completedMissionID != missionID) return;
 
-        bool thisPathWasPlayed = (solutionType == SolutionType.Optimal && wasOptimal)
+        bool thisPathWasPlayed = singleContainerForMission
+                              || (solutionType == SolutionType.Optimal && wasOptimal)
                               || (solutionType == SolutionType.Trivial && !wasOptimal);
         if (!thisPathWasPlayed) return;
 

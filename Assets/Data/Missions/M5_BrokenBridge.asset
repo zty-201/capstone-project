@@ -55,20 +55,19 @@ MonoBehaviour:
     correctAnswer: There's no triangulated support structure to spread the load across
       multiple planks.
     distractors:
-    - Nobody oils the ropes regularly.
+    - Nobody oils the hinges regularly.
     - The riverbed keeps shifting.
     - The bridge is simply too old to fix.
     hint: Think about what kind of structural design would actually hold weight,
       not just span a gap.
-  trivialReflectionText: The rope crossing holds... for now. It creaks with every
-    step, and it's only a matter of time before it gives way again.
+  trivialReflectionText: The design never held up under the test cart's weight, so the crew
+    threw together a quick plank crossing instead. It creaks with every step, and it's only
+    a matter of time before it gives way again.
   optimalReflectionText: The reinforced bridge holds firm under real weight. Properly
     braced, it'll carry carts and livestock for years to come.
   introObjective: The bridge to the eastern fields isn't safe to cross — go take
     a look.
-  trivialObjectives:
-  - Find some rope to lash together a quick crossing.
-  - Bring the rope back and lash the crossing.
+  trivialObjectives: []
   optimalObjectives:
   - Build a braced bridge across the gorge ({0}/{1} planks used).
   - Send the test cart across to check it holds!

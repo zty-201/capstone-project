@@ -4,8 +4,8 @@ using UnityEngine;
 // RiverManager (Mission 2): the minigame containers themselves get torn down by MinigameActivator
 // right after completion, so anything meant to persist afterward (the standing bridge, access to
 // the far side) has to live outside them. Unlike RiverManager, the two outcomes actually look
-// different here (a rickety rope crossing vs. a properly braced bridge), so this branches on
-// wasOptimal for the visual instead of showing the same art either way.
+// different here (a quick wooden-plank crossing vs. a properly braced bridge), so this branches
+// on wasOptimal for the visual instead of showing the same art either way.
 public class BridgeManager : MonoBehaviour
 {
     [SerializeField] private int missionID = 5;

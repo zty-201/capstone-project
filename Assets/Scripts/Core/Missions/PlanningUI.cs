@@ -104,7 +104,10 @@ public class PlanningUI : MonoBehaviour
         nextArrow.SetActive(false);
 
         if (stage == Stage.Outcome)
-            SelectSolution(outcomeIsOptimal ? SolutionType.Optimal : SolutionType.Trivial);
+        {
+            if (currentMission.isAdvancedMission) SelectAdvancedMission();
+            else SelectSolution(outcomeIsOptimal ? SolutionType.Optimal : SolutionType.Trivial);
+        }
     }
 
     private void FinishTyping()
@@ -219,9 +222,20 @@ public class PlanningUI : MonoBehaviour
     {
         stage = Stage.Outcome;
         if (hintText != null) hintText.gameObject.SetActive(false);
+        displayText.text = "";
+
+        // Advanced missions don't route trivial-vs-optimal off this quiz — there's a single
+        // minigame, and its own simulation result decides the outcome (see
+        // SelectAdvancedMission). The score isn't wasted, though: it's handed to that minigame
+        // as bonus attempts, so a strong diagnosis still earns something concrete.
+        if (currentMission.isAdvancedMission)
+        {
+            StartTyping($"You answered {correctCount}/{currentMission.fiveWhys.Length} Whys correctly " +
+                "— the better your read on the cause, the more chances you'll get to prove the fix holds.");
+            return;
+        }
 
         outcomeIsOptimal = correctCount >= currentMission.fiveWhys.Length;
-        displayText.text = "";
         StartTyping(outcomeIsOptimal
             ? "You've traced the true root cause. Time to fix this properly."
             : "You lost the thread partway through... this will need a quick fix for now.");
@@ -263,6 +277,21 @@ public class PlanningUI : MonoBehaviour
     private void SelectSolution(SolutionType choice)
     {
         EventBus.RaiseSolutionSelected(currentMission.missionID, choice);
+        Hide();
+    }
+
+    // Advanced missions still fire the same OnSolutionSelected/MinigameActivator wiring every
+    // other mission uses — SolutionType.Optimal here is a routing placeholder to reach the one
+    // container, not a claim about the eventual outcome. OnSolutionSelected must be raised
+    // FIRST: it's what activates the (until-now-inactive) container, synchronously running that
+    // object's OnEnable before this method's next line executes — only after that does its
+    // minigame system's OnFiveWhysCompleted subscription actually exist. Raising the score event
+    // first would miss it: an inactive GameObject's OnEnable (and, on its very first-ever
+    // activation, even Awake) doesn't run until it's activated, not at scene load.
+    private void SelectAdvancedMission()
+    {
+        EventBus.RaiseSolutionSelected(currentMission.missionID, SolutionType.Optimal);
+        EventBus.RaiseFiveWhysCompleted(currentMission.missionID, correctCount);
         Hide();
     }
 }

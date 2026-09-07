@@ -79,6 +79,23 @@ public static class EventBus
     public static void RaiseSolutionSelected(int missionID, SolutionType type)
         => OnSolutionSelected?.Invoke(missionID, type);
 
+    /// <summary>
+    /// Raised once per Planning pass, right after OnSolutionSelected (deliberately after: that
+    /// event is what activates the minigame's container, and an inactive GameObject's OnEnable
+    /// doesn't run — so its listener isn't subscribed yet — until it's actually activated).
+    /// Basic missions don't need this — their SolutionType is derived entirely from this same
+    /// count inside PlanningUI, so one event covers it. Advanced missions
+    /// (MissionData.isAdvancedMission) route to a single minigame regardless of quiz score — the
+    /// minigame's own simulation decides trivial vs. optimal, not this quiz — so their minigame
+    /// system listens here instead to use the score for something else (e.g. BridgeBuilderSystem
+    /// turning it into bonus test attempts).
+    /// int: Mission ID
+    /// int: how many of the 5 Whys the player answered correctly
+    /// </summary>
+    public static event Action<int, int> OnFiveWhysCompleted;
+    public static void RaiseFiveWhysCompleted(int missionID, int correctCount)
+        => OnFiveWhysCompleted?.Invoke(missionID, correctCount);
+
     // ==========================================
     // STAGE GATE EVENTS
     // ==========================================

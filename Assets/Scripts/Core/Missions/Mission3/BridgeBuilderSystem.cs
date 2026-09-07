@@ -1,9 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Optimal path for Mission 5 (design doc's "Advanced Mission 3: Bridge Building") — a
+// The single minigame for Mission 5 (design doc's "Advanced Mission 3: Bridge Building") — a
 // simplified Poly Bridge: the player connects a fixed grid of BridgeNodes with a limited budget
-// of BridgePlanks, then a BridgeTestCart drives across to prove the structure holds.
+// of BridgePlanks, then a BridgeTestCart drives across to prove the structure holds. There is no
+// separate trivial-path minigame for advanced missions (MissionData.isAdvancedMission): the 5
+// Whys quiz no longer picks a path (see PlanningUI.SelectAdvancedMission) — it only grants bonus
+// test attempts via OnFiveWhysCompleted — and this system's own test outcome decides trivial vs.
+// optimal directly. A passed test raises RaiseMissionCompleted(missionID, true); running out of
+// attempts (see HandleTestFailed) raises RaiseMissionCompleted(missionID, false) — the "quick,
+// unreinforced bridge" outcome — with no separate fetch-quest ever played.
 //
 // Build vs. Test is implemented as one shared physics scene rather than two separate ones: every
 // node/plank is Kinematic (locked at its authored position, ignoring forces) while building, and
@@ -26,6 +32,13 @@ public class BridgeBuilderSystem : MonoBehaviour
     [SerializeField] private float maxPlankLength = 3f;
     [SerializeField] private float plankBreakForce = 40f;
 
+    [Header("Test Attempts")]
+    [SerializeField] private int baseTestAttempts = 3;
+    // Bonus test attempts per correct answer in the 5 Whys quiz (see OnFiveWhysCompleted) — this
+    // mission doesn't use that quiz to pick trivial vs. optimal, so a strong diagnosis earns more
+    // room to get the actual build right instead.
+    [SerializeField] private int bonusAttemptsPerCorrectWhy = 1;
+
     [Header("Prefab & Scene References")]
     [SerializeField] private BridgePlank plankPrefab;
     [SerializeField] private Transform planksParent;
@@ -44,9 +57,9 @@ public class BridgeBuilderSystem : MonoBehaviour
     [SerializeField] private AudioClip breakSfx;
 
     // Cached in Awake, not Start: this object lives inside Container_Optimal_M5, which starts
-    // inactive, and OnEnable (which needs this list immediately, via ResetBridge) fires the
-    // moment the container activates — before Start would. Awake still runs once at scene load
-    // even for an initially-inactive object, same as every other cached-at-startup mission system.
+    // inactive, so Awake is deferred until the container's first activation rather than running
+    // at scene load — but Awake still always precedes OnEnable within that same activation, and
+    // OnEnable (via ResetBridge) needs this list immediately, before Start would ever run.
     private BridgeNode[] nodes;
 
     private readonly List<BridgePlank> placedPlanks = new List<BridgePlank>();
@@ -55,9 +68,13 @@ public class BridgeBuilderSystem : MonoBehaviour
     private BridgeNode selectedNode;
     private int planksUsed;
     private float testTimer;
+    private int correctWhysCount;
+    private int attemptsUsed;
 
     public BuildPhase Phase { get; private set; } = BuildPhase.Building;
     public int RemainingPlanks => plankBudget - planksUsed;
+    public int MaxTestAttempts => baseTestAttempts + correctWhysCount * bonusAttemptsPerCorrectWhy;
+    public int RemainingAttempts => MaxTestAttempts - attemptsUsed;
 
     private void Awake()
     {
@@ -72,12 +89,20 @@ public class BridgeBuilderSystem : MonoBehaviour
 
     private void OnEnable()
     {
+        // PlanningUI.SelectAdvancedMission raises OnSolutionSelected (which activates this
+        // container, running this OnEnable) strictly before OnFiveWhysCompleted, so subscribing
+        // here — not Awake — is enough to always catch it, including on this container's very
+        // first-ever activation.
+        EventBus.OnFiveWhysCompleted += HandleFiveWhysCompleted;
+
         if (uiPanel != null) uiPanel.SetActive(true);
+        attemptsUsed = 0;
         ResetBridge();
     }
 
     private void OnDisable()
     {
+        EventBus.OnFiveWhysCompleted -= HandleFiveWhysCompleted;
         if (uiPanel != null) uiPanel.SetActive(false);
     }
 
@@ -203,6 +228,18 @@ public class BridgeBuilderSystem : MonoBehaviour
     private void HandleTestFailed()
     {
         cart.StopDrive();
+        attemptsUsed++;
+
+        if (attemptsUsed >= MaxTestAttempts)
+        {
+            // Out of attempts: the build never held under test, so this mission resolves
+            // trivially — the quick, unreinforced bridge outcome — with no separate fetch-quest
+            // to play. MinigameActivator.singleContainerForMission is what lets this same
+            // container close correctly on either outcome now.
+            EventBus.RaiseMissionCompleted(missionID, false);
+            return;
+        }
+
         ResetBridge();
     }
 
@@ -215,6 +252,13 @@ public class BridgeBuilderSystem : MonoBehaviour
     private void HandleMissionsNeedReview(int[] missionIDs)
     {
         if (System.Array.IndexOf(missionIDs, missionID) < 0) return;
+        attemptsUsed = 0;
         ResetBridge();
+    }
+
+    private void HandleFiveWhysCompleted(int id, int correctCount)
+    {
+        if (id != missionID) return;
+        correctWhysCount = correctCount;
     }
 }

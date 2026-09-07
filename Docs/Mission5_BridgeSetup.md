@@ -1,8 +1,8 @@
 # Mission 5 (Bridge Building) — Editor Setup Guide
 
 All gameplay logic is in `Assets/Scripts/Core/Missions/Mission3/` and the new
-`BridgeBuilderState`. Mission data (`M5_BrokenBridge.asset`) and the `Rope` item
-are already authored. What's left is scene wiring, which only the Editor can do.
+`BridgeBuilderState`. Mission data (`M5_BrokenBridge.asset`) is already
+authored. What's left is scene wiring, which only the Editor can do.
 
 Mission ID **5** is already registered in `MissionRegistry` and in `Stage2`
 (`StageData.missionIDs = [3, 4, 5]`) — nothing to change there.
@@ -15,7 +15,7 @@ Place a `BridgeInteractable` on the bridge GameObject in the world (same role as
 Add a `BridgeManager` somewhere persistent in the scene (not inside either
 container) with three visuals wired in:
 - `brokenBridgeVisual` — the current broken-bridge sprite (active by default).
-- `lashedBridgeVisual` — a rickety rope-crossing sprite (inactive by default).
+- `lashedBridgeVisual` — a rickety wooden-plank-crossing sprite (inactive by default).
 - `bracedBridgeVisual` — a finished, properly-braced bridge sprite (inactive by default).
 
 ### Unlocking the far bank
@@ -34,32 +34,50 @@ one-way: a trivial outcome flagged for a Stage Gate redo does **not** re-lock
 the cells, since the player could already be exploring the far bank when that
 happens, and re-locking their only way back would strand them there.
 
-### Consequence for the trivial path: a stranded villager
+## 2. No separate trivial container
 
-Add a `StrandedVillager` object, positioned in the water near the far end of
-the rope bridge, **inactive by default**. It reveals itself automatically the
-moment Mission 5 resolves *trivially* (via `OnMissionCompleted`, so no extra
-wiring needed beyond placing it and filling in `rescueDialogue`), and
-disappears for good once the player interacts with it — it's a one-time
-narrative beat, not something that resets on a review redo. It doesn't gate
-Town Hall submission or anything else; it's flavor reinforcing the "quick fix
-isn't final" theme already in `M5_BrokenBridge`'s trivial reflection text.
+Advanced missions (`MissionData.isAdvancedMission`) don't route to a distinct
+trivial-path minigame — there's only one minigame, and its own simulation
+result decides trivial vs. optimal (see `PlanningUI.SelectAdvancedMission` /
+`BridgeBuilderSystem.HandleTestFailed`). `PlankPickup`/`BridgePlankPoint` and
+`Plank.asset` no longer exist (deleted). If your `Mission5` group still has
+the earlier trivial-path scaffolding under it, delete **both**:
+- `Container_Trivial_M5` — the container itself.
+- `Activator_Mission5_Trivial` — its `MinigameActivator`, a **separate**
+  sibling GameObject, not a component on the container (see the note on
+  `MinigameActivator` placement below).
 
-## 2. Trivial container (`Container_Trivial_M5`)
+## 3. The minigame container (`Container_Optimal_M5`)
 
-Same shape as `Container_Trivial_M1`. Starts inactive; a `MinigameActivator`
-(missionID 5, solutionType Trivial, container = this, targetState = Exploration)
-activates it on `OnSolutionSelected`.
+Only one container this mission.
 
-Children:
-- **RopePickup** — an `IInteractable` placed elsewhere on the map, `ropeItem = Rope.asset`.
-- **BridgeLashPoint** — at the bridge, `ropeItem = Rope.asset`, `ropePickup` wired to the RopePickup above.
+**`MinigameActivator` never lives on the container it activates.** It
+subscribes to `EventBus.OnSolutionSelected` in its own `OnEnable` — if it were
+a component on `Container_Optimal_M5`, which starts inactive, that `OnEnable`
+would never run until the container is already active, which is exactly what
+`OnSolutionSelected` is supposed to trigger in the first place. That's why
+every mission's activators are their own dedicated `Activator_Mission{N}_*`
+GameObjects, not children of the container, wired to it only via the
+`container` field. Mission 5 already has one such object,
+`Activator_Mission5_Optimal`, sitting alongside `Container_Optimal_M5` under
+the `Mission5` group — configure it, don't add a new one:
+- `missionID` → 5
+- `container` → `Container_Optimal_M5`
+- `targetState` → **`BridgeBuilder`** (check this — it's easy to leave at the
+  default `Exploration`)
+- **`singleContainerForMission` → checked.** This one container can end in
+  *either* outcome now; without this flag, `MinigameActivator` only closes
+  the container when `wasOptimal` happens to match its `solutionType`,
+  leaving it (and the UI panel) stuck open on a trivial result.
 
-## 3. Optimal container (`Container_Optimal_M5`)
+**`Container_Optimal_M5` itself must start inactive** — like every other
+minigame container, it should only appear once `OnSolutionSelected` fires.
+Double check its active checkbox; it's easy to leave checked while you're
+building it out in the Editor and forget to switch off before playtesting.
 
-Same activation pattern, `targetState = BridgeBuilder`. Put `BridgeBuilderSystem`
-on this container's root — `GetComponentsInChildren<BridgeNode>` requires every
-node to be a child of this GameObject.
+Put `BridgeBuilderSystem` on the container's own root —
+`GetComponentsInChildren<BridgeNode>` requires every node to be a child of
+this GameObject.
 
 ### Node grid
 For each node in your span, add a child GameObject with:
@@ -136,10 +154,18 @@ All on `BridgeBuilderSystem`:
 - `plankBreakForce` (default 40) — lower = bridges snap more easily under the
   cart's weight; this is the main "did you actually brace it" knob.
 - `maxTestDuration` (default 20s) — safety timeout if the cart gets stuck.
+- `baseTestAttempts` (default 3) — how many tries the player gets before a
+  failed test locks in the trivial outcome.
+- `bonusAttemptsPerCorrectWhy` (default 1) — extra attempts per correct answer
+  in the 5 Whys quiz (0-5 correct → 0-5 bonus attempts on top of the base).
 
 On `BridgeTestCart`: `driveSpeed` (default 2) — faster puts more dynamic load
 on the joints as it crosses.
 
-Everything else (5 Whys quiz, reflection text, coin reward, trust, stage-gate
-redo) is already wired for free — those systems are generic over `missionID`
-and just need `M5_BrokenBridge`'s data, which is already filled in.
+Everything downstream of `OnMissionCompleted` (reflection text, coin reward,
+trust, stage-gate redo, Mission Directory resolved state) is already wired
+for free and needs no advanced-mission-specific handling —
+those systems only ever cared about the final `wasOptimal`, never how it was
+reached. The 5 Whys quiz itself still runs for `M5_BrokenBridge` exactly as
+authored, but only feeds `bonusAttemptsPerCorrectWhy` above — it no longer
+picks the path (see `PlanningUI.SelectAdvancedMission`).
