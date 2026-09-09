@@ -14,6 +14,8 @@ public class BridgeBuilderUI : MonoBehaviour
     {
         public Button button;
         public TextMeshProUGUI label;
+        // Optional — leave unassigned if this button doesn't show a material icon.
+        public Image icon;
     }
 
     [SerializeField] private BridgeBuilderSystem system;
@@ -30,10 +32,21 @@ public class BridgeBuilderUI : MonoBehaviour
 
     private void Start()
     {
+        BridgeMaterialData[] materials = system.Materials;
+
         for (int i = 0; i < materialButtons.Length; i++)
         {
             int index = i; // capture by value, not by the loop variable
             materialButtons[i].button.onClick.AddListener(() => system.SelectMaterial(index));
+
+            // Labels/icons are driven from BridgeMaterialData here rather than typed by hand
+            // per button, so they can't drift out of sync with whatever's actually assigned to
+            // BridgeBuilderSystem.materials.
+            if (materials == null || index >= materials.Length) continue;
+            BridgeMaterialData material = materials[index];
+
+            if (materialButtons[i].label != null) materialButtons[i].label.text = material.materialName;
+            if (materialButtons[i].icon != null && material.icon != null) materialButtons[i].icon.sprite = material.icon;
         }
     }
 

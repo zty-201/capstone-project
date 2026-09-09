@@ -15,6 +15,6 @@ MonoBehaviour:
   materialID: cable
   materialName: Cable
   icon: {fileID: -2030540823, guid: 9b51817c9e9184143a60119ace179ffa, type: 3}
-  costPerUnitLength: 5
-  breakForce: 200
-  plankColor: {r: 1, g: 1, b: 1, a: 1}
+  costPerUnitLength: 4
+  breakForce: 80
+  plankColor: {r: 0.16862746, g: 0.16862746, b: 0.16862746, a: 1}

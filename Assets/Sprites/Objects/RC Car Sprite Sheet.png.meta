@@ -1,0 +1,1209 @@
+fileFormatVersion: 2
+guid: 9e901acb1da83264aa8dc93ebaf8e01f
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -153349523285097210
+    second: RC Car Sprite Sheet_0
+  - first:
+      213: -5774228053952740877
+    second: RC Car Sprite Sheet_1
+  - first:
+      213: -8193591058783611168
+    second: RC Car Sprite Sheet_2
+  - first:
+      213: 5941151350266520642
+    second: RC Car Sprite Sheet_3
+  - first:
+      213: 249744625112106428
+    second: RC Car Sprite Sheet_4
+  - first:
+      213: -432387229445050759
+    second: RC Car Sprite Sheet_5
+  - first:
+      213: -6356232288233470742
+    second: RC Car Sprite Sheet_6
+  - first:
+      213: -1876176882787834826
+    second: RC Car Sprite Sheet_7
+  - first:
+      213: -2815908156287252943
+    second: RC Car Sprite Sheet_8
+  - first:
+      213: 6228262976640711923
+    second: RC Car Sprite Sheet_9
+  - first:
+      213: -7091647222091223980
+    second: RC Car Sprite Sheet_10
+  - first:
+      213: -4648076825428371013
+    second: RC Car Sprite Sheet_11
+  - first:
+      213: 5122494503499253567
+    second: RC Car Sprite Sheet_12
+  - first:
+      213: 3633234257934246432
+    second: RC Car Sprite Sheet_13
+  - first:
+      213: 4901682278846280670
+    second: RC Car Sprite Sheet_14
+  - first:
+      213: -5756348318259146145
+    second: RC Car Sprite Sheet_15
+  - first:
+      213: -3864281022158476525
+    second: RC Car Sprite Sheet_16
+  - first:
+      213: -1003698008401374730
+    second: RC Car Sprite Sheet_17
+  - first:
+      213: -8235826881938690736
+    second: RC Car Sprite Sheet_18
+  - first:
+      213: 6301363910927605715
+    second: RC Car Sprite Sheet_19
+  - first:
+      213: 691674805047554252
+    second: RC Car Sprite Sheet_20
+  - first:
+      213: 9152792907476550243
+    second: RC Car Sprite Sheet_21
+  - first:
+      213: -2035600457208545799
+    second: RC Car Sprite Sheet_22
+  - first:
+      213: -17240687804192531
+    second: RC Car Sprite Sheet_23
+  - first:
+      213: -1432917035521128465
+    second: RC Car Sprite Sheet_24
+  - first:
+      213: -826444437819884669
+    second: RC Car Sprite Sheet_25
+  - first:
+      213: -838210959419719639
+    second: RC Car Sprite Sheet_26
+  - first:
+      213: 8392149670673431467
+    second: RC Car Sprite Sheet_27
+  - first:
+      213: 4267420804107513588
+    second: RC Car Sprite Sheet_28
+  - first:
+      213: 3731747885437830036
+    second: RC Car Sprite Sheet_29
+  - first:
+      213: 247287754720927874
+    second: RC Car Sprite Sheet_30
+  - first:
+      213: 2735791689825290
+    second: RC Car Sprite Sheet_31
+  - first:
+      213: -1254755993029103422
+    second: RC Car Sprite Sheet_32
+  - first:
+      213: 5321335730494062599
+    second: RC Car Sprite Sheet_33
+  - first:
+      213: -6718990600345757837
+    second: RC Car Sprite Sheet_34
+  - first:
+      213: -2837232376934589320
+    second: RC Car Sprite Sheet_35
+  - first:
+      213: 5056337276862175826
+    second: RC Car Sprite Sheet_36
+  - first:
+      213: 803981606347817735
+    second: RC Car Sprite Sheet_37
+  - first:
+      213: -6841535718381740697
+    second: RC Car Sprite Sheet_38
+  - first:
+      213: 843806107001380754
+    second: RC Car Sprite Sheet_39
+  - first:
+      213: 6829764183130580346
+    second: RC Car Sprite Sheet_40
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_0
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 223
+        width: 18
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 605cd1acb613fddf0800000000000000
+      internalID: -153349523285097210
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 223
+        width: 18
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f14d089d22dddfa0800000000000000
+      internalID: -5774228053952740877
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_2
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 191
+        width: 18
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e6d262f7548a4e80800000000000000
+      internalID: -8193591058783611168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_3
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 191
+        width: 19
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 244e77deca5337250800000000000000
+      internalID: 5941151350266520642
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_4
+      rect:
+        serializedVersion: 2
+        x: 69
+        y: 191
+        width: 20
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb5ce50d965477300800000000000000
+      internalID: 249744625112106428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_5
+      rect:
+        serializedVersion: 2
+        x: 101
+        y: 191
+        width: 20
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97e238f0b1adff9f0800000000000000
+      internalID: -432387229445050759
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_6
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 159
+        width: 18
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae4c9fd19602ac7a0800000000000000
+      internalID: -6356232288233470742
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_7
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 159
+        width: 18
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 634a1a5c01b76f5e0800000000000000
+      internalID: -1876176882787834826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_8
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 161
+        width: 18
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1368f508372ebe8d0800000000000000
+      internalID: -2815908156287252943
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_9
+      rect:
+        serializedVersion: 2
+        x: 103
+        y: 163
+        width: 18
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3fcf262bd2c3f6650800000000000000
+      internalID: 6228262976640711923
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_10
+      rect:
+        serializedVersion: 2
+        x: 135
+        y: 160
+        width: 18
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 45cedd6bc68659d90800000000000000
+      internalID: -7091647222091223980
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_11
+      rect:
+        serializedVersion: 2
+        x: 167
+        y: 159
+        width: 18
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb9dd9bf0c6be7fb0800000000000000
+      internalID: -4648076825428371013
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_12
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 127
+        width: 18
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f37c6fc5c91c61740800000000000000
+      internalID: 5122494503499253567
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_13
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 127
+        width: 18
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02263f1de47db6230800000000000000
+      internalID: 3633234257934246432
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_14
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 127
+        width: 19
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed3b578ff06460440800000000000000
+      internalID: 4901682278846280670
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_15
+      rect:
+        serializedVersion: 2
+        x: 103
+        y: 127
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f521fb6f3b75d10b0800000000000000
+      internalID: -5756348318259146145
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_16
+      rect:
+        serializedVersion: 2
+        x: 135
+        y: 127
+        width: 18
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31be5f952e05f5ac0800000000000000
+      internalID: -3864281022158476525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_17
+      rect:
+        serializedVersion: 2
+        x: 167
+        y: 127
+        width: 18
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f1187baaf52212f0800000000000000
+      internalID: -1003698008401374730
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_18
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 95
+        width: 18
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05d6e6e061774bd80800000000000000
+      internalID: -8235826881938690736
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_19
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 95
+        width: 18
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3df5e474711f27750800000000000000
+      internalID: 6301363910927605715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_20
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 95
+        width: 18
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc072fe0292599900800000000000000
+      internalID: 691674805047554252
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_21
+      rect:
+        serializedVersion: 2
+        x: 103
+        y: 95
+        width: 19
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 362cad0e7a0450f70800000000000000
+      internalID: 9152792907476550243
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_22
+      rect:
+        serializedVersion: 2
+        x: 135
+        y: 95
+        width: 18
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9fd36735b2810c3e0800000000000000
+      internalID: -2035600457208545799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_23
+      rect:
+        serializedVersion: 2
+        x: 167
+        y: 95
+        width: 18
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de86fbf8fafb2cff0800000000000000
+      internalID: -17240687804192531
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_24
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 63
+        width: 18
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe748215c814d1ce0800000000000000
+      internalID: -1432917035521128465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_25
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 63
+        width: 18
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38bf5299921e784f0800000000000000
+      internalID: -826444437819884669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_26
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 63
+        width: 19
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 920c2fcc2931e54f0800000000000000
+      internalID: -838210959419719639
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_27
+      rect:
+        serializedVersion: 2
+        x: 103
+        y: 63
+        width: 21
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: babb66679a7e67470800000000000000
+      internalID: 8392149670673431467
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_28
+      rect:
+        serializedVersion: 2
+        x: 135
+        y: 63
+        width: 18
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fea0ff8c9ce83b30800000000000000
+      internalID: 4267420804107513588
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_29
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 31
+        width: 18
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49346de1ee4d9c330800000000000000
+      internalID: 3731747885437830036
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_30
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 31
+        width: 19
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 280e17917ea8e6300800000000000000
+      internalID: 247287754720927874
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_31
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 31
+        width: 19
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0cf9d32038b90000800000000000000
+      internalID: 2735791689825290
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_32
+      rect:
+        serializedVersion: 2
+        x: 75
+        y: 40
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c035b38216369ee0800000000000000
+      internalID: -1254755993029103422
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_33
+      rect:
+        serializedVersion: 2
+        x: 84
+        y: 40
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70041ba37ae29d940800000000000000
+      internalID: 5321335730494062599
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_34
+      rect:
+        serializedVersion: 2
+        x: 103
+        y: 31
+        width: 19
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 377d331d5a951c2a0800000000000000
+      internalID: -6718990600345757837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_35
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 0
+        width: 19
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87c939b7f2020a8d0800000000000000
+      internalID: -2837232376934589320
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_36
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 0
+        width: 19
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25a9fe3b6f7bb2640800000000000000
+      internalID: 5056337276862175826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_37
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 0
+        width: 19
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7034f44e201582b00800000000000000
+      internalID: 803981606347817735
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_38
+      rect:
+        serializedVersion: 2
+        x: 81
+        y: 5
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76d95bb138bfd01a0800000000000000
+      internalID: -6841535718381740697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_39
+      rect:
+        serializedVersion: 2
+        x: 103
+        y: 0
+        width: 19
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29f5f130f2dc5bb00800000000000000
+      internalID: 843806107001380754
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RC Car Sprite Sheet_40
+      rect:
+        serializedVersion: 2
+        x: 114
+        y: 7
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a752f23c65238ce50800000000000000
+      internalID: 6829764183130580346
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      RC Car Sprite Sheet_0: -153349523285097210
+      RC Car Sprite Sheet_1: -5774228053952740877
+      RC Car Sprite Sheet_10: -7091647222091223980
+      RC Car Sprite Sheet_11: -4648076825428371013
+      RC Car Sprite Sheet_12: 5122494503499253567
+      RC Car Sprite Sheet_13: 3633234257934246432
+      RC Car Sprite Sheet_14: 4901682278846280670
+      RC Car Sprite Sheet_15: -5756348318259146145
+      RC Car Sprite Sheet_16: -3864281022158476525
+      RC Car Sprite Sheet_17: -1003698008401374730
+      RC Car Sprite Sheet_18: -8235826881938690736
+      RC Car Sprite Sheet_19: 6301363910927605715
+      RC Car Sprite Sheet_2: -8193591058783611168
+      RC Car Sprite Sheet_20: 691674805047554252
+      RC Car Sprite Sheet_21: 9152792907476550243
+      RC Car Sprite Sheet_22: -2035600457208545799
+      RC Car Sprite Sheet_23: -17240687804192531
+      RC Car Sprite Sheet_24: -1432917035521128465
+      RC Car Sprite Sheet_25: -826444437819884669
+      RC Car Sprite Sheet_26: -838210959419719639
+      RC Car Sprite Sheet_27: 8392149670673431467
+      RC Car Sprite Sheet_28: 4267420804107513588
+      RC Car Sprite Sheet_29: 3731747885437830036
+      RC Car Sprite Sheet_3: 5941151350266520642
+      RC Car Sprite Sheet_30: 247287754720927874
+      RC Car Sprite Sheet_31: 2735791689825290
+      RC Car Sprite Sheet_32: -1254755993029103422
+      RC Car Sprite Sheet_33: 5321335730494062599
+      RC Car Sprite Sheet_34: -6718990600345757837
+      RC Car Sprite Sheet_35: -2837232376934589320
+      RC Car Sprite Sheet_36: 5056337276862175826
+      RC Car Sprite Sheet_37: 803981606347817735
+      RC Car Sprite Sheet_38: -6841535718381740697
+      RC Car Sprite Sheet_39: 843806107001380754
+      RC Car Sprite Sheet_4: 249744625112106428
+      RC Car Sprite Sheet_40: 6829764183130580346
+      RC Car Sprite Sheet_5: -432387229445050759
+      RC Car Sprite Sheet_6: -6356232288233470742
+      RC Car Sprite Sheet_7: -1876176882787834826
+      RC Car Sprite Sheet_8: -2815908156287252943
+      RC Car Sprite Sheet_9: 6228262976640711923
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
