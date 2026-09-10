@@ -40,7 +40,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -54,7 +54,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -78,7 +78,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -112,49 +112,84 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: tileMapv2_0
+      name: brokenbridge
       rect:
         serializedVersion: 2
         x: 0
-        y: 31
-        width: 256
-        height: 353
+        y: 64
+        width: 160
+        height: 32
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 3eb9bba2b32cb1ab0800000000000000
-      internalID: -5036218198907970589
+      spriteID: 0717db901f51cc6459671fba89d4cdbe
+      internalID: 1512863968
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tileMapv2_1
+      name: stonebridge
       rect:
         serializedVersion: 2
-        x: 2
-        y: 0
-        width: 92
-        height: 65
+        x: 160
+        y: 32
+        width: 96
+        height: 64
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: d0a4e38b3670c90a0800000000000000
-      internalID: -6873610806399972851
+      spriteID: 6d85d9dd0a5796d43ba5ad3f3d42e640
+      internalID: -1552921214
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: woodenbridge
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 96
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 41af5516ed04714429a115e7d7a04e7b
+      internalID: 1408171517
       vertices: []
       indices: 
       edges: []
@@ -163,7 +198,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: acad2b08ce824d548abf3d8274b9db82
     internalID: 0
     vertices: []
     indices: 
@@ -171,10 +206,99 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":32.0,"y":32.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
+      brokenbridge: 1512863968
+      stonebridge: -1552921214
       tileMapv2_0: -5036218198907970589
       tileMapv2_1: -6873610806399972851
+      tileMapv2_10: 1919478890
+      tileMapv2_11: 760463906
+      tileMapv2_12: -1292458971
+      tileMapv2_13: -249563252
+      tileMapv2_14: 1113551563
+      tileMapv2_15: -535744263
+      tileMapv2_16: 959242792
+      tileMapv2_17: -790531813
+      tileMapv2_18: -937871006
+      tileMapv2_19: 770627810
+      tileMapv2_2: 2053679857
+      tileMapv2_20: 431251720
+      tileMapv2_21: 604833614
+      tileMapv2_22: 640245856
+      tileMapv2_23: 609817490
+      tileMapv2_24: 1501692207
+      tileMapv2_25: -1780213837
+      tileMapv2_26: 177366144
+      tileMapv2_27: -1582379040
+      tileMapv2_28: 1402346642
+      tileMapv2_29: -123948198
+      tileMapv2_3: -1366928025
+      tileMapv2_30: 1002336652
+      tileMapv2_31: 940882955
+      tileMapv2_32: 915406617
+      tileMapv2_33: 1072058409
+      tileMapv2_34: 1167101697
+      tileMapv2_35: -1272089154
+      tileMapv2_36: -503836833
+      tileMapv2_37: -245875389
+      tileMapv2_38: 1531335875
+      tileMapv2_39: 1100857218
+      tileMapv2_4: 1395677398
+      tileMapv2_40: 1160271378
+      tileMapv2_41: 928930215
+      tileMapv2_42: -1980938658
+      tileMapv2_43: 443470374
+      tileMapv2_44: 807649979
+      tileMapv2_45: 1822571703
+      tileMapv2_46: -1723882652
+      tileMapv2_47: -1122057600
+      tileMapv2_48: 399846253
+      tileMapv2_49: 339456323
+      tileMapv2_5: 791690470
+      tileMapv2_50: -431067065
+      tileMapv2_51: -872496532
+      tileMapv2_52: 1687594492
+      tileMapv2_53: -1153585652
+      tileMapv2_54: -8491746
+      tileMapv2_55: -1739013307
+      tileMapv2_56: -784413249
+      tileMapv2_57: -472425989
+      tileMapv2_58: -454442737
+      tileMapv2_59: -1970940758
+      tileMapv2_6: -176703451
+      tileMapv2_60: -1715924446
+      tileMapv2_61: 1984456953
+      tileMapv2_62: -489150952
+      tileMapv2_63: -1857467120
+      tileMapv2_64: -1466137536
+      tileMapv2_65: 1333381510
+      tileMapv2_66: -14262145
+      tileMapv2_67: -1251602183
+      tileMapv2_68: 1465684023
+      tileMapv2_69: -1651798977
+      tileMapv2_7: -1776253337
+      tileMapv2_70: 1002211884
+      tileMapv2_71: 731960922
+      tileMapv2_73: 151814588
+      tileMapv2_74: 260749933
+      tileMapv2_75: -2127608766
+      tileMapv2_76: -187953485
+      tileMapv2_78: -861389543
+      tileMapv2_79: 2009549292
+      tileMapv2_8: -1203574482
+      tileMapv2_81: -582820083
+      tileMapv2_82: -986612325
+      tileMapv2_83: 1659831035
+      tileMapv2_84: 1257740536
+      tileMapv2_85: -1931895450
+      tileMapv2_86: 1284342720
+      tileMapv2_87: 1925702015
+      tileMapv2_88: -1736782822
+      tileMapv2_9: 775595509
+      woodenbridge: 1408171517
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
