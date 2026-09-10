@@ -132,12 +132,13 @@ Cinemachine 3 only blends position/rotation/lens into the one real `Camera`
 (Main Camera, via `CinemachineBrain`), never the Culling Mask. So a purely
 static Editor exclusion would hide the `Bridge` layer permanently, *including*
 while `bridgeViewCamera` is supposed to be showing it. `BridgeBuilderSystem`
-handles this with `ShowBridgeLayer()`/`HideBridgeLayer()` (toggling the bit
+handles this with `ShowBridgeLayers()`/`HideBridgeLayers()` (toggling both
+`Bridge` and `BridgeSupport` — see "Second layer for reinforcement" below —
 directly on `Camera.main.cullingMask`), called from `BridgeBuilderState.Enter()`/
 `Exit()` alongside the camera-active swap — no further wiring needed beyond
-setting `bridgeLayerName` (default `"Bridge"`, matching the layer name above)
-on `BridgeBuilderSystem` and doing the static Main-Camera exclusion described
-above as the *resting* state.
+setting `bridgeLayerName`/`bridgeSupportLayerName` on `BridgeBuilderSystem`
+and doing the static Main-Camera exclusion described above as the *resting*
+state.
 
 ### Node grid — anchors only
 
@@ -207,6 +208,38 @@ Create 2-3 `BridgeMaterialData` assets (`Kaizen Systems/Bridge Material Data`)
 `plankColor` so placed beams read as different materials at a glance. Assign
 the array to `BridgeBuilderSystem.materials`; index 0 is the default selected
 material on activation.
+
+Each material also has `isRoad` (default `true`). At least one material
+should have this **unchecked** — a **Reinforcement** material, say — so the
+player has a way to brace a span with a beam the test cart's own collider
+never touches, the same distinction real Poly Bridge draws between road and
+every other material. A reinforcement plank still fully participates in
+`HingeJoint2D` load-bearing (`breakForce`, reaction force) — only physical
+collision with the cart is exempted, via a second layer (see below), not the
+structural simulation itself.
+
+### Second layer for reinforcement (`BridgeSupport`)
+
+Same idea as the `Bridge` layer above, one slot further: use layer slot
+**`7`** (also confirmed genuinely blank/editable, same as `6`) and name it
+**`BridgeSupport`**. `BridgeBuilderSystem.PlacePlankInternal` puts a plank on
+`bridgeLayerName` (`Bridge`) if its material `isRoad`, or
+`bridgeSupportLayerName` (`BridgeSupport`) otherwise — nothing to author on
+the plank prefab itself for this part, it's set per-instance at placement
+time based on whichever material was selected.
+
+Two more Editor steps this new layer needs, beyond what `Bridge` already has:
+- **Project Settings → Physics 2D → Layer Collision Matrix**: uncheck the
+  **`Bridge` × `BridgeSupport`** cell. This is what actually makes
+  reinforcement planks pass through the cart instead of colliding with it —
+  the cart itself stays on `Bridge` (same layer as the road planks/anchors/
+  nodes), so this one cell is the only matrix change needed.
+- **Main Camera's and `MinimapCamera`'s Culling Masks**: exclude
+  `BridgeSupport` too, same reasoning as `Bridge` — `ShowBridgeLayers()`/
+  `HideBridgeLayers()` (note the plural — both methods were extended to
+  toggle both layers together) handle the runtime side automatically, but the
+  static baseline exclusion on both cameras needs setting by hand, same as
+  `Bridge` was.
 
 ### Placement fields
 
@@ -287,13 +320,15 @@ it at runtime regardless of its authored starting state — `SetActive(true)`
 doesn't care what the object's prior state was. It has **no Culling Mask of
 its own to set** either way — `CinemachineCamera` doesn't carry one at all
 (see "Layer" above) — visibility is handled separately, at runtime, via
-`BridgeBuilderSystem.ShowBridgeLayer()`/`HideBridgeLayer()`.
+`BridgeBuilderSystem.ShowBridgeLayers()`/`HideBridgeLayers()`.
 
 Wire on `BridgeBuilderSystem`:
 - `playerCamera` → the existing `CameraController` GameObject.
 - `bridgeViewCamera` → the new camera GameObject.
 - `bridgeLayerName` → `"Bridge"` (already the default; only change it if you
   named the layer above something else).
+- `bridgeSupportLayerName` → `"BridgeSupport"` (already the default; see
+  "Second layer for reinforcement" below).
 
 `BridgeBuilderState.Enter()`/`Exit()` already do the swap — no further wiring
 needed. `BridgeBuilderState.Tick()` reads the pointer via
@@ -360,6 +395,9 @@ Per material (`BridgeMaterialData` asset), not on `BridgeBuilderSystem`:
   keep at least one material where `budget / costPerUnitLength` comfortably
   clears `maxPlankLength` several times over, or the player can't build a
   full span at all.
+- `isRoad` — at least one material should have this unchecked (a
+  Reinforcement material), or there's no way to brace a span without the
+  cart's collider touching the brace — see "Second layer for reinforcement".
 
 On `BridgeTestCart`: `driveSpeed` (default 2) — faster puts more dynamic load
 on the joints as it crosses.

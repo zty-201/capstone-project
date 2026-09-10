@@ -10,11 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a017637096492cb4ea85adcb118b4382, type: 3}
-  m_Name: Steel
+  m_Name: Road
   m_EditorClassIdentifier: Assembly-CSharp::BridgeMaterialData
-  materialID: steel
-  materialName: Steel
+  materialID: road
+  materialName: Road
   icon: {fileID: -93557289, guid: 9b51817c9e9184143a60119ace179ffa, type: 3}
   costPerUnitLength: 2
-  breakForce: 45
+  breakForce: 450
   plankColor: {r: 0.6039216, g: 0.627451, b: 0.6509804, a: 1}
+  isRoad: 1

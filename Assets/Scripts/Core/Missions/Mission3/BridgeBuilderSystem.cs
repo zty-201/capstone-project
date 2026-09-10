@@ -108,10 +108,17 @@ public class BridgeBuilderSystem : MonoBehaviour
     [SerializeField] private GameObject bridgeViewCamera;
     // Cinemachine 3's CinemachineCamera has no Culling Mask of its own — it only blends
     // position/rotation/lens into the one real Camera (Main Camera, via CinemachineBrain), never
-    // the Culling Mask. So the Bridge layer's visibility can't be controlled per-vcam the way
-    // playerCamera/bridgeViewCamera's active state is above; ShowBridgeLayer/HideBridgeLayer
-    // toggle it directly on Camera.main instead — see BridgeBuilderState.Enter/Exit.
+    // the Culling Mask. So neither layer's visibility can be controlled per-vcam the way
+    // playerCamera/bridgeViewCamera's active state is above; ShowBridgeLayers/HideBridgeLayers
+    // toggle both directly on Camera.main instead — see BridgeBuilderState.Enter/Exit.
     [SerializeField] private string bridgeLayerName = "Bridge";
+    // Reinforcement-only planks (BridgeMaterialData.isRoad == false) live on this separate layer
+    // instead — see PlacePlankInternal. Configured in Project Settings > Physics 2D > Layer
+    // Collision Matrix to never collide with bridgeLayerName (where the cart itself lives), so a
+    // reinforcement beam can brace a span without the cart ever mistaking it for road; it still
+    // fully participates in HingeJoint2D load-bearing regardless, since that's a separate system
+    // from collision detection entirely.
+    [SerializeField] private string bridgeSupportLayerName = "BridgeSupport";
 
     [Header("Audio")]
     [SerializeField] private AudioClip placeSfx;
@@ -295,22 +302,27 @@ public class BridgeBuilderSystem : MonoBehaviour
         if (previewLine != null) previewLine.enabled = false;
     }
 
-    // Main Camera's Culling Mask permanently excludes the Bridge layer (set once in the Editor)
-    // so the playground can't leak into normal Exploration — including while this container is
-    // active but the player Esc'd out mid-build without completing the mission. These two flip
-    // that bit on for the duration of BridgeBuilderState only; see BridgeBuilderState.Enter/Exit.
-    public void ShowBridgeLayer()
+    // Main Camera's Culling Mask permanently excludes both bridge layers (set once in the
+    // Editor) so the playground can't leak into normal Exploration — including while this
+    // container is active but the player Esc'd out mid-build without completing the mission.
+    // These two flip both bits on for the duration of BridgeBuilderState only; see
+    // BridgeBuilderState.Enter/Exit.
+    public void ShowBridgeLayers()
     {
-        int layer = LayerMask.NameToLayer(bridgeLayerName);
-        if (layer < 0 || Camera.main == null) return;
-        Camera.main.cullingMask |= 1 << layer;
+        if (Camera.main == null) return;
+        Camera.main.cullingMask |= LayerBit(bridgeLayerName) | LayerBit(bridgeSupportLayerName);
     }
 
-    public void HideBridgeLayer()
+    public void HideBridgeLayers()
     {
-        int layer = LayerMask.NameToLayer(bridgeLayerName);
-        if (layer < 0 || Camera.main == null) return;
-        Camera.main.cullingMask &= ~(1 << layer);
+        if (Camera.main == null) return;
+        Camera.main.cullingMask &= ~(LayerBit(bridgeLayerName) | LayerBit(bridgeSupportLayerName));
+    }
+
+    private static int LayerBit(string layerName)
+    {
+        int layer = LayerMask.NameToLayer(layerName);
+        return layer >= 0 ? 1 << layer : 0;
     }
 
     private void HandleNodeSelectClick(BridgeNode clicked)
@@ -442,6 +454,14 @@ public class BridgeBuilderSystem : MonoBehaviour
     {
         BridgePlank plank = Instantiate(plankPrefab, planksParent);
         plank.Setup(a, b, material);
+
+        // Road planks stay on the prefab's authored layer (bridgeLayerName, same as the cart);
+        // reinforcement-only planks move to bridgeSupportLayerName, which Project Settings >
+        // Physics 2D > Layer Collision Matrix has configured to never collide with the cart —
+        // see BridgeMaterialData.isRoad.
+        string layerName = material.isRoad ? bridgeLayerName : bridgeSupportLayerName;
+        int layer = LayerMask.NameToLayer(layerName);
+        if (layer >= 0) plank.gameObject.layer = layer;
 
         placedPlanks.Add(plank);
         plankLookup[MakeKey(a.NodeIndex, b.NodeIndex)] = plank;

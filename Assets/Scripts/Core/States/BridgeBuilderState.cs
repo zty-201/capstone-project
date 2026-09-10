@@ -14,7 +14,7 @@ public class BridgeBuilderState : IState
         {
             BridgeBuilderSystem.Instance.PlayerCamera.SetActive(false);
             BridgeBuilderSystem.Instance.BridgeViewCamera.SetActive(true);
-            BridgeBuilderSystem.Instance.ShowBridgeLayer();
+            BridgeBuilderSystem.Instance.ShowBridgeLayers();
         }
     }
 
@@ -58,7 +58,7 @@ public class BridgeBuilderState : IState
         if (BridgeBuilderSystem.Instance != null)
         {
             BridgeBuilderSystem.Instance.CancelDrag();
-            BridgeBuilderSystem.Instance.HideBridgeLayer();
+            BridgeBuilderSystem.Instance.HideBridgeLayers();
             BridgeBuilderSystem.Instance.BridgeViewCamera.SetActive(false);
             BridgeBuilderSystem.Instance.PlayerCamera.SetActive(true);
         }

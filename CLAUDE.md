@@ -157,7 +157,7 @@ A "Needs Review" (trivial) mission *can* now be reopened, but only through the S
 - **`StageData`** — one stage's `stageNumber`, `stageName`, and `missionIDs[]` (the missions that must all be resolved optimally before the stage can be submitted). Create via `Kaizen Systems/Stage Data`.
 - **`StageRegistry`** — array of `StageData`, looked up by index (`GetByIndex`). Create via `Kaizen Systems/Stage Registry`. Assign in Inspector on `StageManager`.
 - **`ItemData`** — one inventory item's `itemID`, `itemName`, `icon`, and stacking rules (`stackable`, `maxStack`). Create via `Kaizen Systems/Item Data`. Five assets exist: **Gold Coin** (stackable) and **Trash** (not stackable, so litter piles up one slot per piece), assigned in Inspector on `CoinRewardSystem`, `TrashPiece`, `TrashCollectionSite`, and `StageManager`; **Brick** (not stackable, only ever one needed) for Mission 1's trivial fetch quest, assigned on `BrickPickup` and `WellPatchSite`; **Machine Part** (stackable) and **Winch** (not stackable) for Mission 2's optimal path, assigned on `MachinePart`, `AssemblyPoint`, and `PlacementPoint` — `AssemblyPoint.Interact()` trades 3 Machine Parts for 1 Winch, and `PlacementPoint.Interact()` consumes the Winch on final placement.
-- **`BridgeMaterialData`** — one bridge-plank material's `materialID`/`materialName`/`icon`, plus the actual cost-vs-strength tradeoff: `costPerUnitLength` (spent from `BridgeBuilderSystem.budget`), `breakForce` (that plank's `HingeJoint2D.breakForce`), `plankColor`. Create via `Kaizen Systems/Bridge Material Data`. No registry asset — low cardinality (2-3 materials), so `BridgeBuilderSystem.materials` just holds the array directly, referenced only within Mission 5's own minigame. See Mission 5: Bridge Building.
+- **`BridgeMaterialData`** — one bridge-plank material's `materialID`/`materialName`/`icon`, plus the actual cost-vs-strength tradeoff: `costPerUnitLength` (spent from `BridgeBuilderSystem.budget`), `breakForce` (that plank's `HingeJoint2D.breakForce`), `plankColor`, and `isRoad` (default true — false marks a reinforcement-only material, see Mission 5: Bridge Building for what that changes about collision). Create via `Kaizen Systems/Bridge Material Data`. No registry asset — low cardinality (2-3 materials), so `BridgeBuilderSystem.materials` just holds the array directly, referenced only within Mission 5's own minigame. See Mission 5: Bridge Building.
 
 ### Stage Gate System
 `StageManager` (singleton) groups missions into stages via `StageData`, tracks each mission's most recent outcome (`missionOutcomes: Dictionary<int, bool>`), and gates day advancement on every mission in the current stage having been resolved *optimally* — resolving a mission trivially no longer quietly counts toward finishing the day.
@@ -290,7 +290,14 @@ Editor-authored grid:
 - **Materials.** `BridgeMaterialData` is cost vs. strength per plank (see Data Layer above). The
   player picks one via `BridgeBuilderSystem.SelectMaterial(index)` before dragging; it's baked
   into the plank's cost/`breakForce`/color at placement (`BridgePlank.Setup`) and never changes
-  afterward.
+  afterward. `isRoad` (default true) is a second, independent axis — a reinforcement material
+  (`isRoad == false`) fully participates in `HingeJoint2D` load-bearing exactly like a road
+  material does, but `PlacePlankInternal` puts its plank on a separate `bridgeSupportLayerName`
+  layer (`BridgeSupport`) instead of `bridgeLayerName` (`Bridge`, where the cart itself lives),
+  and the Physics 2D Layer Collision Matrix is configured so those two layers never collide —
+  collision detection and joint constraint solving are separate Unity systems entirely, so a
+  reinforcement beam can brace a span without the cart's own collider ever touching it, the same
+  distinction real Poly Bridge draws between road and every other material.
 - **Stress visualization.** During the Testing phase, `Update()` drives
   `BridgePlank.UpdateStressVisual()` on every placed plank each frame — it color-lerps from its
   own material color toward a shared `breakingColor` (red) based on
@@ -331,13 +338,18 @@ dedicated `Bridge` layer (a genuinely free/editable slot — Unity locks the nam
 2, 4, and 5 even though slots 3, 6, and 7 sit in that same reserved 0-7 range and remain editable,
 same as how `NPC` got its own layer earlier in the project), excluded from Main Camera's and
 `MinimapCamera`'s Culling Mask *by default*, so the playground can't leak into normal Exploration.
-That default has to be toggled at runtime, not left static, because a `CinemachineCamera` (like
-`bridgeViewCamera`) has no Culling Mask of its own — Cinemachine 3 only blends
+Reinforcement-only planks (`BridgeMaterialData.isRoad == false`, see above) sit on a second such
+layer, `BridgeSupport` (slot 7, the next free one) — excluded from both cameras the same way, and
+additionally configured in the Physics 2D Layer Collision Matrix to never collide with `Bridge`
+(where the cart itself lives), which is the actual mechanism that keeps the cart from touching a
+reinforcement beam regardless of where it's placed.
+Both layers' visibility has to be toggled at runtime, not left static, because a `CinemachineCamera`
+(like `bridgeViewCamera`) has no Culling Mask of its own — Cinemachine 3 only blends
 position/rotation/lens into the one real `Camera` (Main Camera), never the Culling Mask (verified:
 Cinemachine 3 replaced its old per-vcam layer filtering with an unrelated Channels system
 specifically because it moved away from Unity layers/culling for this). A permanent static
-exclusion would hide `Bridge` even while `bridgeViewCamera` is supposed to be showing it, so
-`BridgeBuilderSystem.ShowBridgeLayer()`/`HideBridgeLayer()` flip the bit directly on
+exclusion would hide them even while `bridgeViewCamera` is supposed to be showing them, so
+`BridgeBuilderSystem.ShowBridgeLayers()`/`HideBridgeLayers()` flip both bits directly on
 `Camera.main.cullingMask` from `BridgeBuilderState.Enter()`/`Exit()`, alongside the camera-active
 swap. `MinimapCamera` needs no such toggle — it's a real `Camera` with its own Culling Mask, and
 never needs to show the playground in any state, so its exclusion stays a permanent Editor setting.
