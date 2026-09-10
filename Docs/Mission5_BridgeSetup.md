@@ -216,9 +216,16 @@ On `BridgeBuilderSystem`:
 - `maxPlankLength` — still a hard physical cap on any single beam,
   independent of material/cost.
 - `gridSpacing` — snap increment for placing a new node in empty space.
-- `playgroundBounds` — a `Rect` (in this container's local/world space, since
-  the container itself never moves) clamping how far from the anchors the
-  player can snap-place a new node.
+- `playgroundBounds` — **don't hand-type this.** `ComputePlaygroundBounds()`
+  recomputes it every `OnEnable` from `bridgeViewCamera`'s own orthographic
+  size and aspect ratio, so "you can build anywhere you can see" is true by
+  construction instead of a Rect you'd otherwise have to keep in sync by hand
+  whenever the camera's framing changes. Whatever value shows here before
+  Play is just whatever it last computed to (or the unset default the very
+  first time) — editing it directly has no lasting effect.
+- `playgroundMargin` (default 1) — how far inside `bridgeViewCamera`'s edge
+  the placeable area is inset, so nodes can't snap right at the visible
+  frame's boundary and look clipped.
 - `nodeSnapRadius` — how close a press/release point must be to an existing
   node to resolve onto it instead of empty grid space.
 - `previewLine` — a `LineRenderer` child (on the `Bridge` layer — see above;
@@ -254,15 +261,32 @@ nodes/planks/cart.
 
 The scene already has one `CinemachineCamera` (on `CameraController`,
 `CinemachineFollow`-tracking the player) driving `Main Camera` via
-`CinemachineBrain`. Add a **second** `CinemachineCamera` GameObject (no
-`CinemachineFollow`/Tracking Target — a fixed shot), positioned/sized to
-frame `Container_Optimal_M5` head-on at its normal, unmoving map location.
-Leave both GameObjects **active** in the hierarchy at design time —
-`BridgeBuilderState` toggles which one is active at runtime, and
-`CinemachineBrain` always blends to whichever one is active (exactly one at a
-time, so there's no priority number to tune). It has **no Culling Mask of its
-own to set** — `CinemachineCamera` doesn't carry one at all (see "Layer"
-above) — visibility is handled separately, at runtime, via
+`CinemachineBrain`. Add a **second** `CinemachineCamera` GameObject — just
+`Transform` + `CinemachineCamera`, no `Camera`/`AudioListener`, those only
+ever belong on the one real camera (Main Camera) — with no
+`CinemachineFollow`/Tracking Target (a fixed shot), positioned/sized to frame
+`Container_Optimal_M5` head-on at its normal, unmoving map location.
+**Match its Z to the existing camera's resting Z** (`CameraController`'s
+`CinemachineFollow.FollowOffset.z = -10`, so Main Camera normally sits at the
+player's Z minus 10) — a fresh `CinemachineCamera` defaults to `Z = 0`, the
+same plane as the sprites/tilemap themselves, which puts everything inside
+the Near Clip Plane and renders as nothing (easy to mistake for a Culling
+Mask problem; it isn't one).
+
+**Leave this new GameObject inactive (unchecked) once you're done positioning
+it.** `CinemachineBrain` drives Main Camera to match whichever `CinemachineCamera`
+is currently active — live in the *Editor*, not just Play mode — so two
+simultaneously-active vcams with no clear priority is genuinely ambiguous:
+if this new one (freshly created, not yet framed correctly) ends up "live",
+Main Camera snaps to wherever it happens to sit, and everything else in the
+Scene/Game view — including unrelated things like your tilemap — appears to
+vanish simply because the camera is no longer pointed at your map, not
+because anything was actually culled. Temporarily re-enable it while framing
+it, then uncheck it; `BridgeBuilderState.Enter()` still correctly activates
+it at runtime regardless of its authored starting state — `SetActive(true)`
+doesn't care what the object's prior state was. It has **no Culling Mask of
+its own to set** either way — `CinemachineCamera` doesn't carry one at all
+(see "Layer" above) — visibility is handled separately, at runtime, via
 `BridgeBuilderSystem.ShowBridgeLayer()`/`HideBridgeLayer()`.
 
 Wire on `BridgeBuilderSystem`:
@@ -321,8 +345,10 @@ All on `BridgeBuilderSystem`:
 - `nodeSnapRadius` (default 0.3) — how forgiving snapping onto an existing
   node is; too large makes precise short beams hard to place, too small makes
   it hard to reconnect to an existing joint.
-- `playgroundBounds` — must comfortably contain every anchor plus however far
-  out you want players able to build; nothing can snap-place outside it.
+- `playgroundMargin` (default 1) — the only real tuning knob for placement
+  area, since `playgroundBounds` itself is computed automatically from
+  `bridgeViewCamera`'s framing (see "Placement fields" above) — raise it if
+  nodes are snapping uncomfortably close to the visible edge of the popup.
 - `maxTestDuration` (default 20s) — safety timeout if the cart gets stuck.
 - `baseTestAttempts` (default 3) — how many tries the player gets before a
   failed test locks in the trivial outcome.

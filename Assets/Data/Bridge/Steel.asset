@@ -15,6 +15,6 @@ MonoBehaviour:
   materialID: steel
   materialName: Steel
   icon: {fileID: -93557289, guid: 9b51817c9e9184143a60119ace179ffa, type: 3}
-  costPerUnitLength: 3
-  breakForce: 120
-  plankColor: {r: 1, g: 1, b: 1, a: 1}
+  costPerUnitLength: 2
+  breakForce: 45
+  plankColor: {r: 0.6039216, g: 0.627451, b: 0.6509804, a: 1}

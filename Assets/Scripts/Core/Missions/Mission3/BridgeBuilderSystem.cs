@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Cinemachine;
 using UnityEngine;
 
 // The single minigame for Mission 5 (design doc's "Advanced Mission 3: Bridge Building") — a
@@ -75,7 +76,14 @@ public class BridgeBuilderSystem : MonoBehaviour
     [SerializeField] private BridgeNode nodePrefab;
     [SerializeField] private Transform nodesParent;
     [SerializeField] private float gridSpacing = 0.5f;
+    // Recomputed every OnEnable from bridgeViewCamera's own framing (see ComputePlaygroundBounds)
+    // — not hand-typed. bridgeViewCamera already defines exactly how much of the playground is
+    // visible, so deriving bounds from it keeps them correct by construction instead of needing
+    // to be kept in sync by hand if the camera's framing ever changes. Whatever value shows here
+    // in the Inspector before Play is just the last computed result (or the unset default before
+    // this ever ran once) — editing it directly has no lasting effect.
     [SerializeField] private Rect playgroundBounds;
+    [SerializeField] private float playgroundMargin = 1f;
     [SerializeField] private float nodeSnapRadius = 0.3f;
     [SerializeField] private LineRenderer previewLine;
 
@@ -169,7 +177,25 @@ public class BridgeBuilderSystem : MonoBehaviour
         if (uiPanel != null) uiPanel.SetActive(true);
         attemptsUsed = 0;
         SelectedMaterial = materials != null && materials.Length > 0 ? materials[0] : null;
+        ComputePlaygroundBounds();
         ResetBridge();
+    }
+
+    // bridgeViewCamera already defines exactly how much of the playground the player can see —
+    // deriving the placement bounds from its actual orthographic size/aspect every activation
+    // means "you can build anywhere you can see" is true by construction, rather than needing a
+    // hand-typed Rect to be kept in sync with the camera's framing by hand.
+    private void ComputePlaygroundBounds()
+    {
+        if (bridgeViewCamera == null || Camera.main == null) return;
+        CinemachineCamera vcam = bridgeViewCamera.GetComponent<CinemachineCamera>();
+        if (vcam == null) return;
+
+        float halfHeight = vcam.Lens.OrthographicSize - playgroundMargin;
+        float halfWidth = halfHeight * Camera.main.aspect;
+        Vector3 center = bridgeViewCamera.transform.position;
+
+        playgroundBounds = new Rect(center.x - halfWidth, center.y - halfHeight, halfWidth * 2f, halfHeight * 2f);
     }
 
     private void OnDisable()

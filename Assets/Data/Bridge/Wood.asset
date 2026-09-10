@@ -16,5 +16,5 @@ MonoBehaviour:
   materialName: Wood
   icon: {fileID: 1319864186, guid: 9b51817c9e9184143a60119ace179ffa, type: 3}
   costPerUnitLength: 1
-  breakForce: 40
-  plankColor: {r: 1, g: 1, b: 1, a: 1}
+  breakForce: 25
+  plankColor: {r: 0.54509807, g: 0.3529412, b: 0.16862746, a: 1}

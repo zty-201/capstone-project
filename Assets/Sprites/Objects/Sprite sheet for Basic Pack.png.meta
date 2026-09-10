@@ -1533,7 +1533,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sprite sheet for Basic Pack_21
+      name: ButtonSprite
       rect:
         serializedVersion: 2
         x: 711
@@ -5669,7 +5669,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sprite sheet for Basic Pack_209
+      name: LongButton
       rect:
         serializedVersion: 2
         x: 163
@@ -7907,6 +7907,8 @@ TextureImporter:
         value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
       BridgeNodeSprite: 8320191559072506858
+      ButtonSprite: 2701315124404743235
+      LongButton: -4171949278277939191
       NodeSprite: 7936792504525602602
       Plank: 2292737356795794705
       Sprite sheet for Basic Pack_0: -6947281443083930522
@@ -8029,8 +8031,6 @@ TextureImporter:
       Sprite sheet for Basic Pack_206: -8482879506207794504
       Sprite sheet for Basic Pack_207: -8033613528775123654
       Sprite sheet for Basic Pack_208: 5065416218353993813
-      Sprite sheet for Basic Pack_209: -4171949278277939191
-      Sprite sheet for Basic Pack_21: 2701315124404743235
       Sprite sheet for Basic Pack_210: 3546469167490301977
       Sprite sheet for Basic Pack_211: 4712092526694736556
       Sprite sheet for Basic Pack_212: -1586339837237081268

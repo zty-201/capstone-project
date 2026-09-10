@@ -81,10 +81,20 @@ public class BridgePlank : MonoBehaviour
     // breakForce, using whichever of its two joints is under more load. A cheap, non-allocating
     // read of the physics engine's already-solved joint state, safe every frame at plank counts
     // this minigame ever reaches.
+    //
+    // A joint that actually breaks gets destroyed by Unity right after OnJointBreak2D fires —
+    // this plank's GameObject survives until the next ResetBridge(), so Update() keeps calling
+    // this every frame in the meantime. jointA/jointB have to be null-checked (Unity's == null
+    // correctly reports true for an already-destroyed Object, per the exact MissingReferenceException
+    // this was throwing) rather than read unconditionally; a broken joint counts as maximum
+    // stress, not "skip this plank" — it's the most failed a plank can be.
     public void UpdateStressVisual()
     {
         if (visual == null) return;
-        float stress = Mathf.Max(jointA.reactionForce.magnitude, jointB.reactionForce.magnitude) / breakForce;
+
+        float stressA = jointA != null ? jointA.reactionForce.magnitude : breakForce;
+        float stressB = jointB != null ? jointB.reactionForce.magnitude : breakForce;
+        float stress = Mathf.Max(stressA, stressB) / breakForce;
         visual.color = Color.Lerp(baseColor, breakingColor, Mathf.Clamp01(stress));
     }
 

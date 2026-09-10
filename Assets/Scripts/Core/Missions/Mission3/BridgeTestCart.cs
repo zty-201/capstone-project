@@ -12,33 +12,41 @@ public class BridgeTestCart : MonoBehaviour
     private Rigidbody2D rb;
     private bool isDriving;
 
-    private void Awake() => rb = GetComponent<Rigidbody2D>();
+    // Lazily fetched rather than cached only in Awake: BridgeBuilderSystem.OnEnable() (on the
+    // container root) calls ResetToStart via ResetBridge() synchronously during the same
+    // container.SetActive(true) that activates this object too — but Unity only guarantees an
+    // object's own Awake precedes its own OnEnable, never one object's Awake before a *different*
+    // object's OnEnable, even parent/child activated together (verified: cross-object Awake/
+    // OnEnable order is explicitly undefined). This object's Awake losing that race is exactly
+    // what caused a NullReferenceException here — a lazy getter is correct regardless of which
+    // object's lifecycle method Unity happens to run first.
+    private Rigidbody2D Rb => rb ??= GetComponent<Rigidbody2D>();
 
     public void BeginDrive()
     {
         isDriving = true;
-        rb.bodyType = RigidbodyType2D.Dynamic;
+        Rb.bodyType = RigidbodyType2D.Dynamic;
     }
 
     public void StopDrive()
     {
         isDriving = false;
-        rb.linearVelocity = Vector2.zero;
+        Rb.linearVelocity = Vector2.zero;
     }
 
     public void ResetToStart(Vector3 startPosition)
     {
         isDriving = false;
-        rb.bodyType = RigidbodyType2D.Kinematic;
+        Rb.bodyType = RigidbodyType2D.Kinematic;
         transform.position = startPosition;
         transform.rotation = Quaternion.identity;
-        rb.linearVelocity = Vector2.zero;
-        rb.angularVelocity = 0f;
+        Rb.linearVelocity = Vector2.zero;
+        Rb.angularVelocity = 0f;
     }
 
     private void FixedUpdate()
     {
         if (!isDriving) return;
-        rb.linearVelocity = new Vector2(driveSpeed, rb.linearVelocity.y);
+        Rb.linearVelocity = new Vector2(driveSpeed, Rb.linearVelocity.y);
     }
 }

@@ -319,7 +319,12 @@ only a background sprite moved. So the container never moves — it stays at its
 location like every other minigame container — and `BridgeBuilderState.Enter()`/`Exit()` instead
 swap between the scene's normal player-tracking Cinemachine camera and a second, dedicated one
 (`BridgeBuilderSystem.playerCamera`/`.bridgeViewCamera`) framing that fixed spot, handing tracking
-back on Exit. Because the container stays active for the entire build/test session — only
+back on Exit. `bridgeViewCamera` starts **inactive** in the Editor-authored hierarchy (only
+`playerCamera` is active at rest) — `CinemachineBrain` drives Main Camera to match whichever
+`CinemachineCamera` is active live in the Editor, not just Play mode, so leaving both
+simultaneously active would make Edit-mode camera preview ambiguous/jumpy; `Enter()`'s explicit
+`SetActive(true)` doesn't care what the object's authored starting state was, so this costs
+nothing at runtime. Because the container stays active for the entire build/test session — only
 deactivated on actual mission completion, not on an Esc-out mid-build — everything under it
 (anchors, the node/plank prefabs, the cart, the preview line, the background sprite) sits on a
 dedicated `Bridge` layer (a genuinely free/editable slot — Unity locks the names of layers 0, 1,
