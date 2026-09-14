@@ -302,7 +302,11 @@ Editor-authored grid:
   `BridgePlank.UpdateStressVisual()` on every placed plank each frame — it color-lerps from its
   own material color toward a shared `breakingColor` (red) based on
   `max(jointA, jointB).reactionForce.magnitude / breakForce`, a cheap read of the physics
-  engine's already-solved joint state.
+  engine's already-solved joint state. A joint that actually breaks gets destroyed by Unity right
+  after `OnJointBreak2D` fires — the plank's GameObject survives until the next `ResetBridge()`,
+  so `Update()` keeps calling this every frame in the meantime — so `jointA`/`jointB` are
+  null-checked (Unity's `== null` correctly reports true for an already-destroyed `Object`) rather
+  than read unconditionally; a broken joint counts as maximum stress, not "skip this plank".
 - **Undo/redo.** `BridgeActions.cs` defines `IBridgeAction` (`PlaceBeamAction`, `DeleteNodeAction`)
   — small reversible commands on two `Stack<IBridgeAction>` (`Undo`/`Redo`), cleared on every
   `ResetBridge()` — a stale entry referencing an already-destroyed node/plank would corrupt state
@@ -315,6 +319,18 @@ Editor-authored grid:
   placement attempt; Delete/Backspace or the Delete button then removes the selected node,
   cascading to every plank touching it (refunding each one's stored `Cost`) — anchors can't be
   deleted.
+- **The test cart** (`BridgeTestCart`) is deliberately dumb — plain constant-velocity locomotion
+  (`FixedUpdate` forces `linearVelocity.x` back to `driveSpeed` every step) rather than full wheel
+  physics, so it needs `Rigidbody2D` → `Freeze Rotation Z` and a `BoxCollider2D` (not
+  `CircleCollider2D`) to rest flush on a plank without spinning under contact friction — a
+  flat-bottomed body dragged at an externally-forced velocity has no stable
+  rolling-without-slipping configuration otherwise. Its `Rigidbody2D` reference is a lazy-fetched
+  property, not an `Awake`-only cache: `BridgeBuilderSystem.OnEnable()` (on the container root)
+  calls `ResetToStart` via `ResetBridge()` synchronously during the same `container.SetActive(true)`
+  that activates this object too, but Unity only guarantees an object's own `Awake` precedes its
+  own `OnEnable` — never one object's `Awake` before a *different* object's `OnEnable`, even
+  parent/child activated together — so caching only in `Awake` intermittently threw a
+  `NullReferenceException` depending on which order Unity happened to run things in that frame.
 
 **Presented as a popup, reached the opposite way round from the pipe puzzle.** The pipe puzzle's
 `Container_Optimal_M1` can carry a `CameraFollower` (re-centers itself on the camera every frame)
@@ -323,7 +339,18 @@ because it has zero `Rigidbody2D` anywhere in it. `Container_Optimal_M5` is noth
 non-physics parent's motion into a `Rigidbody2D` child (the child's transform gets corrected back
 to hold its world position), so a `CameraFollower` here would strand the physics playground while
 only a background sprite moved. So the container never moves — it stays at its authored map
-location like every other minigame container — and `BridgeBuilderState.Enter()`/`Exit()` instead
+location like every other minigame container. Unlike the pipe puzzle's `CameraFollower` trick,
+though, nothing here dynamically corrects for *where* that authored location actually is:
+`Container_Optimal_M5`'s own position (and everything nested inside it, including
+`bridgeViewCamera`) has to be deliberately authored to coincide with wherever `BridgeInteractable`
+(the real bridge the player walks up to) actually sits. The pipe puzzle's container can be
+authored anywhere in the scene, since `CameraFollower` re-centers it on the camera every frame
+regardless of its own position; Mission 5's container has no such correction, so a mismatch here
+is a real Editor-authoring bug, not just cosmetic — found and fixed once already, when the
+container had been left at a Mission-group's local origin rather than the bridge's actual
+position, producing a jarring camera jump on every mission start instead of the popup simply
+appearing where the player already was standing.
+`BridgeBuilderState.Enter()`/`Exit()` instead
 swap between the scene's normal player-tracking Cinemachine camera and a second, dedicated one
 (`BridgeBuilderSystem.playerCamera`/`.bridgeViewCamera`) framing that fixed spot, handing tracking
 back on Exit. `bridgeViewCamera` starts **inactive** in the Editor-authored hierarchy (only

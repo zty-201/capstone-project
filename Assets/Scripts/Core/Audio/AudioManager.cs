@@ -4,6 +4,9 @@ public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
 
+    private const string MusicVolumeKey = "MusicVolume";
+    private const string SFXVolumeKey = "SFXVolume";
+
     [Header("Sources")]
     [SerializeField] private AudioSource musicSource;
     [SerializeField] private AudioSource sfxSource;
@@ -17,6 +20,9 @@ public class AudioManager : MonoBehaviour
     [Header("UI")]
     [SerializeField] private AudioClip uiClickClip;
 
+    public float MusicVolume => musicSource.volume;
+    public float SFXVolume => sfxSource.volume;
+
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -25,6 +31,29 @@ public class AudioManager : MonoBehaviour
         if (musicSource == null) Debug.LogError($"[{name}] musicSource is not assigned!", this);
         if (sfxSource == null) Debug.LogError($"[{name}] sfxSource is not assigned!", this);
         if (exclusiveSource == null) Debug.LogError($"[{name}] exclusiveSource is not assigned!", this);
+
+        // Loaded once at startup (not just when the settings menu opens) so a saved volume
+        // actually applies from the very first sound played, not only after the player has
+        // opened the menu at least once this session.
+        SetMusicVolume(PlayerPrefs.GetFloat(MusicVolumeKey, 1f));
+        SetSFXVolume(PlayerPrefs.GetFloat(SFXVolumeKey, 1f));
+    }
+
+    // Wired to SettingsMenuUI's musicVolumeSlider OnValueChanged.
+    public void SetMusicVolume(float volume)
+    {
+        musicSource.volume = volume;
+        PlayerPrefs.SetFloat(MusicVolumeKey, volume);
+    }
+
+    // Wired to SettingsMenuUI's sfxVolumeSlider OnValueChanged. exclusiveSource is also an SFX
+    // source (e.g. footsteps, see PlaySFXExclusive) — same slider covers both, matching how the
+    // player thinks about "sound effects" as one category rather than two.
+    public void SetSFXVolume(float volume)
+    {
+        sfxSource.volume = volume;
+        exclusiveSource.volume = volume;
+        PlayerPrefs.SetFloat(SFXVolumeKey, volume);
     }
 
     private void OnEnable()

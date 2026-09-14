@@ -8,5 +8,6 @@ public enum GameStateType
     Reflection,
     MissionBoard,
     DayComplete,
-    InfoBoard
+    InfoBoard,
+    SettingsMenu
 }

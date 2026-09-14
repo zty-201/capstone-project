@@ -1335,7 +1335,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sprite sheet for Basic Pack_12
+      name: SliderButton
       rect:
         serializedVersion: 2
         x: 402
@@ -1621,7 +1621,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sprite sheet for Basic Pack_25
+      name: CrossButton
       rect:
         serializedVersion: 2
         x: 839
@@ -2831,7 +2831,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sprite sheet for Basic Pack_80
+      name: SettingsButton
       rect:
         serializedVersion: 2
         x: 645
@@ -7908,9 +7908,12 @@ TextureImporter:
     nameFileIdTable:
       BridgeNodeSprite: 8320191559072506858
       ButtonSprite: 2701315124404743235
+      CrossButton: -3140306434105344677
       LongButton: -4171949278277939191
       NodeSprite: 7936792504525602602
       Plank: 2292737356795794705
+      SettingsButton: 6407848852001479671
+      SliderButton: -9175474789163301616
       Sprite sheet for Basic Pack_0: -6947281443083930522
       Sprite sheet for Basic Pack_1: 5893398131277028864
       Sprite sheet for Basic Pack_100: 4354597444368450274
@@ -7933,7 +7936,6 @@ TextureImporter:
       Sprite sheet for Basic Pack_117: -8901036058530684642
       Sprite sheet for Basic Pack_118: -7720136223623680778
       Sprite sheet for Basic Pack_119: 1412806603764020478
-      Sprite sheet for Basic Pack_12: -9175474789163301616
       Sprite sheet for Basic Pack_120: 3401402391378252195
       Sprite sheet for Basic Pack_121: -1917491382410648930
       Sprite sheet for Basic Pack_122: -410194609583437253
@@ -8074,7 +8076,6 @@ TextureImporter:
       Sprite sheet for Basic Pack_247: 5294362032791201043
       Sprite sheet for Basic Pack_248: -8872531902131867930
       Sprite sheet for Basic Pack_249: -1423228425947677428
-      Sprite sheet for Basic Pack_25: -3140306434105344677
       Sprite sheet for Basic Pack_250: 9093643400709361319
       Sprite sheet for Basic Pack_251: 6312909307820299722
       Sprite sheet for Basic Pack_252: -8448628364679636394
@@ -8201,7 +8202,6 @@ TextureImporter:
       Sprite sheet for Basic Pack_78: -3970151176697175393
       Sprite sheet for Basic Pack_79: -8136252216235359901
       Sprite sheet for Basic Pack_8: 4813360202715789574
-      Sprite sheet for Basic Pack_80: 6407848852001479671
       Sprite sheet for Basic Pack_81: 4495244896673484047
       Sprite sheet for Basic Pack_82: 1452661204505636956
       Sprite sheet for Basic Pack_83: 3566667457662208008

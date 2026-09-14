@@ -23,6 +23,7 @@ public class GameManager : MonoBehaviour
             { GameStateType.MissionBoard,  new MissionBoardState()  },
             { GameStateType.DayComplete,   new DayCompleteState()   },
             { GameStateType.InfoBoard,     new InfoBoardState()     },
+            { GameStateType.SettingsMenu,  new SettingsMenuState()  },
         });
     }
 
