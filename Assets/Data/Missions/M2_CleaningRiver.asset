@@ -16,60 +16,63 @@ MonoBehaviour:
   missionName: The Blocked River
   isAdvancedMission: 0
   villagerComplaint:
-  - "The river's gone still and green \u2014 hasn't looked like that in years."
-  - A few folks have taken sick after drinking from it. Something's choking the flow
-    up at the falls.
-  actualRootCause: "The cliff face above the falls has been quietly eroding for seasons,
-    and every past slide has\njust been shoved aside by hand \u2014 nothing was ever
-    built that could clear one safely and keep the\nchannel clear, so the next slide
-    always jams it right back up, leaving the river stagnant."
+  - "The riverbed down past the village has gone completely dry, not even a trickle's
+    getting through anymore."
+  - "Something up at the source must be blocking it. Someone needs to go upstream
+    and see what's wrong."
+  actualRootCause: "Leaves and loose dirt have been quietly building up in the upper
+    stream for a long time, and nothing has ever been set up to clear that debris
+    on its own, so every manual cleanup just resets the clock until it clogs right
+    back up again."
   fiveWhys:
-  - question: Why is the villagers' river water making people sick?
-    correctAnswer: The water has gone stagnant, and with no fresh water flowing in, it's grown bacteria.
+  - question: Why has the river down in the village gone completely dry?
+    correctAnswer: No water is making it down from the upper stream at all anymore.
     distractors:
-    - Someone dumped waste directly into the river.
-    - The well pump has rusted and tainted the pipes.
-    - A dead animal fell into the water upstream.
-    hint: Think about what happens to water that stops moving, not what's been added to it.
-  - question: Why has no fresh water been flowing into the river?
-    correctAnswer: The waterfall that normally feeds it has slowed to barely a trickle.
+    - The dry season has finally caught up with the river.
+    - Someone dug a new irrigation channel that's diverting the flow.
+    - The riverbed has cracked and the water is draining into the ground.
+    hint: Think about where the water should be coming from, not what's happening to the riverbed itself.
+  - question: Why isn't any water making it down from the upper stream?
+    correctAnswer: The upper stream itself has backed up and stopped flowing properly.
     distractors:
-    - The dry season has reduced the river's volume.
-    - The river's channel has silted shut over the years.
-    - Upstream fields are diverting the river for irrigation.
-    hint: Look at where the water comes from, not the river below the falls.
-  - question: Why has the waterfall slowed to a trickle?
-    correctAnswer: A rockslide has jammed a boulder right at the lip of the falls.
+    - The upper stream was rerouted by beavers building a dam.
+    - The upper stream has simply run dry at its source.
+    - Villagers upstream are hoarding the water for themselves.
+    hint: Look at what's happening to the water's path higher up, not further downstream.
+  - question: Why has the upper stream backed up like that?
+    correctAnswer: Fallen leaves and dirt have piled up and clogged the channel.
     distractors:
-    - Beavers have dammed it further upstream.
-    - Fallen trees are blocking the channel higher up.
-    - The riverbed above the falls has cracked and is leaking elsewhere.
-    hint: Something is physically blocking the channel at one specific point.
-  - question: Why did a rockslide come down right at the falls?
-    correctAnswer: The cliff face above the falls has been eroding and giving way.
+    - Fish have built nests that are blocking the narrow channel.
+    - Ice from last winter never fully melted out of the stream.
+    - Tree roots have grown across the streambed.
+    hint: Something is physically clogging the channel, not damaging it.
+  - question: Why were leaves and dirt able to pile up enough to clog it?
+    correctAnswer: Nothing has ever been set up to clear that debris out on its own.
     distractors:
-    - Miners are blasting rock further up the mountain.
-    - The village dug into the hillside for a new well.
-    - Heavy foot traffic has worn away the cliff path.
-    hint: What's been happening to the cliff itself over time?
-  - question: Why hasn't this kind of blockage ever been dealt with properly?
-    correctAnswer: Every past slide was just shoved aside by hand, and nothing was ever built to clear one safely and keep it clear.
+    - Nobody in the village walks up that far to check on it.
+    - The stream is too narrow to hold any real amount of debris.
+    - The trees nearby were planted too close to the water.
+    hint: It's not that no one's noticed, it's about what's actually been done about it.
+  - question: Why does the stream keep clogging even after people clear it out?
+    correctAnswer: A one-time manual cleanup doesn't stop more leaves and dirt from building up again.
     distractors:
-    - Nobody in the village drinks from the river anyway.
-    - The village has never had a rockslide before.
-    - Clearing it isn't considered anyone's job.
-    hint: What's actually been done about it before, versus what's actually needed?
-  trivialReflectionText: "You've cleared enough loose rock for a trickle to get through
-    \u2014 the river stirs a\nlittle, but nowhere near enough to flush out the green,
-    stagnant water villagers have been\nforced to use. This will happen again."
-  optimalReflectionText: "With the rig anchored at the lip, you finally lever the
-    wedged stone free. The falls\nroar back to full flow, flushing the river clean
-    within the day \u2014 and the rig stays bolted in\nplace to catch whatever comes
-    down next, so the water stays safe."
-  introObjective: "There's a stench coming from the river \u2014 go look at what happened."
+    - The last cleanup crew didn't do a thorough enough job.
+    - The stream is cursed and no fix will ever hold.
+    - Nobody has ever actually tried to clear it before.
+    hint: What happens after a cleanup, once nobody's watching it anymore?
+  trivialReflectionText: "You pick out the leaves and dirt clogging the stream by
+    hand, and the water pushes through again. The river down in the village starts
+    flowing once more, but nothing is stopping more leaves and dirt from settling
+    right back in. This will happen again."
+  optimalReflectionText: "You assemble and place the automatic dirt collector at
+    the upper stream, and the channel clears for good. The river flows freely down
+    through the village again, and the collector stays right there, skimming out
+    whatever leaves and dirt drift in next, so it never clogs the same way twice."
+  introObjective: "The river down in the village has run bone dry. Head upstream
+    and find out what's blocking it."
   trivialObjectives:
-  - Clear the loose rubble blocking the falls ({0}/{1})
+  - Clear the dirt and leaves blocking the stream ({0}/{1})
   optimalObjectives:
-  - Collect the parts to build the machine ({0}/{1})
-  - Go to the blacksmith to assemble the parts.
-  - Place the machine near the blocked river.
+  - Collect the parts to build the automatic dirt collector ({0}/{1})
+  - Go to the blacksmith to assemble the dirt collector.
+  - Place the dirt collector at the upper stream.
