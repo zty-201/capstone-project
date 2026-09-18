@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 // Define the core shapes your pipes can be
 public enum PipeShape
@@ -10,7 +12,18 @@ public enum PipeShape
     Cross     // Four openings
 }
 
-public class PipeVisual : MonoBehaviour
+// UI Image, not SpriteRenderer: Container_Optimal_M1 is a Canvas panel (see PuzzleCanvas in the
+// Mission 1 setup guide), same "separate Canvas encapsulating the UI" shape as Mission 5's
+// BridgeCanvas. Click detection is IPointerClickHandler through Unity's own EventSystem/
+// GraphicRaycaster instead of a broadcast EventBus.OnPuzzleClicked world-position + per-object
+// Collider2D.OverlapPoint check — the raycaster only ever calls this on the pipe actually under
+// the cursor, so there's nothing left for this class to resolve itself, only react to.
+//
+// GetStartingBits/rotation math is completely unaffected by this: it only ever reads
+// transform.eulerAngles.z, which RectTransform (Image's transform) reports identically to a
+// world-space Transform — the canonical-bits-per-shape calibration below still has to match
+// whatever the sprite art actually shows at 0°, exactly as before.
+public class PipeVisual : MonoBehaviour, IPointerClickHandler
 {
     [Header("Level Design")]
     public PipeShape shapeType;
@@ -23,31 +36,18 @@ public class PipeVisual : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private AudioClip rotateClip;
 
-    private BoxCollider2D col;
-    private SpriteRenderer sr;
+    private Image image;
     private Sprite emptySprite;
 
     private void Awake()
     {
-        col = GetComponent<BoxCollider2D>();
-        sr = GetComponent<SpriteRenderer>();
-        emptySprite = sr.sprite;
+        image = GetComponent<Image>();
+        emptySprite = image.sprite;
     }
 
     public void SetPowered(bool powered)
     {
-        sr.sprite = powered ? filledSprite : emptySprite;
-    }
-
-    private void OnEnable()
-    {
-        // Subscribe to your custom EventBus
-        EventBus.OnPuzzleClicked += HandlePuzzleClick;
-    }
-
-    private void OnDisable()
-    {
-        EventBus.OnPuzzleClicked -= HandlePuzzleClick;
+        image.sprite = powered ? filledSprite : emptySprite;
     }
 
     public void ResetRotation(float originalZ)
@@ -84,17 +84,20 @@ public class PipeVisual : MonoBehaviour
         return bits;
     }
 
-    private void HandlePuzzleClick(Vector3 worldPos)
+    public void OnPointerClick(PointerEventData eventData)
     {
-        // 1. Guard Clause: Ignore if not in the puzzle state
+        // Container_Optimal_M1 stays active (and visible, via its own screen-space Canvas)
+        // between a player Esc-ing out mid-puzzle and the mission actually resolving — same
+        // pre-existing behavior the old world-position broadcast had too, since nothing there
+        // ever hid the container on Exit either. This guard is what stops a stray click from
+        // rotating a pipe while the player isn't actually in Puzzle state anymore; unlike the old
+        // broadcast (which only Puzzle state ever raised in the first place), UGUI's EventSystem
+        // will call this on any active, raycast-target Image regardless of GameStateType, so the
+        // check has to live here now instead of being implicit in who raises the event.
         if (GameManager.Instance.StateManager.CurrentStateType != GameStateType.Puzzle) return;
 
-        // 2. Check if the mouse click exactly overlapped THIS pipe's collider
-        if (col.OverlapPoint(worldPos))
-        {
-            PipePuzzleSystem.Instance.RotatePipeAt(gridX, gridY);
-            transform.Rotate(0, 0, -90f);
-            AudioManager.Instance.PlaySFX(rotateClip);
-        }
+        PipePuzzleSystem.Instance.RotatePipeAt(gridX, gridY);
+        transform.Rotate(0, 0, -90f);
+        AudioManager.Instance.PlaySFX(rotateClip);
     }
 }

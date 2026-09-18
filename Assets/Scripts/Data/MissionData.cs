@@ -28,6 +28,16 @@ public class MissionData : ScriptableObject
     [Header("5 Whys Investigation — must reach 5/5 for the optimal path")]
     public WhyStage[] fiveWhys = new WhyStage[5];
 
+    [Header("Advanced Mission Minigame Hint")]
+    // Shown only mid-minigame when StageManager.IsMissionUnderReview(missionID) is true — same
+    // review-only-hint convention as WhyStage.hint, but for a single mission-wide minigame hint
+    // rather than a per-Why-stage one, since an advanced mission's action-phase minigame (e.g.
+    // FarmRoutineSystem) isn't structured as discrete Why stages the way the quiz is. Missions
+    // that don't need it (e.g. M5_BrokenBridge, which hints via bonus test attempts instead)
+    // just leave this blank.
+    [TextArea(1, 3)]
+    public string minigameHint;
+
     [Header("Action Phase (Do)")]
     [TextArea(2, 4)]
     public string trivialReflectionText;

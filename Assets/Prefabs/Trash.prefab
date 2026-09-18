@@ -47,6 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrashPiece
   trashItem: {fileID: 11400000, guid: 7a03f3c44f2fcf34298462da1b0b4c56, type: 2}
+  interactSfx: {fileID: 8300000, guid: b7fc08fe6536ea547b579ac63a104de9, type: 3}
 --- !u!212 &1537585270288537219
 SpriteRenderer:
   serializedVersion: 2

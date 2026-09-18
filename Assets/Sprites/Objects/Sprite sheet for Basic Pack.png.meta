@@ -4595,9 +4595,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 148
-        y: 83
-        width: 8
-        height: 9
+        y: 67
+        width: 24
+        height: 25
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -4635,16 +4635,16 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sprite sheet for Basic Pack_162
+      name: SlotBorder
       rect:
         serializedVersion: 2
         x: 180
-        y: 83
-        width: 8
-        height: 9
+        y: 67
+        width: 24
+        height: 25
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      border: {x: 8, y: 9, z: 8, w: 9}
       customData: 
       outline: []
       physicsShape: []
@@ -7914,6 +7914,7 @@ TextureImporter:
       Plank: 2292737356795794705
       SettingsButton: 6407848852001479671
       SliderButton: -9175474789163301616
+      SlotBorder: -9173520656252915862
       Sprite sheet for Basic Pack_0: -6947281443083930522
       Sprite sheet for Basic Pack_1: 5893398131277028864
       Sprite sheet for Basic Pack_100: 4354597444368450274
@@ -7982,7 +7983,6 @@ TextureImporter:
       Sprite sheet for Basic Pack_16: -6914121774448765919
       Sprite sheet for Basic Pack_160: -2624991063095580857
       Sprite sheet for Basic Pack_161: 8872098542861917332
-      Sprite sheet for Basic Pack_162: -9173520656252915862
       Sprite sheet for Basic Pack_163: -2005117412811095754
       Sprite sheet for Basic Pack_164: 2816103860649422791
       Sprite sheet for Basic Pack_165: -5030736350051744935

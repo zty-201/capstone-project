@@ -22,14 +22,13 @@ using UnityEngine;
 // the cart's own fall — if a joint breaks and that leaves a gap, the cart simply falls through
 // it, which the existing fail check already catches.
 //
-// Presented as a popup, same idea as the pipe puzzle's Container_Optimal_M1 (a background sprite
-// plus interactive sprites, always framed the same way regardless of where the player triggered
-// it) — but reached the opposite way round. The pipe puzzle can get away with a CameraFollower
-// on its container because it has zero Rigidbody2D anywhere; this container is nothing BUT
+// Presented as a popup, but for a different reason than the pipe puzzle (Mission 1) or the
+// routine builder (Mission 3) reach the same look — both of those are pure UI now, Canvas panels
+// authored anywhere convenient in the scene, since a Canvas panel presents identically regardless
+// of its own GameObject's position. This container can't take that shortcut: it's nothing BUT
 // Rigidbody2D-driven objects (nodes, planks, the cart), and Unity does not carry a moving
 // non-physics parent's motion into a Rigidbody2D child — the child's transform gets corrected
-// back to hold its world position, so a CameraFollower here would leave the physics objects
-// stuck in place while only the (non-physics) background moved. So instead the container itself
+// back to hold its world position — so it has to stay world-space. The container itself
 // never moves — it stays at its authored map position exactly like every other minigame
 // container — and BridgeBuilderState swaps to a second, dedicated Cinemachine camera
 // (bridgeViewCamera) framing that fixed spot while this state is active, swapping back to

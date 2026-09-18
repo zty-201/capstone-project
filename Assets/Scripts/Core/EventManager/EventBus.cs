@@ -65,10 +65,6 @@ public static class EventBus
     public static void RaiseMapClicked(Vector3 worldPos)
         => OnMapClicked?.Invoke(worldPos);
 
-    public static event Action<Vector3> OnPuzzleClicked;
-    public static void RaisePuzzleClicked(Vector3 worldPos)
-        => OnPuzzleClicked?.Invoke(worldPos);
-
     public static event Action<int, SolutionType> OnSolutionSelected;
     public static void RaiseSolutionSelected(int missionID, SolutionType type)
         => OnSolutionSelected?.Invoke(missionID, type);

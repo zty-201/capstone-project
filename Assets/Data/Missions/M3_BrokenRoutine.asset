@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10fc3a025822d194aad4d77cfe8095cc, type: 3}
+  m_Name: M3_BrokenRoutine
+  m_EditorClassIdentifier: Assembly-CSharp::MissionData
+  missionID: 3
+  missionName: The Farmer's Broken Routine
+  isAdvancedMission: 1
+  villagerComplaint:
+  - "The clumsy farmer waters crops at random times and forgets steps constantly
+    \u2014 the whole town feels the small inefficiencies."
+  actualRootCause: "There's no standardized routine for the farm's daily stations
+    \u2014 the order chores get done in is left to chance, so earlier steps keep
+    getting undone by later ones."
+  fiveWhys:
+  - question: Why do the animals and crops keep getting neglected some days?
+    correctAnswer: The farmer does his chores in a different order every day.
+    distractors:
+    - The farmer oversleeps most mornings.
+    - There isn't enough feed to go around.
+    - The animals wander off before he gets to them.
+    hint: Look at how his day is organized, not what he's missing.
+  - question: Why does he do his chores in a different order every day?
+    correctAnswer: He has no set routine — he just does whatever's in front of
+      him first.
+    distractors:
+    - He can't read a written schedule.
+    - The stations keep moving around the farm.
+    - He's easily distracted by villagers passing by.
+    hint: Think about whether there's a plan at all, not what's distracting him.
+  - question: Why has he never settled on a routine?
+    correctAnswer: Nobody ever mapped out which order the stations actually depend
+      on.
+    distractors:
+    - He prefers to work spontaneously.
+    - The farm is too small for a routine to matter.
+    - He's new to farming this season.
+    hint: Consider whether the order of tasks was ever actually worked out.
+  - question: Why does the order of stations actually matter?
+    correctAnswer: Harvesting before the crops are watered, or selling before anything's
+      even been harvested, undoes the earlier steps.
+    distractors:
+    - The stations are far apart and tiring to walk between.
+    - Some stations are only open certain hours.
+    - The farmer likes variety in his day.
+    hint: Think about what happens if a later step runs before an earlier one is
+      finished.
+  - question: Why hasn't anyone fixed the order before now?
+    correctAnswer: Nobody treats the farm's daily workflow as something worth standardizing.
+    distractors:
+    - The town has no one trained in farm work.
+    - Tools for the stations are in short supply.
+    - The weather changes his plans too often.
+    hint: Think about whether "how the day is run" has ever been treated as a real
+      problem to solve.
+  minigameHint: Feeding the animals and watering the crops can happen in either order
+    — but both need to happen before the harvest, and there's nothing to sell at
+    market until the harvest is in.
+  trivialReflectionText: The farmer never quite settles into a rhythm — some days
+    the harvest sits too long before it ever reaches market, other days the animals
+    go hungry. Villagers shrug it off as just how he is.
+  optimalReflectionText: With every station tackled in the right order, the farmer's
+    day finally clicks into place — nothing sits waiting, nothing gets skipped, and
+    a full cart makes it to market every time.
+  introObjective: The farmer's day is chaos — go take a look at his routine board.
+  trivialObjectives: []
+  optimalObjectives:
+  - Arrange the farmer's stations into the right order and submit ({0}/{1} attempts
+    used).

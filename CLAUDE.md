@@ -41,7 +41,9 @@ Open the project in the Unity Editor (Unity 6). There are no CLI build or test c
 | `Exploration` | Polls mouse clicks, fires `RaiseMapClicked` |
 | `Dialogue` | Delegates left-click to `DialogueManager.OnAdvanceDialogue()` |
 | `Planning` | Delegates left-click to `PlanningUI.OnAdvance()`; ESC returns to Exploration |
-| `Puzzle` | Polls mouse clicks, fires `RaisePuzzleClicked` for the pipe puzzle |
+| `Puzzle` | ESC returns to Exploration; pipe clicks route directly via `IPointerClickHandler` on each Canvas-based `PipeVisual`, not through `Tick()` polling |
+| `BridgeBuilder` | Forwards press/hold/release world positions into `BridgeBuilderSystem.HandleDragStart/Update/End`; ESC returns to Exploration (guarded — only while `Phase == Building`) |
+| `RoutineBuilder` | ESC returns to Exploration; card drag/drop routes directly via Unity's `IBeginDragHandler`/`IDropHandler` on the Canvas panel, not through `Tick()` polling |
 | `Reflection` | Delegates left-click to `ReflectionPopupUI.OnDismiss()` |
 | `MissionBoard` | ESC returns to Exploration |
 | `DayComplete` | Empty stub — the day-complete panel is dismissed via a UI Button wired directly to `DayCompleteUI.OnDismiss()` in the Inspector, not through `Tick()` |
@@ -152,7 +154,7 @@ The quiz behaves differently on a redo (see Stage Gate System below): `hintText`
 A "Needs Review" (trivial) mission *can* now be reopened, but only through the Stage Gate System (see below) rejecting a stage submission at Town Hall — there's no way to manually revisit a trivial mission before then. Once `OnMissionsNeedReview` fires for it, `MissionEntryUI.ResetVisual()` un-greys the entry and the mission's own interactable/minigame resets itself so it can be replayed.
 
 ### Data Layer (ScriptableObjects)
-- **`MissionData`** — all text content for one mission: complaint, root cause, 5 Whys quiz data (`fiveWhys: WhyStage[5]`, each with `question`/`correctAnswer`/`distractors[]`/`hint`), solution names, reflection texts. Create via `Kaizen Systems/Mission Data`. `M1_ParchedCrops` and `M2_CleaningRiver` have their 5 Whys chains populated, each one ending at the mission's `actualRootCause`.
+- **`MissionData`** — all text content for one mission: complaint, root cause, 5 Whys quiz data (`fiveWhys: WhyStage[5]`, each with `question`/`correctAnswer`/`distractors[]`/`hint`), an optional `minigameHint` (shown only mid-minigame when `StageManager.IsMissionUnderReview` is true — for advanced missions whose action-phase minigame isn't structured as discrete Why stages the way the quiz is, so there's no per-question `hint` slot to reuse; see Mission 3 below), solution names, reflection texts. Create via `Kaizen Systems/Mission Data`. `M1_ParchedCrops`, `M2_CleaningRiver`, `M3_BrokenRoutine`, and `M5_BrokenBridge` have their 5 Whys chains populated, each one ending at the mission's `actualRootCause`.
 - **`MissionRegistry`** — array of `MissionData`, looked up by `missionID`. Create via `Kaizen Systems/Mission Registry`. Assign in Inspector on `ReflectionPopupUI`.
 - **`StageData`** — one stage's `stageNumber`, `stageName`, and `missionIDs[]` (the missions that must all be resolved optimally before the stage can be submitted). Create via `Kaizen Systems/Stage Data`.
 - **`StageRegistry`** — array of `StageData`, looked up by index (`GetByIndex`). Create via `Kaizen Systems/Stage Registry`. Assign in Inspector on `StageManager`.
@@ -250,14 +252,81 @@ canonical, never inspects the art; a mismatch (found and fixed for `TJunction`, 
 `Left|Right|Down` at 0° rather than the code's original `Up|Right|Down`) desyncs the visual
 rotation from the logical connections by a fixed step at every angle rather than just being
 cosmetically wrong. `Cross` is rotation-invariant (`Up|Right|Down|Left` always) — any authored
-rotation works. Clicks delegate to `PipePuzzleSystem.RotatePipeAt` via the dedicated `Puzzle`
-state/`RaisePuzzleClicked` event (no adjacency requirement — a precise click on a pipe tile
-rotates it regardless of player position). The puzzle system runs a DFS flood-fill from
+rotation works. Clicks delegate to `PipePuzzleSystem.RotatePipeAt` via `PipeVisual.OnPointerClick`
+(`IPointerClickHandler`, resolved by Unity's own `EventSystem`/`GraphicRaycaster` — no adjacency
+requirement either way, a precise click on a pipe tile rotates it regardless of player position).
+The puzzle system runs a DFS flood-fill from
 `startPos` to `endPos` to check for a valid water path after every rotation, and raises
 `RaiseMissionCompleted(id, true)` once solved. The puzzle board is a full 5×5 grid (all four
 `PipeShape`s in play — `Straight`, `Corner`, `TJunction`, `Cross`); not every cell needs a pipe
 (`PipePuzzleSystem` only populates grid cells where a `PipeVisual` actually exists — an
 unfilled cell is just `null` and the flood-fill skips it).
+
+`Container_Optimal_M1` is a Canvas panel — `Canvas`/`CanvasScaler`/`GraphicRaycaster` directly on
+the container itself (same collapsed shape Mission 3 uses, see below), not a world-space
+`SpriteRenderer` grid with a `CameraFollower` the way it used to be. `PipeVisual` is `Image`-based
+now, and click resolution moved from a broadcast `EventBus.OnPuzzleClicked` world position + each
+pipe's own `Collider2D.OverlapPoint` check to the `IPointerClickHandler` above. The conversion only
+ever touched the rendering/input layer: `GetStartingBits()`'s canonical-bits-per-shape calibration
+above and `PipePuzzleSystem`'s flood-fill are both untouched, since neither ever depended on
+`SpriteRenderer` specifically — `GetStartingBits()` only reads `transform.eulerAngles.z`, which an
+`Image`'s `RectTransform` reports identically to a world-space `Transform`.
+
+### Mission 3: The Farmer's Broken Routine
+
+Like Mission 1's well and Mission 2's boulder, the thing that starts this mission isn't an NPC —
+it's `RoutineBoardInteractable`, on a schedule board prop in the world near the farm. Mission 3 is
+this game's second **Advanced Mission** (`MissionData.isAdvancedMission`, see 5 Whys Quiz above),
+following the shape Mission 5 established: no separate trivial-path container, the 5 Whys quiz
+doesn't pick `SolutionType` at all — `PlanningUI.SelectAdvancedMission()` always routes into the
+single `Container_Optimal_M3`, and that container's own minigame simulation decides `wasOptimal`
+directly.
+
+**The minigame (`FarmRoutineSystem`) is a drag-to-reorder puzzle:** 4 station cards
+(`RoutineCardUI` — "Feed the Animals", "Water the Crops", "Harvest the Crops", "Sell at Market")
+sit in 4 fixed `RoutineSlotUI` positions; the player drags cards between slots to propose an
+order, then clicks Submit. `acceptedOrders` holds the 2 permutations the design doc's "2 desirable
+outcomes" calls for — `[Feed, Water, Harvest, Sell]` and `[Water, Feed, Harvest, Sell]` — since
+feeding the animals and watering the crops don't depend on each other and can go in either order,
+but both have to happen before the harvest, and the harvest has to happen before anything can be
+sold. Station identity is purely an array index (`stations[i]`/`cards[i]` authored 1:1 in
+parallel, same fixed-array-authored-in-parallel shape as `PlanningUI.fiveWChoiceButtons`/
+`BridgeBuilderUI.materialButtons`) — `Initialize(i, ...)` assigns that identity at `Awake`, so it
+doesn't matter which physical card GameObject ends up at which array index; whichever one does
+just gets labeled and identified as that station.
+
+**A Canvas is the whole container — not a Canvas plus a separate container the way Mission 5
+has.** Mission 5 splits `BridgeCanvas` (screen-space UI: budget/status/buttons) from
+`Container_Optimal_M5` (a world-space `Rigidbody2D` physics playground) because those are two
+fundamentally different rendering systems that can't share a hierarchy branch. Mission 3 has no
+such mixing: cards, slots, text, and the Submit button are all UI, so `Container_Optimal_M3`
+carries `Canvas`/`CanvasScaler`/`GraphicRaycaster`, `FarmRoutineSystem`, and `RoutineBuilderUI`
+directly on one GameObject — same as every other mission's container is one object — not nested
+under `PlayerCanvas` either. Dragging resolves through Unity's own `IBeginDragHandler`/
+`IDragHandler`/`IEndDragHandler`/`IDropHandler` (`RoutineCardUI`/`RoutineSlotUI`) rather than
+hand-rolled hit-testing — `FarmRoutineSystem` only reparents whatever card/slot the raycaster
+already resolved (`HandleCardDropped`/`PlaceCardInSlot`), it never does its own
+`Physics2D`/`RectTransform` overlap math. Mission 1's pipe puzzle went through this exact same
+Canvas conversion for the same reason — see above.
+
+**Attempts** (`baseAttempts`, default 5, matching the design doc's "5 tries for the player"
+directly) **plus bonus attempts from the 5 Whys score** (`bonusAttemptsPerCorrectWhy`, same idea as
+`BridgeBuilderSystem.bonusAttemptsPerCorrectWhy` — a strong diagnosis earns extra room to get the
+actual arrangement right, even though this mission's quiz doesn't pick the path either).
+Submitting a wrong order doesn't end the attempt loop immediately — `FarmRoutineSystem` increments
+`attemptsUsed` and lets the player try again until attempts run out, at which point
+`RaiseMissionCompleted(3, false)` fires (the trivial outcome, same "exhausted attempts" shape
+`BridgeBuilderSystem.HandleTestFailed` uses). `MissionData.minigameHint` is shown only when
+`StageManager.IsMissionUnderReview(3)` is true (the design doc's "hint on the second attempt"),
+same review-only-hint convention as `WhyStage.hint`.
+
+**The per-submit "small CG" the design doc calls for — an NPC visibly executing the tasks in
+order — is still under construction, not built yet.** `FarmRoutineSystem.SimulateAndResolve()`
+steps through the submitted order calling `RoutineCardUI.PlayStepHighlight()` on each card in turn
+(a brief color pulse on that card's background), which stands in for the real payoff without
+requiring any animation work. Swapping in an actual animated CG later is a drop-in replacement at
+that one call site — nothing about the ordering/evaluation logic depends on how that step is
+visualized.
 
 ### Mission 5: Bridge Building (Full Poly Bridge)
 
@@ -332,21 +401,18 @@ Editor-authored grid:
   parent/child activated together — so caching only in `Awake` intermittently threw a
   `NullReferenceException` depending on which order Unity happened to run things in that frame.
 
-**Presented as a popup, reached the opposite way round from the pipe puzzle.** The pipe puzzle's
-`Container_Optimal_M1` can carry a `CameraFollower` (re-centers itself on the camera every frame)
-because it has zero `Rigidbody2D` anywhere in it. `Container_Optimal_M5` is nothing *but*
-`Rigidbody2D`-driven objects (nodes, planks, the cart) — Unity does not carry a moving
-non-physics parent's motion into a `Rigidbody2D` child (the child's transform gets corrected back
-to hold its world position), so a `CameraFollower` here would strand the physics playground while
-only a background sprite moved. So the container never moves — it stays at its authored map
-location like every other minigame container. Unlike the pipe puzzle's `CameraFollower` trick,
-though, nothing here dynamically corrects for *where* that authored location actually is:
+**Presented as a popup, but for a different reason than Mission 1's pipe puzzle or Mission 3's
+routine builder reach the same look.** Both of those are pure UI now — `Container_Optimal_M1`/`M3`
+are Canvas panels, authored anywhere convenient in the scene, since a Canvas panel presents
+identically regardless of its own GameObject's position (there's no "where in the world is this"
+question for screen-space UI). `Container_Optimal_M5` can't take that shortcut: it's nothing *but*
+`Rigidbody2D`-driven objects (nodes, planks, the cart) — Unity does not carry a moving non-physics
+parent's motion into a `Rigidbody2D` child (the child's transform gets corrected back to hold its
+world position) — so it has to stay world-space. That means, unlike M1/M3's Canvas panels,
 `Container_Optimal_M5`'s own position (and everything nested inside it, including
 `bridgeViewCamera`) has to be deliberately authored to coincide with wherever `BridgeInteractable`
-(the real bridge the player walks up to) actually sits. The pipe puzzle's container can be
-authored anywhere in the scene, since `CameraFollower` re-centers it on the camera every frame
-regardless of its own position; Mission 5's container has no such correction, so a mismatch here
-is a real Editor-authoring bug, not just cosmetic — found and fixed once already, when the
+(the real bridge the player walks up to) actually sits — a mismatch here is a real
+Editor-authoring bug, not just cosmetic — found and fixed once already, when the
 container had been left at a Mission-group's local origin rather than the bridge's actual
 position, producing a jarring camera jump on every mission start instead of the popup simply
 appearing where the player already was standing.
@@ -382,10 +448,10 @@ swap. `MinimapCamera` needs no such toggle — it's a real `Camera` with its own
 never needs to show the playground in any state, so its exclusion stays a permanent Editor setting.
 
 ### Singletons
-`GameManager`, `DialogueManager`, `PlanningUI`, `MissionBoardUI`, `ReflectionPopupUI`, `DayCompleteUI`, `InventorySystem`, `TrustSystem`, `InfoBoardUI`, `StageManager`, `TrashSpawner`, `BridgeBuilderSystem` all follow the same pattern: static `Instance`, destroyed if a duplicate exists in `Awake`.
+`GameManager`, `DialogueManager`, `PlanningUI`, `MissionBoardUI`, `ReflectionPopupUI`, `DayCompleteUI`, `InventorySystem`, `TrustSystem`, `InfoBoardUI`, `StageManager`, `TrashSpawner`, `BridgeBuilderSystem`, `FarmRoutineSystem` all follow the same pattern: static `Instance`, destroyed if a duplicate exists in `Awake`.
 
 ### IInteractable
-`NPCController`, `MissionBoardInteractable`, `RiverInteractable`, `WastePiece`, `MachinePart`, `AssemblyPoint`, `PlacementPoint`, `TrashPiece`, `TrashCollectionSite`, `TownHallInteractable`, `ContextInteractable`, `BrickPickup`, `WellPatchSite`, `InfoBoardInteractable`, and `BridgeInteractable` all implement `IInteractable`. `InputManager` detects them via `Physics2D.OverlapPoint` and calls `Interact()` when the player is within 1 grid cell (or routes the player adjacent first). `ContextInteractable` is the odd one out: it's narrative-only (dialogue with no associated `MissionData`), so `DialogueManager` returns straight to `Exploration` afterward instead of opening `PlanningUI` — it never starts or resolves a mission.
+`NPCController`, `MissionBoardInteractable`, `RiverInteractable`, `WastePiece`, `MachinePart`, `AssemblyPoint`, `PlacementPoint`, `TrashPiece`, `TrashCollectionSite`, `TownHallInteractable`, `ContextInteractable`, `BrickPickup`, `WellPatchSite`, `InfoBoardInteractable`, `BridgeInteractable`, and `RoutineBoardInteractable` all implement `IInteractable`. `InputManager` detects them via `Physics2D.OverlapPoint` and calls `Interact()` when the player is within 1 grid cell (or routes the player adjacent first). `ContextInteractable` is the odd one out: it's narrative-only (dialogue with no associated `MissionData`), so `DialogueManager` returns straight to `Exploration` afterward instead of opening `PlanningUI` — it never starts or resolves a mission.
 
 ### Info Board
 A walk-up-and-interact help/tutorial panel, architecturally a clone of the Mission Board: `InfoBoardInteractable` (`IInteractable`) shows `InfoBoardUI` and changes state to `InfoBoard`; `InfoBoardState` is ESC-only, same shape as `MissionBoardState`. `InfoBoardUI` isn't dialogue-typed — it's a static paged reference (`InfoPage[] pages`, each a `title`/`body`), navigated with Next/Previous buttons wired directly to `ShowNextPage()`/`ShowPreviousPage()` in the Inspector, covering movement, the 5 Whys mechanic, the PDCA cycle, gold coins & trust, trash & inventory, town hall, and a catalog of interactable types. The default page content is a C# field initializer on `InfoBoardUI.pages`, not scene-authored data.
