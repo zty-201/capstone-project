@@ -18,6 +18,7 @@ Open the project in the Unity Editor (Unity 6). There are no CLI build or test c
 - No fallbacks: One correct path, no alternatives
 - One way: One way to do things, not many
 - Match existing structure: When a new feature could reasonably be built more than one way, prefer whichever way is consistent with how similar things already work in this codebase — even over an option that's more "correct" in the abstract. Consistency for future maintainers outranks textbook-ideal architecture.
+- Scope of these conventions: "One way" / "Match existing structure" govern code architecture and implementation only. They do not apply to game/mission design. When brainstorming new missions, mechanics, or design directions, give unbiased design recommendations from a game-design point of view, even if the result looks nothing like an existing mission — consistency-with-existing-structure only becomes a constraint once a design is chosen and it's time to implement it in code.
 - Clarity over compatibility: Clear code beats backward compatibility
 - Throw errors: Fail fast when preconditions aren't met
 - No backups: Trust the primary mechanism

@@ -5,6 +5,7 @@ public class RiverManager : MonoBehaviour
     [SerializeField] private int missionID = 2;
     [SerializeField] private GameObject blockageVisual;
     [SerializeField] private GameObject animatedRiverTilemap;
+    [SerializeField] private GameObject seabinVisual;
     [SerializeField] private GameObject[] wastePieces;
 
     private void OnEnable()
@@ -24,6 +25,7 @@ public class RiverManager : MonoBehaviour
         if (id != missionID) return;
         if (blockageVisual != null) blockageVisual.SetActive(false);
         if (animatedRiverTilemap != null) animatedRiverTilemap.SetActive(true);
+        if (seabinVisual != null) seabinVisual.SetActive(wasOptimal);
 
         foreach (var piece in wastePieces)
             if (piece != null) piece.SetActive(false);
@@ -34,6 +36,7 @@ public class RiverManager : MonoBehaviour
         if (System.Array.IndexOf(missionIDs, missionID) < 0) return;
         if (blockageVisual != null) blockageVisual.SetActive(true);
         if (animatedRiverTilemap != null) animatedRiverTilemap.SetActive(false);
+        if (seabinVisual != null) seabinVisual.SetActive(false);
 
         foreach (var piece in wastePieces)
             if (piece != null) piece.SetActive(true);

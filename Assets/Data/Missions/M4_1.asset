@@ -12,34 +12,76 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10fc3a025822d194aad4d77cfe8095cc, type: 3}
   m_Name: M4_1
   m_EditorClassIdentifier: Assembly-CSharp::MissionData
-  missionID: 0
-  missionName: 
+  missionID: 4
+  missionName: The Tangled Marketplace
   isAdvancedMission: 0
-  villagerComplaint: []
-  actualRootCause: 
+  villagerComplaint:
+  - Half the stalls sit empty by midday and buyers just walk off!
+  - But the other half are drowning in stock that's gone bad before anyone bought
+    it — nobody can tell what's actually needed until it's too late.
+  actualRootCause: There's no pull-based restocking signal — merchants push large
+    speculative orders instead of pulling exactly enough stock, exactly when it's
+    actually needed.
   fiveWhys:
-  - question: 
-    correctAnswer: 
-    distractors: []
-    hint: 
-  - question: 
-    correctAnswer: 
-    distractors: []
-    hint: 
-  - question: 
-    correctAnswer: 
-    distractors: []
-    hint: 
-  - question: 
-    correctAnswer: 
-    distractors: []
-    hint: 
-  - question: 
-    correctAnswer: 
-    distractors: []
-    hint: 
-  trivialReflectionText: 
-  optimalReflectionText: 
-  introObjective: 
-  trivialObjectives: []
-  optimalObjectives: []
+  - question: Why do buyers walk off empty-handed at some stalls while others waste
+      unsold stock?
+    correctAnswer: Every stall either runs dry mid-day or ends up overstocked with
+      goods that spoil unsold.
+    distractors:
+    - The market just doesn't get enough visitors some days.
+    - The stalls are poorly placed and buyers can't find them.
+    - Merchants are simply lazy about tending their stalls.
+    hint: Look at what's actually happening at the stalls themselves — too little
+      stock, or too much.
+  - question: Why do stalls run dry or end up overstocked?
+    correctAnswer: Merchants restock by feel, whenever they happen to notice or
+      remember — not based on what's actually selling.
+    distractors:
+    - Suppliers deliver goods on an unpredictable schedule.
+    - Some merchants just don't care about their stock levels.
+    - The market has too few merchants to keep every stall full.
+    hint: Think about how a merchant decides when to order more, not who delivers
+      it.
+  - question: Why do merchants restock by feel instead of by need?
+    correctAnswer: There's no signal that tells a merchant exactly when a stall
+      has actually gotten low.
+    distractors:
+    - Merchants haven't been trained properly.
+    - The market has no clock or calendar to track the day.
+    - Buyers don't tell merchants what they want in advance.
+    hint: Consider what information a merchant would need in order to restock at
+      the right moment.
+  - question: Why is there no such signal?
+    correctAnswer: Nobody's ever set a reorder point — every order is a bulk guess
+      made whenever a merchant thinks to place one.
+    distractors:
+    - The market has no storage space for extra signals or tools.
+    - Suppliers refuse to deliver small orders.
+    - Merchants believe bulk buying is always cheaper.
+    hint: Think about whether anyone ever decided "restock exactly here" for any
+      stall.
+  - question: Why has no one ever set a reorder point for any stall?
+    correctAnswer: No one's ever separated "how much stock is sitting here" from
+      "how much do we actually need right now" — every order tries to guess both
+      at once.
+    distractors:
+    - The market has never had a bad enough day to force a change.
+    - Nobody in the market has ever run a business before.
+    - There's no market official responsible for such decisions.
+    hint: Think about what kind of system would actually fix this for good, not
+      just for one day.
+  trivialReflectionText: You keep running back and forth restocking whatever looks
+    empty. Some days it works out — other days a stall sits bare for hours, or rots
+    with stock nobody bought in time. It's exhausting, and sooner or later you're
+    going to miss one.
+  optimalReflectionText: Each stall now signals the moment it actually needs more
+    — never empty, never overflowing. You barely had to watch over any of them;
+    the market keeps itself running exactly as it should. Turns out the idea has
+    a name — a Kanban system — and it was invented by watching supermarkets do exactly
+    this.
+  introObjective: The marketplace can't keep its shelves balanced — go see what's
+    going wrong.
+  trivialObjectives:
+  - Restock stalls before they run dry.
+  optimalObjectives:
+  - Set reorder-point signals for each stall.

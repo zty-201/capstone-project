@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
             { GameStateType.Puzzle,         new PuzzleState()         },
             { GameStateType.BridgeBuilder,  new BridgeBuilderState()  },
             { GameStateType.RoutineBuilder, new RoutineBuilderState() },
+            { GameStateType.KanbanBuilder,  new KanbanBuilderState()  },
             { GameStateType.Reflection,     new ReflectionState()     },
             { GameStateType.MissionBoard,   new MissionBoardState()   },
             { GameStateType.DayComplete,    new DayCompleteState()    },
