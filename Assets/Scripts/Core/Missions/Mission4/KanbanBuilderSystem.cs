@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 // Mission 4's optimal minigame: a configure-then-simulate puzzle, a new mechanical genre for
@@ -26,6 +27,11 @@ public class KanbanBuilderSystem : MonoBehaviour
         [Range(0f, 1f)] public float wastefulThresholdRatio = 0.75f; // set the reorder point above this and you're just always topped up, not pulling
     }
 
+    // Tracked per stall instead of a single bool so the end-of-day message can tell the player
+    // *which* of the two failure modes happened and in which direction to adjust — "it failed"
+    // alone gives no way to know whether to raise or lower a threshold.
+    private enum FailureReason { None, Stockout, Wasteful }
+
     [Header("Mission Identity")]
     [SerializeField] private int missionID = 4;
 
@@ -46,11 +52,25 @@ public class KanbanBuilderSystem : MonoBehaviour
     private float[] currentStock;
     private bool[] pendingDelivery;
     private float[] deliveryTimer;
-    private bool[] stallFailed;
+    private FailureReason[] failureReason;
+    private float dayElapsed;
 
     public bool IsSimulating { get; private set; }
     public bool CanConfigure => !IsSimulating;
     public string StatusMessage { get; private set; } = "";
+    public int StallCount => stalls.Length;
+
+    // Read by KanbanBuilderUI to show a "Day: 60%" readout while a run is in progress — purely
+    // cosmetic, so the player understands this is a timed run with a defined end rather than
+    // indefinite ambient motion.
+    public float DayProgress01 => simDuration > 0f ? Mathf.Clamp01(dayElapsed / simDuration) : 0f;
+
+    // Read by MarketAmbientSystem once the mission resolves optimally, so the permanent
+    // post-completion "Kanban mode" epilogue restocks each stall at the exact threshold the
+    // player actually tuned here — not a fresh, independently-authored "ideal" value. The
+    // container is inactive by then (MinigameActivator disables it on completion), but an
+    // inactive GameObject's components keep their field values, so this still reads correctly.
+    public float GetThresholdRatio(int index) => gauges[index].ThresholdRatio;
 
     private void Awake()
     {
@@ -60,7 +80,7 @@ public class KanbanBuilderSystem : MonoBehaviour
         currentStock = new float[stalls.Length];
         pendingDelivery = new bool[stalls.Length];
         deliveryTimer = new float[stalls.Length];
-        stallFailed = new bool[stalls.Length];
+        failureReason = new FailureReason[stalls.Length];
 
         // Subscribed in Awake/OnDestroy, not OnEnable/OnDisable — see MarketStallTrivialSystem's
         // comment on the same pattern.
@@ -81,6 +101,7 @@ public class KanbanBuilderSystem : MonoBehaviour
     {
         IsSimulating = true;
         StatusMessage = "Watching the market run...";
+        dayElapsed = 0f;
 
         for (int i = 0; i < stalls.Length; i++)
         {
@@ -89,14 +110,15 @@ public class KanbanBuilderSystem : MonoBehaviour
             deliveryTimer[i] = 0f;
             // A threshold set above the wasteful line fails on principle — it never actually
             // waits for a real pull signal, so nothing that happens later in the day earns it back.
-            stallFailed[i] = gauges[i].ThresholdRatio > stalls[i].wastefulThresholdRatio;
+            failureReason[i] = gauges[i].ThresholdRatio > stalls[i].wastefulThresholdRatio
+                ? FailureReason.Wasteful
+                : FailureReason.None;
         }
 
-        float elapsed = 0f;
-        while (elapsed < simDuration)
+        while (dayElapsed < simDuration)
         {
             float dt = Time.deltaTime;
-            elapsed += dt;
+            dayElapsed += dt;
 
             for (int i = 0; i < stalls.Length; i++)
             {
@@ -109,6 +131,7 @@ public class KanbanBuilderSystem : MonoBehaviour
                 {
                     pendingDelivery[i] = true;
                     deliveryTimer[i] = cfg.deliveryLeadTime;
+                    gauges[i].ShowEventCallout("Reordered!");
                 }
                 else if (pendingDelivery[i])
                 {
@@ -117,26 +140,44 @@ public class KanbanBuilderSystem : MonoBehaviour
                     {
                         currentStock[i] = cfg.maxStock;
                         pendingDelivery[i] = false;
+                        gauges[i].ShowEventCallout("Restocked!");
                     }
                 }
 
-                if (currentStock[i] <= 0f) stallFailed[i] = true;
+                // Only flags on the actual transition into stockout, and only if nothing already
+                // flagged this stall (a Wasteful threshold set at day-start shouldn't be
+                // overwritten just because the stall also happened to run dry).
+                if (currentStock[i] <= 0f && failureReason[i] == FailureReason.None)
+                {
+                    failureReason[i] = FailureReason.Stockout;
+                    gauges[i].ShowEventCallout("Ran dry!");
+                }
                 currentStock[i] = Mathf.Clamp(currentStock[i], 0f, cfg.maxStock);
 
-                gauges[i].SetStockRatio(currentStock[i] / cfg.maxStock, stallFailed[i]);
+                gauges[i].SetStockRatio(currentStock[i] / cfg.maxStock);
             }
 
             yield return null;
         }
 
         bool allPassed = true;
-        foreach (bool failed in stallFailed)
-            if (failed) allPassed = false;
+        var failureLines = new List<string>();
+        for (int i = 0; i < stalls.Length; i++)
+        {
+            bool failed = failureReason[i] != FailureReason.None;
+            gauges[i].SetFailureOutline(failed);
+            if (!failed) continue;
+
+            allPassed = false;
+            failureLines.Add(failureReason[i] == FailureReason.Stockout
+                ? $"{stalls[i].stallName} ran dry — try raising its reorder point."
+                : $"{stalls[i].stallName} is set too cautiously — try lowering it.");
+        }
 
         AudioManager.Instance.PlaySFX(allPassed ? successSfx : failSfx);
         StatusMessage = allPassed
             ? "Every stall stayed stocked right when it needed to be — nothing wasted, nothing empty."
-            : "Something's still off — a stall either ran dry or you're ordering more than it needs.";
+            : string.Join("\n", failureLines);
 
         IsSimulating = false;
 
@@ -153,7 +194,8 @@ public class KanbanBuilderSystem : MonoBehaviour
         {
             gauges[i].Initialize(stalls[i].stallName, stalls[i].wastefulThresholdRatio);
             gauges[i].SetThresholdRatio(0.5f);
-            gauges[i].SetStockRatio(1f, false);
+            gauges[i].SetStockRatio(1f);
+            gauges[i].SetFailureOutline(false);
         }
     }
 

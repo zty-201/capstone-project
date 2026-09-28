@@ -17,6 +17,11 @@ public class MarketStall : MonoBehaviour, IInteractable
 
     private float stockRatio = 1f;
 
+    // Read by MarketAmbientSystem's post-completion "Kanban mode" to decide when a stall has
+    // crossed its own reorder threshold — the same stock value drives both the pre-completion
+    // minigame visual above and the permanent epilogue simulation, no separate tracking needed.
+    public float StockRatio => stockRatio;
+
     public void Interact() => ResetStall();
 
     public void TickDeplete(float dt)

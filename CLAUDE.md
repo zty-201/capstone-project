@@ -216,8 +216,10 @@ path; only the reflection text (and whether a future slide gets caught automatic
 
 ### Mission 1: Well & Pipe Puzzle
 Like Mission 2's river, the well itself (not an NPC) is the interactable that starts the
-mission — `NPCController` (`Mission1NPCInteractble.cs`, historically written for a wandering
-villager) is attached directly to the well's `GameObject` rather than a separate Farmer NPC.
+mission — `NPCController` (`Assets/Scripts/Core/Missions/NPCController.cs` — lives at the shared
+`Missions/` root, not under `Mission1/`, since it's a generic dialogue-trigger component reused
+by other missions, not mission-specific) is attached directly to the well's `GameObject` rather
+than a separate Farmer NPC.
 Since two things now need to be clickable at the same world position (the dialogue trigger,
 then whatever the chosen path activates there), `HandleSolutionSelected` disables the well's
 own `Collider2D` once a solution is picked — `Physics2D.OverlapPoint` doesn't guarantee which

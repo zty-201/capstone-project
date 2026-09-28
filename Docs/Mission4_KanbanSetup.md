@@ -19,11 +19,10 @@ Create a root-level `Mission4` GameObject at the marketplace map location.
 
 ## 2. The Merchant NPC (mission trigger)
 
-Place an `NPCController` (the same component Mission 1's well uses,
-`Mission1NPCInteractble.cs` — despite the filename it's the generic
-NPC-dialogue-trigger component, not mission-specific) on a `Merchant_NPC`
-GameObject under `Mission4`. Add `NPCPatrol` too if you want the merchant to
-wander like `Farmer_NPC` does. Assign `associatedMission = M4_1`. Needs a
+Place an `NPCController` (`Assets/Scripts/Core/Missions/NPCController.cs` —
+the same generic dialogue-trigger component Mission 1's well uses) on a
+`Merchant_NPC` GameObject under `Mission4`. Add `NPCPatrol` too if you want
+the merchant to wander like `Farmer_NPC` does. Assign `associatedMission = M4_1`. Needs a
 `Collider2D` for `InputManager`'s `Physics2D.OverlapPoint` walk-up-and-click
 detection, same as every other `IInteractable`.
 
@@ -84,12 +83,23 @@ A vertical "click-anywhere slider" — dragging anywhere along the bar moves
 the reorder-point marker, same forgiving-hit-area idea as a normal UI
 slider, rather than requiring a precise grab on a tiny pin.
 
+Also carries three legibility additions that came out of an early
+playtest: a first-time player looking at 4 bare bars had no idea what they
+represented, the simulation read as silent bar-jiggling with no narration,
+and a failed run gave no way to tell which stall failed or which direction
+to adjust. Live percentage readouts, a per-stall event callout, and a
+dedicated failure outline are the fix — see below.
+
 ```
 KanbanGauge_<Stall>          Image (track background, Raycast Target ON)
                               + KanbanStallGaugeUI component
  ├─ Fill                     Image (Fill Method: Vertical, Fill Origin: Bottom)
  ├─ Marker                   Image (small horizontal bar/pin)
- └─ Label                    TextMeshProUGUI
+ ├─ Label                    TextMeshProUGUI (stall name, e.g. "Produce")
+ ├─ ThresholdReadout         TextMeshProUGUI (e.g. "Reorder at 42%")
+ ├─ StockReadout             TextMeshProUGUI (e.g. "78%", live during a run)
+ ├─ EventCallout             TextMeshProUGUI (e.g. "Reordered!" — starts inactive)
+ └─ FailureOutline           Image or border sprite (starts inactive)
 ```
 
 Wire `KanbanStallGaugeUI`'s fields:
@@ -103,19 +113,61 @@ Wire `KanbanStallGaugeUI`'s fields:
   dragging if you drag above the wasteful line — instant feedback before
   the player even runs the day).
 - `stallNameLabel` → the `Label` child.
+- `thresholdReadout` → the `ThresholdReadout` child. Updates live every time
+  the marker moves (`SetThresholdRatio`), both while dragging and when the
+  Stage Gate system resets it — a number is much easier to judge precisely
+  than bar height alone.
+- `stockReadout` → the `StockReadout` child. Updates every simulated frame
+  alongside the fill (`SetStockRatio`) — sits at "100%" at rest, since
+  that's the true starting stock, not just a placeholder.
+- `eventCalloutText` → the `EventCallout` child. **Start this object
+  inactive** — `Initialize()`/`ShowEventCallout()` handle activating and
+  hiding it, so leaving it active by default would show stale/empty text
+  before the first event fires.
+- `failureOutline` → the `FailureOutline` child (a colored border `Image`
+  behind or around the bar works well). **Start this object inactive too**
+  — same reasoning, `SetFailureOutline(bool)` is the only thing that
+  toggles it, driven once at the end of each run.
 
 Instantiate 4 gauge instances as children of `Container_Optimal_M4`
 (anywhere in a row — a `Horizontal Layout Group` on their shared parent
 keeps them evenly spaced) and assign them, **in the same order as
 `stalls[]` below**, to `KanbanBuilderSystem.gauges`.
 
-### Status text and Run Day button
+**Why a stall sitting at 90% full can still show its `FailureOutline`:**
+`SetStockRatio` only ever shows the *honest* live stock color/fill —
+it no longer force-colors a stall red just because it's flagged failed.
+A real stockout still reads as red on its own (the color naturally
+approaches `dangerColor` as stock nears 0), but a "wasteful" failure
+(threshold set too high) can leave the fill looking perfectly healthy the
+whole run — `FailureOutline` is the one visual that's guaranteed to show up
+either way, precisely because fill color alone can't distinguish "about to
+run dry" from "carrying too much stock on purpose."
+
+### Static instructions, status text, day progress, and the Run Day button
+
+Add a plain, always-visible `TextMeshProUGUI` somewhere near the top of
+`Container_Optimal_M4` with static authored text explaining the mechanic in
+plain language, e.g.: *"Each bar is a stall's stock. Drag the pin to set
+when it should reorder — too low risks running dry, too high wastes
+stock."* This never changes at runtime, so it isn't wired to any script —
+just author it directly in the Editor, same as any other static UI label
+(a button's own text, for instance).
 
 Add a `KanbanBuilderUI` component to `Container_Optimal_M4`'s root (or a
-child), wire `system` → `KanbanBuilderSystem`, `statusText`, and a **Run
-Day** `Button` wired to `KanbanBuilderUI.OnRunDayPressed` in the Inspector
-— same "buttons call straight into the owning system" pattern as
-`RoutineBuilderUI`/`BridgeBuilderUI`.
+child), wire:
+- `system` → `KanbanBuilderSystem`.
+- `statusText` → a `TextMeshProUGUI` for the dynamic status line (this is
+  the one that changes — "Set a reorder point...", the per-stall failure
+  list, or the success message).
+- `runDayButton` → a **Run Day** `Button`, wired to
+  `KanbanBuilderUI.OnRunDayPressed` in the Inspector — same "buttons call
+  straight into the owning system" pattern as `RoutineBuilderUI`/
+  `BridgeBuilderUI`.
+- `dayProgressText` → optional, a `TextMeshProUGUI` showing "Day: 60%"
+  while a run is in flight. `KanbanBuilderUI` handles showing/hiding it
+  automatically (`system.IsSimulating`) — it disappears entirely outside a
+  run rather than sitting at a stale "Day: 0%".
 
 ### `KanbanBuilderSystem` fields — suggested starting values
 
@@ -195,9 +247,84 @@ raises it directly.
 - `KanbanBuilderSystem.simDuration` (suggested 20s) — longer gives more
   delivery cycles to visibly succeed or fail across, same tradeoff as
   `FarmRoutineSystem.stepDelay`/`resultHoldDuration`'s pacing knobs.
+- `MarketAmbientSystem.minRestockInterval`/`maxRestockInterval` (suggested
+  8s–20s) and however many `attendants[]` you assign — see §8 below.
+- `KanbanStallGaugeUI.calloutDuration` (suggested 1.5s) — how long
+  "Reordered!"/"Restocked!"/"Ran dry!" stays on screen per event. Too short
+  and it's unreadable during a fast simulation; too long and overlapping
+  events on the same stall get cut off by `ShowEventCallout`'s own
+  restart-the-coroutine behavior before the player finishes reading the
+  first one.
 
-Everything downstream of `OnMissionCompleted` (reflection text, coin
-reward, trust, Stage Gate redo, Mission Directory resolved state) is
-already wired for free and needs no Mission-4-specific handling — those
-systems only ever cared about the final `wasOptimal`, same as every other
-mission.
+## 8. Post-completion epilogue (`MarketAmbientSystem`) — optional, world-permanent
+
+Entirely separate from the two Do-phase containers above, and not required
+for the mission itself to work — this is a permanent world system that
+starts running only *after* Mission 4 resolves, dramatizing which fix
+actually stuck. Same trigger `RiverManager` uses for its own permanent
+post-completion visual swap (`OnMissionCompleted` for missionID 4), just
+driving an ongoing simulation instead of a one-time flip.
+
+### A third set of stalls (not the trivial minigame's)
+
+`Container_Trivial_M4`'s 4 `MarketStall`s are temporary — they get
+deactivated forever once the mission resolves, same as any other minigame
+container. The epilogue needs its **own** 4 `MarketStall` instances, placed
+permanently in the always-visible marketplace (visible before, during, and
+after the mission plays out) — reuse the exact same `MarketStall` component
+and prefab from §3.
+
+**Do not add a `Collider2D`** to these ones. `MarketStall` still implements
+`IInteractable`, but without a collider `InputManager`'s
+`Physics2D.OverlapPoint` simply can't detect them, which is what makes them
+purely decorative/non-clickable — the player watches this epilogue, they
+don't operate it. (Contrast with §3's trivial-minigame stalls, which *do*
+need a `Collider2D` since the player has to be able to tap those.)
+
+### Attendant NPCs — as many as you want to experiment with
+
+Build a `MarketAttendantNPC` prefab: `Animator`/`SpriteRenderer` (both
+optional — null-checked, but needed for movement animation/flipping to
+actually show), and a `pathfindingSystem` field wired to the scene's
+`PathfindingSystem` directly (same as `NPCPatrol.pathfindingSystem` — not a
+singleton lookup). Place however many instances you want in the
+marketplace and drag them all into `MarketAmbientSystem.attendants[]` —
+the dispatch logic round-robins pending restock jobs across whichever
+attendants are currently free, so trying 1 vs. 4 attendants is purely an
+Inspector-array-length experiment, no code changes needed either way.
+
+### `MarketAmbientSystem` fields
+
+Add this component to a permanent GameObject in the `Mission4` world group
+(not inside either Do-phase container):
+- `missionID` → 4.
+- `stalls` → the 4 persistent stalls above, **in the same index order as
+  `KanbanBuilderSystem.stalls`/`gauges`** — `GetThresholdRatio(i)` assumes
+  matching indices, so stall 0 here must be the same stall (Produce) as
+  index 0 in the Kanban panel.
+- `attendants` → however many `MarketAttendantNPC`s you built.
+- `minRestockInterval`/`maxRestockInterval` (suggested 8s/20s) — only used
+  by the trivial "Unmanaged" mode's random dispatch timer; the optimal
+  "Kanban" mode ignores these entirely and dispatches purely off threshold
+  crossings.
+
+### What it actually does
+
+On `OnMissionCompleted(4, wasOptimal)`, it locks into one mode forever:
+- **Trivial → "Unmanaged"**: every 8–20s, dispatches an attendant to a
+  **random** stall regardless of that stall's actual stock — restocking
+  has no relationship to real need, same "nobody's watching the threshold"
+  idea the reflection text already states, just made literal.
+- **Optimal → "Kanban"**: continuously reads each stall's live
+  `MarketStall.StockRatio` against `KanbanBuilderSystem.GetThresholdRatio(i)`
+  — the exact value the player actually dragged into place, not a
+  re-authored ideal — and dispatches the instant it crosses. The walk
+  itself stands in for delivery lead time; there's no separate abstract
+  timer for it.
+
+Everything downstream of `OnMissionCompleted` that already existed before
+this feature (reflection text, coin reward, trust, Stage Gate redo, Mission
+Directory resolved state) is still wired for free and needs no
+Mission-4-specific handling. `MarketAmbientSystem` is the one addition that
+*does* need its own manual scene wiring above — it isn't automatic the way
+those other systems are.
