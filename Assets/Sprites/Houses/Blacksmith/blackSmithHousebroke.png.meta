@@ -1,0 +1,546 @@
+fileFormatVersion: 2
+guid: d7efa5b8f4217bc42b5b1bc9cbb08726
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5089418611320694189
+    second: blackSmithHousebroke_0
+  - first:
+      213: 7611773835631450443
+    second: blackSmithHousebroke_1
+  - first:
+      213: -3728224612169513833
+    second: blackSmithHousebroke_2
+  - first:
+      213: -2757091647797940339
+    second: blackSmithHousebroke_3
+  - first:
+      213: 2466210401909903351
+    second: blackSmithHousebroke_4
+  - first:
+      213: 6815218958110206309
+    second: blackSmithHousebroke_5
+  - first:
+      213: 8061866283260626875
+    second: blackSmithHousebroke_6
+  - first:
+      213: 6553460886041783455
+    second: blackSmithHousebroke_7
+  - first:
+      213: 2084782921101349878
+    second: blackSmithHousebroke_8
+  - first:
+      213: 8069040680049185089
+    second: blackSmithHousebroke_9
+  - first:
+      213: -5725948519135903296
+    second: blackSmithHousebroke_10
+  - first:
+      213: 5256646752599413704
+    second: blackSmithHousebroke_11
+  - first:
+      213: -1808731552035524541
+    second: blackSmithHousebroke_12
+  - first:
+      213: -4925711735016442482
+    second: blackSmithHousebroke_13
+  - first:
+      213: 3514696844521428520
+    second: blackSmithHousebroke_14
+  - first:
+      213: -5800763352557952516
+    second: blackSmithHousebroke_15
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: blackSmithHousebroke_0
+      rect:
+        serializedVersion: 2
+        x: 5
+        y: 384
+        width: 150
+        height: 117
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35ad7f6ecb0ce59b0800000000000000
+      internalID: -5089418611320694189
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blackSmithHousebroke_1
+      rect:
+        serializedVersion: 2
+        x: 165
+        y: 384
+        width: 150
+        height: 117
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b49dc6f79f372a960800000000000000
+      internalID: 7611773835631450443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blackSmithHousebroke_2
+      rect:
+        serializedVersion: 2
+        x: 327
+        y: 384
+        width: 148
+        height: 123
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79484ccd77fa24cc0800000000000000
+      internalID: -3728224612169513833
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blackSmithHousebroke_3
+      rect:
+        serializedVersion: 2
+        x: 487
+        y: 384
+        width: 148
+        height: 123
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8faec701c7dcb9d0800000000000000
+      internalID: -2757091647797940339
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blackSmithHousebroke_4
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 246
+        width: 148
+        height: 133
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ff86334b4db93220800000000000000
+      internalID: 2466210401909903351
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blackSmithHousebroke_5
+      rect:
+        serializedVersion: 2
+        x: 167
+        y: 246
+        width: 148
+        height: 133
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 569aaa8a885849e50800000000000000
+      internalID: 6815218958110206309
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blackSmithHousebroke_6
+      rect:
+        serializedVersion: 2
+        x: 327
+        y: 256
+        width: 148
+        height: 117
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb7c278cba081ef60800000000000000
+      internalID: 8061866283260626875
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blackSmithHousebroke_7
+      rect:
+        serializedVersion: 2
+        x: 487
+        y: 256
+        width: 148
+        height: 117
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9cefe144f192fa50800000000000000
+      internalID: 6553460886041783455
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blackSmithHousebroke_8
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 128
+        width: 148
+        height: 119
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f31c066503aeec10800000000000000
+      internalID: 2084782921101349878
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blackSmithHousebroke_9
+      rect:
+        serializedVersion: 2
+        x: 167
+        y: 128
+        width: 148
+        height: 119
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14112843fbdfaff60800000000000000
+      internalID: 8069040680049185089
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blackSmithHousebroke_10
+      rect:
+        serializedVersion: 2
+        x: 325
+        y: 128
+        width: 150
+        height: 124
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c10bb2c8285980b0800000000000000
+      internalID: -5725948519135903296
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blackSmithHousebroke_11
+      rect:
+        serializedVersion: 2
+        x: 485
+        y: 128
+        width: 150
+        height: 124
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c3166ede5c53f840800000000000000
+      internalID: 5256646752599413704
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blackSmithHousebroke_12
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 0
+        width: 151
+        height: 119
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 340b1ea8c3816e6e0800000000000000
+      internalID: -1808731552035524541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blackSmithHousebroke_13
+      rect:
+        serializedVersion: 2
+        x: 164
+        y: 0
+        width: 151
+        height: 119
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e853f58464b54abb0800000000000000
+      internalID: -4925711735016442482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blackSmithHousebroke_14
+      rect:
+        serializedVersion: 2
+        x: 323
+        y: 0
+        width: 152
+        height: 120
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 826d2ee8826b6c030800000000000000
+      internalID: 3514696844521428520
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blackSmithHousebroke_15
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 0
+        width: 152
+        height: 120
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf1eda0f67c8f7fa0800000000000000
+      internalID: -5800763352557952516
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      blackSmithHousebroke_0: -5089418611320694189
+      blackSmithHousebroke_1: 7611773835631450443
+      blackSmithHousebroke_10: -5725948519135903296
+      blackSmithHousebroke_11: 5256646752599413704
+      blackSmithHousebroke_12: -1808731552035524541
+      blackSmithHousebroke_13: -4925711735016442482
+      blackSmithHousebroke_14: 3514696844521428520
+      blackSmithHousebroke_15: -5800763352557952516
+      blackSmithHousebroke_2: -3728224612169513833
+      blackSmithHousebroke_3: -2757091647797940339
+      blackSmithHousebroke_4: 2466210401909903351
+      blackSmithHousebroke_5: 6815218958110206309
+      blackSmithHousebroke_6: 8061866283260626875
+      blackSmithHousebroke_7: 6553460886041783455
+      blackSmithHousebroke_8: 2084782921101349878
+      blackSmithHousebroke_9: 8069040680049185089
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
