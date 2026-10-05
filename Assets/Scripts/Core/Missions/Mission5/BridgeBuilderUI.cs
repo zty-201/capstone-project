@@ -21,6 +21,9 @@ public class BridgeBuilderUI : MonoBehaviour
     [SerializeField] private BridgeBuilderSystem system;
     [SerializeField] private TextMeshProUGUI budgetText;
     [SerializeField] private TextMeshProUGUI statusText;
+    // Separate from statusText so the stakes (attempts left) read on their own next to Test,
+    // rather than trailing the how-to hint.
+    [SerializeField] private TextMeshProUGUI attemptsText;
     [SerializeField] private Button testButton;
     [SerializeField] private Button resetButton;
     [SerializeField] private Button deleteButton;
@@ -29,6 +32,9 @@ public class BridgeBuilderUI : MonoBehaviour
     // One entry per BridgeBuilderSystem.Materials index — authored 1:1 against it in the
     // Inspector, same fixed-array-of-buttons shape as PlanningUI.fiveWChoiceButtons.
     [SerializeField] private MaterialButton[] materialButtons;
+    // Tints the selected material button's background so the current pick is always visible.
+    [SerializeField] private Color selectedMaterialTint = new Color(1f, 0.85f, 0.45f);
+    [SerializeField] private Color unselectedMaterialTint = Color.white;
 
     private void Start()
     {
@@ -45,7 +51,11 @@ public class BridgeBuilderUI : MonoBehaviour
             if (materials == null || index >= materials.Length) continue;
             BridgeMaterialData material = materials[index];
 
-            if (materialButtons[i].label != null) materialButtons[i].label.text = material.materialName;
+            // Cost and strength on the button itself — the tradeoff the player is choosing between
+            // shouldn't only be discoverable by placing a beam and watching the budget move.
+            if (materialButtons[i].label != null)
+                materialButtons[i].label.text =
+                    $"{material.materialName}\n<size=70%>{material.costPerUnitLength:0}/m  Str {material.breakForce:0}</size>";
             if (materialButtons[i].icon != null && material.icon != null) materialButtons[i].icon.sprite = material.icon;
         }
     }
@@ -54,7 +64,8 @@ public class BridgeBuilderUI : MonoBehaviour
     {
         if (system == null) return;
 
-        budgetText.text = $"Budget: {system.RemainingBudget:0.0}";
+        budgetText.text = $"Budget: {system.BudgetUsed:0} / {system.Budget:0}";
+        attemptsText.text = $"Attempts left: {system.RemainingAttempts}";
 
         bool building = system.Phase == BridgeBuilderSystem.BuildPhase.Building;
         testButton.interactable = building;
@@ -63,12 +74,17 @@ public class BridgeBuilderUI : MonoBehaviour
         undoButton.interactable = building && system.CanUndo;
         redoButton.interactable = building && system.CanRedo;
 
-        foreach (var materialButton in materialButtons)
-            materialButton.button.interactable = building;
+        BridgeMaterialData[] materials = system.Materials;
+        for (int i = 0; i < materialButtons.Length; i++)
+        {
+            materialButtons[i].button.interactable = building;
+            bool selected = i < materials.Length && materials[i] == system.SelectedMaterial;
+            materialButtons[i].button.image.color = selected ? selectedMaterialTint : unselectedMaterialTint;
+        }
 
-        statusText.text = building
-            ? $"Drag to place a beam. Attempts left: {system.RemainingAttempts}"
-            : "Testing...";
+        // The how-to hint is static Editor-authored text on its own TMP object, not driven here —
+        // this label only reports the live phase.
+        statusText.text = building ? string.Empty : "Testing...";
     }
 
     // Wired to the Test button's OnClick in the Inspector.

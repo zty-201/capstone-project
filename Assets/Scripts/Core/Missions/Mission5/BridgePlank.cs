@@ -13,6 +13,11 @@ public class BridgePlank : MonoBehaviour
     [SerializeField] private SpriteRenderer visual;
     [Tooltip("Color every material's plank shifts toward as it approaches its breakForce during the test.")]
     [SerializeField] private Color breakingColor = Color.red;
+    // Second, non-color cue for near-breaking planks — the red lerp alone is hard to read with
+    // red-green color vision deficiency. Above this stress ratio the plank blinks to flashColor.
+    [SerializeField, Range(0f, 1f)] private float flashThreshold = 0.8f;
+    [SerializeField] private Color flashColor = Color.white;
+    [SerializeField] private float flashesPerSecond = 6f;
 
     private Rigidbody2D rb;
     private HingeJoint2D jointA;
@@ -94,8 +99,10 @@ public class BridgePlank : MonoBehaviour
 
         float stressA = jointA != null ? jointA.reactionForce.magnitude : breakForce;
         float stressB = jointB != null ? jointB.reactionForce.magnitude : breakForce;
-        float stress = Mathf.Max(stressA, stressB) / breakForce;
-        visual.color = Color.Lerp(baseColor, breakingColor, Mathf.Clamp01(stress));
+        float stress = Mathf.Clamp01(Mathf.Max(stressA, stressB) / breakForce);
+
+        bool flashOn = stress >= flashThreshold && Mathf.Repeat(Time.time * flashesPerSecond, 1f) < 0.5f;
+        visual.color = flashOn ? flashColor : Color.Lerp(baseColor, breakingColor, stress);
     }
 
     // Unity message: fired automatically when a joint's reaction force exceeds its breakForce.

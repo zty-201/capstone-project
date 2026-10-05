@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class BridgeBuilderState : IState
@@ -24,7 +25,13 @@ public class BridgeBuilderState : IState
 
         if (system != null && PointerInput.TryGetPrimaryWorldPosition(out Vector3 worldPos))
         {
-            if (PointerInput.PrimaryPressedThisFrame()) system.HandleDragStart(worldPos);
+            // A press on a HUD button (Undo/Delete/a material...) is that button's click, not a
+            // build gesture — without this guard it also deselected the node Delete was about to
+            // act on. Only the press is filtered: HandleDragUpdate/End no-op without a started drag.
+            if (PointerInput.PrimaryPressedThisFrame())
+            {
+                if (!EventSystem.current.IsPointerOverGameObject()) system.HandleDragStart(worldPos);
+            }
             else if (PointerInput.PrimaryHeld()) system.HandleDragUpdate(worldPos);
             else if (PointerInput.PrimaryReleasedThisFrame()) system.HandleDragEnd(worldPos);
         }

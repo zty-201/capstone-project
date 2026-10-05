@@ -16,6 +16,7 @@ public class KanbanBuilderUI : MonoBehaviour
 {
     [SerializeField] private KanbanBuilderSystem system;
     [SerializeField] private TextMeshProUGUI statusText;
+    [SerializeField] private TextMeshProUGUI attemptsText;
     [SerializeField] private Button runDayButton;
     [SerializeField] private TextMeshProUGUI dayProgressText;
 
@@ -25,6 +26,9 @@ public class KanbanBuilderUI : MonoBehaviour
 
         statusText.text = system.StatusMessage;
         runDayButton.interactable = system.CanConfigure;
+
+        if (attemptsText != null)
+            attemptsText.text = $"Attempts left: {system.RemainingAttempts}";
 
         if (dayProgressText != null)
         {

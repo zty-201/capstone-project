@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MissionData
   missionID: 4
   missionName: The Tangled Marketplace
-  isAdvancedMission: 0
+  isAdvancedMission: 1
   villagerComplaint:
   - Half the stalls sit empty by midday and buyers just walk off!
   - But the other half are drowning in stock that's gone bad before anyone bought
@@ -70,10 +70,10 @@ MonoBehaviour:
     - There's no market official responsible for such decisions.
     hint: Think about what kind of system would actually fix this for good, not just
       for one day.
-  trivialReflectionText: You keep running back and forth restocking whatever looks
-    empty. Some days it works out — other days a stall sits bare for hours, or
-    rots with stock nobody bought in time. It's exhausting, and sooner or later you're
-    going to miss one.
+  trivialReflectionText: No matter how you adjusted the signals, they never quite
+    held up — a stall would run dry one day and drown in stock the next. After one
+    bad day too many, the merchants gave up on the system and went back to just
+    restocking whatever looked empty, the way they always had.
   optimalReflectionText: Each stall now signals the moment it actually needs more
     — never empty, never overflowing. You barely had to watch over any of them;
     the market keeps itself running exactly as it should. Turns out the idea has
@@ -81,7 +81,6 @@ MonoBehaviour:
     exactly this.
   introObjective: The marketplace can't keep its shelves balanced — go see what's
     going wrong.
-  trivialObjectives:
-  - Restock stalls before they run dry.
+  trivialObjectives: []
   optimalObjectives:
-  - Set reorder-point signals for each stall.
+  - Set reorder-point signals and test the day ({0}/{1} attempts used).

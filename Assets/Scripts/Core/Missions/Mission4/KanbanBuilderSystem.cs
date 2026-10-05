@@ -2,17 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Mission 4's optimal minigame: a configure-then-simulate puzzle, a new mechanical genre for
-// this game (every other optimal minigame is either manipulated continuously — pipe rotation,
-// bridge building — or a discrete fetch/assemble/place chain — the winch). The player sets a
-// reorder-point threshold per stall (KanbanStallGaugeUI), then runs a simulated market day: each
-// stall drains at its own consumption rate and refills after its own delivery lead time once its
-// threshold is crossed. Set a threshold too low and the stall runs dry before delivery lands; set
-// it too high (above wastefulThresholdRatio) and it's not actually pulling stock on demand, it's
-// just always kept topped up — both count as a fail. Passing every stall fires
-// RaiseMissionCompleted(4, true) directly; unlike Mission 3/5's Advanced Mission shape, Mission 4
-// is a classic mission — the 5 Whys quiz already picked this path, so there's no attempt limit
-// here, same as Mission 1's pipe puzzle letting the player retry indefinitely until it's solved.
+// Mission 4's single minigame (design doc's "Tangled Marketplace"): a configure-then-simulate
+// puzzle, a new mechanical genre for this game (every other optimal minigame is either
+// manipulated continuously — pipe rotation, bridge building — or a discrete fetch/assemble/place
+// chain — the winch). The player sets a reorder-point threshold per stall (KanbanStallGaugeUI),
+// then runs a simulated market day: each stall drains at its own consumption rate and refills
+// after its own delivery lead time once its threshold is crossed. Set a threshold too low and the
+// stall runs dry before delivery lands; set it too high (above wastefulThresholdRatio) and it's
+// not actually pulling stock on demand, it's just always kept topped up — both count as a fail.
+//
+// Mission 4 is an Advanced Mission (MissionData.isAdvancedMission), same shape as Mission 3/5:
+// there's no separate trivial-path container, and the 5 Whys quiz doesn't pick SolutionType at
+// all — PlanningUI.SelectAdvancedMission() always routes into this single container, and this
+// system's own pass/fail on the simulated day decides wasOptimal directly. The quiz score instead
+// buys bonus attempts (same "quiz score becomes practice attempts, not the decision itself" idea
+// FarmRoutineSystem/BridgeBuilderSystem use) — a multiple-choice diagnosis can't stand in for
+// "did you actually tune the thresholds correctly" any better than it can for "does the bridge
+// hold" or "is the chore order right," so the test itself is what proves it.
 public class KanbanBuilderSystem : MonoBehaviour
 {
     public static KanbanBuilderSystem Instance { get; private set; }
@@ -45,6 +51,14 @@ public class KanbanBuilderSystem : MonoBehaviour
     [Header("Simulated Day")]
     [SerializeField] private float simDuration = 12f; // real seconds the "day" plays out over
 
+    [Header("Attempts")]
+    [SerializeField] private int baseAttempts = 5;
+    // Bonus attempts per correct answer in the 5 Whys quiz — same idea as
+    // FarmRoutineSystem.bonusAttemptsPerCorrectWhy/BridgeBuilderSystem.bonusAttemptsPerCorrectWhy,
+    // so a strong diagnosis still earns something concrete even though this mission's quiz
+    // doesn't pick the path either.
+    [SerializeField] private int bonusAttemptsPerCorrectWhy = 1;
+
     [Header("Audio")]
     [SerializeField] private AudioClip successSfx;
     [SerializeField] private AudioClip failSfx;
@@ -54,11 +68,15 @@ public class KanbanBuilderSystem : MonoBehaviour
     private float[] deliveryTimer;
     private FailureReason[] failureReason;
     private float dayElapsed;
+    private int attemptsUsed;
+    private int correctWhysCount;
 
     public bool IsSimulating { get; private set; }
     public bool CanConfigure => !IsSimulating;
     public string StatusMessage { get; private set; } = "";
     public int StallCount => stalls.Length;
+    public int MaxAttempts => baseAttempts + correctWhysCount * bonusAttemptsPerCorrectWhy;
+    public int RemainingAttempts => MaxAttempts - attemptsUsed;
 
     // Read by KanbanBuilderUI to show a "Day: 60%" readout while a run is in progress — purely
     // cosmetic, so the player understands this is a timed run with a defined end rather than
@@ -89,7 +107,17 @@ public class KanbanBuilderSystem : MonoBehaviour
 
     private void OnDestroy() => EventBus.OnMissionsNeedReview -= HandleMissionsNeedReview;
 
-    private void OnEnable() => ResetKanban();
+    private void OnEnable()
+    {
+        // PlanningUI.SelectAdvancedMission raises OnSolutionSelected (which activates this
+        // container, running this OnEnable) strictly before OnFiveWhysCompleted, so subscribing
+        // here — not Awake — is enough to always catch it, including on this container's very
+        // first-ever activation. Matches FarmRoutineSystem/BridgeBuilderSystem's same reasoning.
+        EventBus.OnFiveWhysCompleted += HandleFiveWhysCompleted;
+        ResetKanban();
+    }
+
+    private void OnDisable() => EventBus.OnFiveWhysCompleted -= HandleFiveWhysCompleted;
 
     public void RunDay()
     {
@@ -175,19 +203,34 @@ public class KanbanBuilderSystem : MonoBehaviour
         }
 
         AudioManager.Instance.PlaySFX(allPassed ? successSfx : failSfx);
-        StatusMessage = allPassed
-            ? "Every stall stayed stocked right when it needed to be — nothing wasted, nothing empty."
-            : string.Join("\n", failureLines);
-
         IsSimulating = false;
 
         if (allPassed)
+        {
+            StatusMessage = "Every stall stayed stocked right when it needed to be — nothing wasted, nothing empty.";
             EventBus.RaiseMissionCompleted(missionID, true);
+            yield break;
+        }
+
+        attemptsUsed++;
+        if (attemptsUsed >= MaxAttempts)
+        {
+            // Out of attempts: the system never held up under test, so this mission resolves
+            // trivially and waits for a Stage Gate redo, same "exhausted attempts" shape
+            // BridgeBuilderSystem/FarmRoutineSystem use.
+            StatusMessage = string.Join("\n", failureLines) + "\nOut of attempts.";
+            EventBus.RaiseMissionCompleted(missionID, false);
+            yield break;
+        }
+
+        StatusMessage = string.Join("\n", failureLines) + $"\n{RemainingAttempts} attempt(s) left.";
+        EventBus.RaiseObjectiveProgress(missionID, SolutionType.Optimal, 0, attemptsUsed, MaxAttempts);
     }
 
     private void ResetKanban()
     {
         IsSimulating = false;
+        attemptsUsed = 0;
         StatusMessage = "Set a reorder point for each stall, then run the day.";
 
         for (int i = 0; i < stalls.Length && i < gauges.Length; i++)
@@ -197,6 +240,14 @@ public class KanbanBuilderSystem : MonoBehaviour
             gauges[i].SetStockRatio(1f);
             gauges[i].SetFailureOutline(false);
         }
+
+        EventBus.RaiseObjectiveProgress(missionID, SolutionType.Optimal, 0, attemptsUsed, MaxAttempts);
+    }
+
+    private void HandleFiveWhysCompleted(int id, int correctCount)
+    {
+        if (id != missionID) return;
+        correctWhysCount = correctCount;
     }
 
     private void HandleMissionsNeedReview(int[] missionIDs)

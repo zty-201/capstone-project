@@ -203,8 +203,8 @@ Assign this prefab to `BridgeBuilderSystem.plankPrefab`, and add an empty
 ### Materials
 
 Create 2-3 `BridgeMaterialData` assets (`Kaizen Systems/Bridge Material Data`)
-— e.g. **Wood** (low `costPerUnitLength`, low `breakForce`), **Steel**
-(mid/mid), **Cable** (high cost, high `breakForce`) — each with a distinct
+— currently **Wood** (cheapest, weakest), **Road** (mid/mid, the only `isRoad`
+material), **Steel** (most expensive, strongest) — each with a distinct
 `plankColor` so placed beams read as different materials at a glance. Assign
 the array to `BridgeBuilderSystem.materials`; index 0 is the default selected
 material on activation.
@@ -249,6 +249,12 @@ On `BridgeBuilderSystem`:
 - `maxPlankLength` — still a hard physical cap on any single beam,
   independent of material/cost.
 - `gridSpacing` — snap increment for placing a new node in empty space.
+- `gridOverlay` — a child GameObject (on the `Bridge` layer, sorting order
+  below the planks) with a `SpriteRenderer` + `BridgeGridOverlay`. It draws a
+  faint dot at every snap point while building and hides during the test. The
+  dot sprite is generated in code to match `gridSpacing`, so leave the
+  `SpriteRenderer`'s Sprite empty; set its **Color** to a faint dark tint (e.g.
+  dark brown at ~30% alpha).
 - `playgroundBounds` — **don't hand-type this.** `ComputePlaygroundBounds()`
   recomputes it every `OnEnable` from `bridgeViewCamera`'s own orthographic
   size and aspect ratio, so "you can build anywhere you can see" is true by
@@ -340,8 +346,12 @@ the brain, so drag/node resolution needs no camera-specific handling either.
 ### UI panel
 Build a small Canvas panel (can live under the main Canvas, doesn't need to be
 world-space — see `InfoBoard`/`PlanningUI` panels for the pattern) with:
-- A budget `TextMeshProUGUI`.
-- A status `TextMeshProUGUI`.
+- A budget `TextMeshProUGUI` (shows "spent / total").
+- A status `TextMeshProUGUI` (empty while building, "Testing..." during a test).
+- A hint `TextMeshProUGUI` with the objective/how-to typed directly in the Editor —
+  static, not referenced by `BridgeBuilderUI`.
+- An attempts `TextMeshProUGUI`, kept separate from status and placed next to
+  **Test**.
 - **Test**, **Reset**, **Delete**, **Undo**, and **Redo** `Button`s.
 - One `Button`+`TextMeshProUGUI` label pair per entry in
   `BridgeBuilderSystem.materials` (a material picker row) — matches

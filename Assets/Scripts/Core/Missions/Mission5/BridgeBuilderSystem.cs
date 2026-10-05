@@ -85,6 +85,8 @@ public class BridgeBuilderSystem : MonoBehaviour
     [SerializeField] private float playgroundMargin = 1f;
     [SerializeField] private float nodeSnapRadius = 0.3f;
     [SerializeField] private LineRenderer previewLine;
+    // Shows the SnapToGrid points while building, so the player can predict where a new node lands.
+    [SerializeField] private BridgeGridOverlay gridOverlay;
 
     [Header("Prefab & Scene References")]
     [SerializeField] private BridgePlank plankPrefab;
@@ -149,6 +151,8 @@ public class BridgeBuilderSystem : MonoBehaviour
     private Vector3 dragStartPoint;
 
     public BuildPhase Phase { get; private set; } = BuildPhase.Building;
+    public float Budget => budget;
+    public float BudgetUsed => budgetUsed;
     public float RemainingBudget => budget - budgetUsed;
     public int MaxTestAttempts => baseTestAttempts + correctWhysCount * bonusAttemptsPerCorrectWhy;
     public int RemainingAttempts => MaxTestAttempts - attemptsUsed;
@@ -202,6 +206,7 @@ public class BridgeBuilderSystem : MonoBehaviour
         Vector3 center = bridgeViewCamera.transform.position;
 
         playgroundBounds = new Rect(center.x - halfWidth, center.y - halfHeight, halfWidth * 2f, halfHeight * 2f);
+        gridOverlay.Fit(playgroundBounds, gridSpacing);
     }
 
     private void OnDisable()
@@ -502,6 +507,7 @@ public class BridgeBuilderSystem : MonoBehaviour
 
         Phase = BuildPhase.Testing;
         testTimer = 0f;
+        gridOverlay.SetVisible(false);
 
         foreach (var node in nodes) node.SetSimulated(true);
         foreach (var plank in placedPlanks) plank.SetSimulated(true);
@@ -519,6 +525,7 @@ public class BridgeBuilderSystem : MonoBehaviour
     {
         Phase = BuildPhase.Building;
         testTimer = 0f;
+        gridOverlay.SetVisible(true);
 
         CancelDrag();
         if (selectedNode != null) { selectedNode.SetSelected(false); selectedNode = null; }

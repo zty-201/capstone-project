@@ -1,17 +1,31 @@
 # Mission 4 (The Tangled Marketplace) — Editor Setup Guide
 
 All gameplay logic is in `Assets/Scripts/Core/Missions/Mission4/` and the new
-`KanbanBuilderState`. Mission data (`M4_1.asset`) is already fully authored —
-complaint, root cause, 5 Whys chain, reflection texts, directory objectives.
-Mission ID **4** is already registered in `MissionRegistry` and in `Stage2`
-(`StageData.missionIDs = [3, 4, 5]`) — nothing to change there. What's left
-is scene/prefab wiring, which only the Editor can do.
+`KanbanBuilderState`. Mission data (`M4_KanBanMarket.asset`) is already fully
+authored — complaint, root cause, 5 Whys chain, reflection texts, directory
+objectives. Mission ID **4** is already registered in `MissionRegistry` and
+in `Stage2` (`StageData.missionIDs = [3, 4, 5]`) — nothing to change there.
+What's left is scene/prefab wiring, which only the Editor can do.
 
-Unlike Mission 3/5 (Advanced Missions, one container, the minigame's own
-result decides `wasOptimal`), Mission 4 is a **classic** mission — the 5
-Whys quiz picks the path directly via the normal `OnSolutionSelected` flow,
-so it needs **two** containers and **two** `MinigameActivator`s, same shape
-as Mission 1/2, not Mission 3/5's single-container shape.
+Mission 4 is an **Advanced Mission** (`MissionData.isAdvancedMission`), same
+shape as Mission 3/5 — **one** container, no separate trivial path. The 5
+Whys quiz doesn't pick `SolutionType` at all: `PlanningUI.SelectAdvancedMission()`
+always routes into the single Kanban panel, and `KanbanBuilderSystem`'s own
+pass/fail on the simulated day decides `wasOptimal` directly. The quiz score
+instead buys bonus attempts (`baseAttempts` + `bonusAttemptsPerCorrectWhy` ×
+correct answers) — same "quiz score becomes practice attempts, not the
+decision itself" idea `FarmRoutineSystem`/`BridgeBuilderSystem` already use.
+
+> **If you previously built the earlier two-container version** (a
+> `Container_Trivial_M4` with `MarketStallTrivialSystem` + 4 tappable world
+> `MarketStall`s, plus a separate `Activator_Mission4_Trivial`): that shape
+> is retired for Mission 4's Do phase. Delete (or deactivate)
+> `Container_Trivial_M4` and `Activator_Mission4_Trivial` from the scene —
+> `PlanningUI.SelectAdvancedMission()` never raises `SolutionType.Trivial`
+> for an advanced mission, so that activator can no longer ever fire.
+> **Don't delete the scripts** (`MarketStallTrivialSystem.cs`/`MarketStall.cs`)
+> — they're earmarked for reuse in the post-5-missions farming/market
+> sandbox later, just unplugged from Mission 4 specifically.
 
 ## 1. The `Mission4` group (world-space)
 
@@ -22,53 +36,12 @@ Create a root-level `Mission4` GameObject at the marketplace map location.
 Place an `NPCController` (`Assets/Scripts/Core/Missions/NPCController.cs` —
 the same generic dialogue-trigger component Mission 1's well uses) on a
 `Merchant_NPC` GameObject under `Mission4`. Add `NPCPatrol` too if you want
-the merchant to wander like `Farmer_NPC` does. Assign `associatedMission = M4_1`. Needs a
-`Collider2D` for `InputManager`'s `Physics2D.OverlapPoint` walk-up-and-click
-detection, same as every other `IInteractable`.
+the merchant to wander like `Farmer_NPC` does. Assign
+`associatedMission = M4_KanBanMarket`. Needs a `Collider2D` for
+`InputManager`'s `Physics2D.OverlapPoint` walk-up-and-click detection, same
+as every other `IInteractable`.
 
-## 3. Trivial container (`Container_Trivial_M4`) — "Restock by Feel"
-
-World-space, same shape as `Container_Trivial_M2` (the rubble-clearing
-container) — a set of `IInteractable` pieces scattered in the world, not UI.
-
-Create a root-level `Container_Trivial_M4` GameObject (starts **inactive**,
-like every minigame container). Add `MarketStallTrivialSystem` to its root.
-
-### Stall prop (×4 — Produce, Fish, Tools, Cloth)
-
-Not strictly a prefab requirement (four one-off props are fine), but a
-prefab keeps them in sync. Each stall needs:
-- A `SpriteRenderer` (the stall's stock visual) → `MarketStall.stockVisual`.
-  Its color gets lerped between `emptyColor` (default red) and `fullColor`
-  (default green) as stock drains — no separate sprite swap needed, same
-  cheap-visual-feedback approach `BridgePlank.UpdateStressVisual` uses for
-  stress.
-- A `Collider2D` (for `InputManager`'s `OverlapPoint` check, same as every
-  other world `IInteractable`).
-- The `MarketStall` component itself.
-
-Place all 4 stall instances anywhere sensible under `Container_Trivial_M4`
-and assign them, in the same order you'll use for the optimal container's
-`stalls[]` below (Produce/Fish/Tools/Cloth), to
-`MarketStallTrivialSystem.stalls`.
-
-### `MarketStallTrivialSystem` fields
-
-- `missionID` → 4.
-- `stalls` → the 4 `MarketStall`s above.
-- `dayDuration` → how long (real seconds) the simulated trivial day runs
-  before it always resolves to `RaiseMissionCompleted(4, false)` regardless
-  of how many stalls were sitting empty. Suggested **30s** — long enough
-  that a player who's actually paying attention can keep every stall mostly
-  full, but a distracted player will visibly lose one or two along the way.
-- `depletionRate` (on each `MarketStall`, not the system) — suggested
-  **0.08** (a stall goes from full to empty in ~12.5s if never restocked).
-  Vary it slightly per stall if you want some to feel more urgent than
-  others, same spirit as the optimal path's per-stall `consumptionRate`
-  below — but it doesn't need to match those values exactly; the trivial
-  path is deliberately "restock whatever looks empty," not a tuned puzzle.
-
-## 4. Optimal container (`Container_Optimal_M4`) — the Kanban panel
+## 3. The Kanban panel (`Container_Optimal_M4`) — Mission 4's only container
 
 Screen-space Canvas, same shape as `Container_Optimal_M3` — one GameObject
 carrying `Canvas`/`CanvasScaler`/`GraphicRaycaster` directly, not nested
@@ -144,7 +117,7 @@ whole run — `FailureOutline` is the one visual that's guaranteed to show up
 either way, precisely because fill color alone can't distinguish "about to
 run dry" from "carrying too much stock on purpose."
 
-### Static instructions, status text, day progress, and the Run Day button
+### Static instructions, status/attempts text, day progress, and the Run Day button
 
 Add a plain, always-visible `TextMeshProUGUI` somewhere near the top of
 `Container_Optimal_M4` with static authored text explaining the mechanic in
@@ -159,7 +132,10 @@ child), wire:
 - `system` → `KanbanBuilderSystem`.
 - `statusText` → a `TextMeshProUGUI` for the dynamic status line (this is
   the one that changes — "Set a reorder point...", the per-stall failure
-  list, or the success message).
+  list plus remaining attempts, or the success message).
+- `attemptsText` → a `TextMeshProUGUI` showing "Attempts left: N" —
+  updated every frame from `system.RemainingAttempts`, same always-visible
+  pattern `RoutineBuilderUI.attemptsText` uses for Mission 3.
 - `runDayButton` → a **Run Day** `Button`, wired to
   `KanbanBuilderUI.OnRunDayPressed` in the Inspector — same "buttons call
   straight into the owning system" pattern as `RoutineBuilderUI`/
@@ -197,49 +173,52 @@ child), wire:
   the Inspector). 12s is too short for Cloth's 6s lead time to complete even
   one full delivery cycle during testing; 20s gives every stall at least one
   full drain-and-refill to actually observe.
-- `successSfx`/`failSfx` — optional, played once at the end of
-  `RunDay()`'s simulated day.
+- `baseAttempts` (default 5) — matching Mission 3's "5 tries" convention
+  directly.
+- `bonusAttemptsPerCorrectWhy` (default 1) — same idea as
+  `FarmRoutineSystem.bonusAttemptsPerCorrectWhy`/
+  `BridgeBuilderSystem.bonusAttemptsPerCorrectWhy`: a strong 5 Whys
+  diagnosis earns extra attempts on top of the base 5, even though this
+  mission's quiz doesn't pick trivial vs. optimal either.
+- `successSfx`/`failSfx` — optional, played once at the end of each
+  `RunDay()`'s simulated day (a failed-but-not-yet-exhausted run still
+  plays `failSfx`).
 
-## 5. `MinigameActivator` wiring (both paths)
+## 4. `MinigameActivator` wiring — single container, `singleContainerForMission` checked
 
-Same two-activator shape as Mission 1/2 — **not** Mission 3/5's
-`singleContainerForMission` shape, since Mission 4 has two real containers
-and the quiz already decided which one plays.
+Same shape as Mission 3/5 — **not** Mission 1/2's two-activator shape,
+since there's only one real container here and the quiz never decides
+which path plays.
 
-**`Activator_Mission4_Trivial`** (a dedicated GameObject next to, not
-inside, `Container_Trivial_M4` — `MinigameActivator` never lives on the
-container it activates, since it subscribes to `OnSolutionSelected` in its
-own `OnEnable`, which wouldn't run on an object that starts inactive):
-- `missionID` → 4
-- `solutionType` → **Trivial**
-- `container` → `Container_Trivial_M4`
-- `targetState` → **Exploration** (same as Mission 1/2's trivial paths —
-  plain walk-up-and-click `IInteractable`s, no dedicated state needed)
-- `singleContainerForMission` → unchecked
-
-**`Activator_Mission4_Optimal`**:
+`MinigameActivator` never lives on the container it activates (it
+subscribes to `OnSolutionSelected` in its own `OnEnable`, which wouldn't
+run on an object that starts inactive). Create a dedicated
+`Activator_Mission4_Optimal` GameObject next to (not inside)
+`Container_Optimal_M4`:
 - `missionID` → 4
 - `solutionType` → **Optimal**
 - `container` → `Container_Optimal_M4`
 - `targetState` → **`KanbanBuilder`**
-- `singleContainerForMission` → unchecked
+- **`singleContainerForMission` → checked** — this one container can end
+  in either outcome (pass the day, or exhaust attempts), and without this
+  flag `MinigameActivator` only closes the container when `wasOptimal`
+  happens to match its own `solutionType`, leaving it stuck open on a
+  trivial (attempts-exhausted) result.
 
-## 6. Mission Directory HUD
+## 5. Mission Directory HUD
 
-Add a `MissionDirectoryUI.DirectoryEntry` for `M4_1` with its own
-`TextMeshProUGUI` line, same as the existing missions. Both
-`trivialObjectives`/`optimalObjectives` on `M4_1` are single-entry (no
-sub-stage granularity worth tracking — same reasoning as Mission 1/2's
-simple paths), so `MinigameActivator`'s own stage-0 raise right before
-`container.SetActive(true)` is the only `OnObjectiveProgress` call either
-path needs; neither `MarketStallTrivialSystem` nor `KanbanBuilderSystem`
-raises it directly.
+Add a `MissionDirectoryUI.DirectoryEntry` for `M4_KanBanMarket` with its own
+`TextMeshProUGUI` line, same as the existing missions. `trivialObjectives`
+is intentionally empty — same reason as Mission 3/5: the single container's
+`MinigameActivator.solutionType` is always `Optimal`, so a trivial-path line
+never gets raised. `KanbanBuilderSystem` raises `OnObjectiveProgress` at
+stage index 0 itself (on every reset and after every failed-but-not-exhausted
+run), matching `M4_KanBanMarket.optimalObjectives[0]`'s `{0}/{1}`
+placeholders (attempts used / max attempts) — same pattern
+`FarmRoutineSystem` uses for Mission 3's directory line.
 
-## 7. Tuning knobs (playtest and adjust)
+## 6. Tuning knobs (playtest and adjust)
 
-- `MarketStallTrivialSystem.dayDuration` (suggested 30s) /
-  `MarketStall.depletionRate` per stall (suggested 0.08) — trivial path
-  pacing.
 - `KanbanBuilderSystem.stalls[]` — see the table above; the whole puzzle's
   difficulty lives in these four rows. Widen a band by lowering
   `consumptionRate`/`deliveryLeadTime` or raising `wastefulThresholdRatio`;
@@ -247,8 +226,11 @@ raises it directly.
 - `KanbanBuilderSystem.simDuration` (suggested 20s) — longer gives more
   delivery cycles to visibly succeed or fail across, same tradeoff as
   `FarmRoutineSystem.stepDelay`/`resultHoldDuration`'s pacing knobs.
+- `KanbanBuilderSystem.baseAttempts`/`bonusAttemptsPerCorrectWhy` — see
+  above; this is the mission's actual difficulty/forgiveness dial now that
+  there's no separate trivial path to fall back on.
 - `MarketAmbientSystem.minRestockInterval`/`maxRestockInterval` (suggested
-  8s–20s) and however many `attendants[]` you assign — see §8 below.
+  8s–20s) and however many `attendants[]` you assign — see §7 below.
 - `KanbanStallGaugeUI.calloutDuration` (suggested 1.5s) — how long
   "Reordered!"/"Restocked!"/"Ran dry!" stays on screen per event. Too short
   and it's unreadable during a fast simulation; too long and overlapping
@@ -256,30 +238,31 @@ raises it directly.
   restart-the-coroutine behavior before the player finishes reading the
   first one.
 
-## 8. Post-completion epilogue (`MarketAmbientSystem`) — optional, world-permanent
+## 7. Post-completion epilogue (`MarketAmbientSystem`) — optional, world-permanent
 
-Entirely separate from the two Do-phase containers above, and not required
-for the mission itself to work — this is a permanent world system that
-starts running only *after* Mission 4 resolves, dramatizing which fix
-actually stuck. Same trigger `RiverManager` uses for its own permanent
+Entirely separate from the Do-phase container above, and not required for
+the mission itself to work — this is a permanent world system that starts
+running only *after* Mission 4 resolves, dramatizing which fix actually
+stuck. Same trigger `RiverManager` uses for its own permanent
 post-completion visual swap (`OnMissionCompleted` for missionID 4), just
-driving an ongoing simulation instead of a one-time flip.
+driving an ongoing simulation instead of a one-time flip. It doesn't care
+*how* the mission resolved trivially (there's no trivial minigame anymore —
+"trivial" here just means the player ran out of attempts), only that
+`wasOptimal` came back false, so nothing about this section changes from
+Mission 4's earlier two-container design.
 
-### A third set of stalls (not the trivial minigame's)
+### A set of persistent world stalls (separate from the Kanban panel's gauges)
 
-`Container_Trivial_M4`'s 4 `MarketStall`s are temporary — they get
-deactivated forever once the mission resolves, same as any other minigame
-container. The epilogue needs its **own** 4 `MarketStall` instances, placed
-permanently in the always-visible marketplace (visible before, during, and
-after the mission plays out) — reuse the exact same `MarketStall` component
-and prefab from §3.
+The Kanban panel's gauges are abstract UI, not world objects. The epilogue
+needs its own 4 `MarketStall` instances (`Assets/Scripts/Core/Missions/Mission4/MarketStall.cs`
+— reused from the retired trivial path, see the note at the top of this
+doc), placed permanently in the always-visible marketplace.
 
-**Do not add a `Collider2D`** to these ones. `MarketStall` still implements
+**Do not add a `Collider2D`** to these. `MarketStall` still implements
 `IInteractable`, but without a collider `InputManager`'s
 `Physics2D.OverlapPoint` simply can't detect them, which is what makes them
 purely decorative/non-clickable — the player watches this epilogue, they
-don't operate it. (Contrast with §3's trivial-minigame stalls, which *do*
-need a `Collider2D` since the player has to be able to tap those.)
+don't operate it.
 
 ### Attendant NPCs — as many as you want to experiment with
 
@@ -296,7 +279,7 @@ Inspector-array-length experiment, no code changes needed either way.
 ### `MarketAmbientSystem` fields
 
 Add this component to a permanent GameObject in the `Mission4` world group
-(not inside either Do-phase container):
+(not inside `Container_Optimal_M4`):
 - `missionID` → 4.
 - `stalls` → the 4 persistent stalls above, **in the same index order as
   `KanbanBuilderSystem.stalls`/`gauges`** — `GetThresholdRatio(i)` assumes

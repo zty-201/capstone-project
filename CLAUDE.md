@@ -43,8 +43,9 @@ Open the project in the Unity Editor (Unity 6). There are no CLI build or test c
 | `Dialogue` | Delegates left-click to `DialogueManager.OnAdvanceDialogue()` |
 | `Planning` | Delegates left-click to `PlanningUI.OnAdvance()`; ESC returns to Exploration |
 | `Puzzle` | ESC returns to Exploration; pipe clicks route directly via `IPointerClickHandler` on each Canvas-based `PipeVisual`, not through `Tick()` polling |
-| `BridgeBuilder` | Forwards press/hold/release world positions into `BridgeBuilderSystem.HandleDragStart/Update/End`; ESC returns to Exploration (guarded — only while `Phase == Building`) |
+| `BridgeBuilder` | Forwards press/hold/release world positions into `BridgeBuilderSystem.HandleDragStart/Update/End` — a press over any UI raycast target (`EventSystem.IsPointerOverGameObject()`) is skipped so HUD button clicks aren't also read as build gestures; ESC returns to Exploration (guarded — only while `Phase == Building`) |
 | `RoutineBuilder` | ESC returns to Exploration; card drag/drop routes directly via Unity's `IBeginDragHandler`/`IDropHandler` on the Canvas panel, not through `Tick()` polling |
+| `KanbanBuilder` | ESC returns to Exploration (guarded — only while not mid-simulation); threshold-marker dragging and the Run Day button route directly via Unity's own UGUI handlers on the Canvas panel, not through `Tick()` polling |
 | `Reflection` | Delegates left-click to `ReflectionPopupUI.OnDismiss()` |
 | `MissionBoard` | ESC returns to Exploration |
 | `DayComplete` | Empty stub — the day-complete panel is dismissed via a UI Button wired directly to `DayCompleteUI.OnDismiss()` in the Inspector, not through `Tick()` |
@@ -155,7 +156,7 @@ The quiz behaves differently on a redo (see Stage Gate System below): `hintText`
 A "Needs Review" (trivial) mission *can* now be reopened, but only through the Stage Gate System (see below) rejecting a stage submission at Town Hall — there's no way to manually revisit a trivial mission before then. Once `OnMissionsNeedReview` fires for it, `MissionEntryUI.ResetVisual()` un-greys the entry and the mission's own interactable/minigame resets itself so it can be replayed.
 
 ### Data Layer (ScriptableObjects)
-- **`MissionData`** — all text content for one mission: complaint, root cause, 5 Whys quiz data (`fiveWhys: WhyStage[5]`, each with `question`/`correctAnswer`/`distractors[]`/`hint`), an optional `minigameHint` (shown only mid-minigame when `StageManager.IsMissionUnderReview` is true — for advanced missions whose action-phase minigame isn't structured as discrete Why stages the way the quiz is, so there's no per-question `hint` slot to reuse; see Mission 3 below), solution names, reflection texts. Create via `Kaizen Systems/Mission Data`. `M1_ParchedCrops`, `M2_CleaningRiver`, `M3_BrokenRoutine`, and `M5_BrokenBridge` have their 5 Whys chains populated, each one ending at the mission's `actualRootCause`.
+- **`MissionData`** — all text content for one mission: complaint, root cause, 5 Whys quiz data (`fiveWhys: WhyStage[5]`, each with `question`/`correctAnswer`/`distractors[]`/`hint`), an optional `minigameHint` (shown only mid-minigame when `StageManager.IsMissionUnderReview` is true — for advanced missions whose action-phase minigame isn't structured as discrete Why stages the way the quiz is, so there's no per-question `hint` slot to reuse; see Mission 3 below), solution names, reflection texts. Create via `Kaizen Systems/Mission Data`. `M1_ParchedCrops`, `M2_CleaningRiver`, `M3_BrokenRoutine`, `M4_KanBanMarket`, and `M5_BrokenBridge` have their 5 Whys chains populated, each one ending at the mission's `actualRootCause`.
 - **`MissionRegistry`** — array of `MissionData`, looked up by `missionID`. Create via `Kaizen Systems/Mission Registry`. Assign in Inspector on `ReflectionPopupUI`.
 - **`StageData`** — one stage's `stageNumber`, `stageName`, and `missionIDs[]` (the missions that must all be resolved optimally before the stage can be submitted). Create via `Kaizen Systems/Stage Data`.
 - **`StageRegistry`** — array of `StageData`, looked up by index (`GetByIndex`). Create via `Kaizen Systems/Stage Registry`. Assign in Inspector on `StageManager`.
@@ -331,6 +332,88 @@ requiring any animation work. Swapping in an actual animated CG later is a drop-
 that one call site — nothing about the ordering/evaluation logic depends on how that step is
 visualized.
 
+### Mission 4: The Tangled Marketplace
+
+Like Mission 1's well, the trigger is an `NPCController` (`Assets/Scripts/Core/Missions/NPCController.cs`
+— the shared, generic dialogue-trigger component, not a mission-specific script) on a `Merchant_NPC`
+GameObject, rather than a broken prop in the world. Mission 4 is this game's third **Advanced
+Mission** (`MissionData.isAdvancedMission`, see 5 Whys Quiz above): no separate trivial-path
+container, and the 5 Whys quiz doesn't pick `SolutionType` at all — `PlanningUI.SelectAdvancedMission()`
+always routes into the single `M4KanbanPanel` container, and that container's own simulation
+decides `wasOptimal` directly, with `MinigameActivator.singleContainerForMission` checked so the
+one container closes correctly on either outcome, same as Mission 3/5.
+
+**Design history — Mission 4 was originally built as a classic mission** (quiz picks `SolutionType`
+directly, two separate containers: a "Restock by Feel" trivial container and this Kanban container
+as the optimal path), then converted to Advanced mid-development for two compounding reasons: (1)
+the same reasoning Mission 3/5 are built on — a multiple-choice diagnosis can't stand in for "did
+you actually tune the thresholds correctly" any better than it can for "does the bridge hold," so
+the simulated day's own pass/fail is the more honest test; and (2) the old trivial path
+(`MarketStallTrivialSystem`/`MarketStall`, still in the codebase) ran a real-time day timer gated
+only on `GameStateType.Exploration` — a player who wandered off to explore the rest of town (still
+valid `Exploration`) could have the mission silently resolve trivially without ever being near the
+market to see it happen, the only mission in the game with that failure mode. A later pass added
+player-proximity gating (`MarketStallTrivialSystem.marketRadius`) as a partial fix before the
+Advanced-mission conversion removed the background clock entirely. The retired scripts are kept
+IInteractable-ready (see above) for reuse in the planned post-5-missions farming/market sandbox —
+see `Docs/TODO.md`.
+
+**The minigame (`KanbanBuilderSystem`) is a configure-then-simulate puzzle** — a new mechanical
+genre for this game (every other optimal minigame is either manipulated continuously or a discrete
+fetch/assemble/place chain). Four `StallConfig` entries (`maxStock`/`consumptionRate`/
+`deliveryLeadTime`/`wastefulThresholdRatio`), each paired 1:1 by array index with a
+`KanbanStallGaugeUI` (same fixed-array-authored-in-parallel shape as
+`FarmRoutineSystem.stations`/`cards`). The player drags each gauge's reorder-point marker, then
+presses Run Day: `SimulateDay()` drains each stall at its `consumptionRate`, triggers a delivery
+once stock crosses the player's threshold, and lands that delivery after `deliveryLeadTime` —
+consumption keeps draining during the wait, so a threshold set below
+`consumptionRate * deliveryLeadTime / maxStock` guarantees a stockout. A threshold set above
+`wastefulThresholdRatio` fails on principle from the start of the day, regardless of what happens
+afterward — "always topped up" isn't pulling on demand. Both failure modes are tracked per stall as
+a `FailureReason` enum (`Stockout`/`Wasteful`, not a single bool) specifically so the end-of-day
+message can tell the player which direction to adjust each failing stall, not just that it failed.
+`SetStockRatio` always shows the honest live stock color — it never force-colors a stall red just
+because it's flagged failed, since that made a "wasteful" stall sitting at 90% full look identical
+to one actually about to run dry; a dedicated `FailureOutline` (toggled once at day's end) is the
+one visual guaranteed to show up for either failure type. Live event callouts
+("Reordered!"/"Restocked!"/"Ran dry!") fire at the exact simulation-state transitions, narrating
+what would otherwise be silent bar motion.
+
+**Attempts** (`baseAttempts`, default 5) **plus bonus attempts from the 5 Whys score**
+(`bonusAttemptsPerCorrectWhy`, same idea as `FarmRoutineSystem`/`BridgeBuilderSystem`) — a failed
+day increments `attemptsUsed` and lets the player retune and retry; exhausting `MaxAttempts`
+without passing fires `RaiseMissionCompleted(4, false)` (same "exhausted attempts" shape
+`BridgeBuilderSystem.HandleTestFailed`/`FarmRoutineSystem` use).
+
+**`KanbanStallGaugeUI`'s drag math is rotation-agnostic by necessity**: the gauge prefab's source
+sprite is horizontal, so the authored `Track` is rotated (typically 90°) to read as a vertical bar.
+Reading `track`'s local Y directly (as a naive vertical-slider implementation would) breaks the
+instant the object is rotated, since a rotated rect's local axes no longer correspond to "up" on
+screen. The fix: `OnDrag` determines which of `Width`/`Height` is actually the bar's long dimension
+(rotating a Transform doesn't swap its own numeric Width/Height), builds the two local extremes
+along that axis, and carries them through whatever rotation is currently applied via
+`track.TransformPoint(...)` before comparing against the pointer in screen space — correct
+regardless of rotation angle or direction, rather than assuming a specific one.
+
+**`KanbanBuilderState`** is ESC-only outside of a running simulation (same `canLeave` guard shape
+as `RoutineBuilderState`/`BridgeBuilderState`) — all actual input (dragging thresholds, the Run Day
+button) resolves through Unity's own UGUI handlers, not `Tick()` polling.
+
+**`MarketAmbientSystem` is a permanent, post-completion epilogue** — entirely separate from
+`M4KanbanPanel`, listening for `OnMissionCompleted` for missionID 4 the same way `RiverManager`
+listens for Mission 2's, except driving an ongoing simulation instead of a one-time visual flip. It
+owns its own permanent, collider-less `MarketStall` instances (decorative — `InputManager` can't
+detect a `IInteractable` with no `Collider2D`) and locks into one of two modes forever based on
+`wasOptimal`: **"Unmanaged"** (trivial outcome) dispatches a `MarketAttendantNPC` to a random stall
+on a random timer, completely decoupled from actual stock level; **"Kanban"** (optimal outcome)
+continuously checks each stall's live `MarketStall.StockRatio` against
+`KanbanBuilderSystem.GetThresholdRatio(i)` — the player's own tuned value, read back even though
+the container is by then inactive, since `SetActive(false)` doesn't clear a component's fields —
+and dispatches the instant it crosses. `MarketAttendantNPC` reuses `NPCPatrol`'s exact movement
+shape (`PathfindingSystem.RequestPathSync` + step-along-path) but is dispatched to a specific
+destination on demand rather than wandering randomly; the walk itself stands in for delivery lead
+time, deliberately not a separate abstract timer.
+
 ### Mission 5: Bridge Building (Full Poly Bridge)
 
 Like Missions 1 and 2, the broken thing itself — not an NPC — is what starts the mission:
@@ -379,6 +462,39 @@ Editor-authored grid:
   so `Update()` keeps calling this every frame in the meantime — so `jointA`/`jointB` are
   null-checked (Unity's `== null` correctly reports true for an already-destroyed `Object`) rather
   than read unconditionally; a broken joint counts as maximum stress, not "skip this plank".
+  Above `flashThreshold` (default 0.8) the plank also blinks to `flashColor` — a second,
+  non-color cue, since the red lerp alone is hard to read with red-green color vision deficiency.
+- **Current materials** are Wood (cheap/weak), Road (mid, the only `isRoad` one), and Steel
+  (expensive/strong, reinforcement-only). Steel was originally named "Cable" and renamed because
+  every material is a rigid `HingeJoint2D` plank — it resists compression too, which a real cable
+  can't, and teaching that wrong in an educational game was worse than the less-exotic name. A
+  true tension-only cable would need a different joint (e.g. `DistanceJoint2D` with
+  `maxDistanceOnly`), not just a new `BridgeMaterialData`. `plankColor` *multiplies* the plank
+  sprite, so the plank sprite itself must be white/light — a dark sprite makes every material
+  read as near-black.
+- **Grid overlay.** `BridgeGridOverlay` (a `SpriteRenderer` child on the `Bridge` layer, wired to
+  `BridgeBuilderSystem.gridOverlay`) draws a faint dot at every `SnapToGrid` point while
+  building, refit from `ComputePlaygroundBounds()` and hidden for the test. Its dot sprite is
+  generated in code (`Sprite.Create`, `FullRect` mesh for `SpriteDrawMode.Tiled`) with PPU
+  derived from `gridSpacing`, so one tile always equals one snap step — an imported sprite's PPU
+  would have to be kept in sync by hand. Its `SpriteRenderer` is a lazy getter for the same
+  cross-object `Awake`/`OnEnable` ordering reason as `BridgeTestCart.Rb`.
+- **HUD (`BridgeBuilderUI`).** Budget reads "spent / total"; `attemptsText` is its own label
+  beside Test rather than trailing the hint; `statusText` only reports the live phase (empty
+  while building, "Testing..." during a test) — the objective/how-to hint is static,
+  Editor-typed text on a separate TMP object that the script doesn't reference at all. Material
+  buttons get their name plus cost/strength from `BridgeMaterialData` in `Start()`, and the
+  selected one is tinted (`selectedMaterialTint`) every frame.
+- **Sorting / click-blocking against `PlayerCanvas`.** `PlayerCanvas` is Screen Space - Camera on
+  the `UI` sorting layer at order 0, so it sorts *with* the container's world sprites: anything
+  in the container must sit above order 0 to cover the HUD (the `BackGround` parchment tied at 0
+  and drew under it). Order within the container: background → grid → planks (15) → nodes (16,
+  so they stay grabbable on top of beams) → cart (20). The HUD is still there underneath,
+  though, and still raycastable — since the press guard above treats any raycast target as UI,
+  every non-interactive `PlayerCanvas` graphic (mission directory lines, PDCA text, inventory
+  images, minimap) must have **Raycast Target** unticked, or it silently blocks building
+  wherever it sits (found via the `Mission4` directory line swallowing presses on the start
+  anchor). For TMP, the toggle is under the component's collapsed **Extra Settings**.
 - **Undo/redo.** `BridgeActions.cs` defines `IBridgeAction` (`PlaceBeamAction`, `DeleteNodeAction`)
   — small reversible commands on two `Stack<IBridgeAction>` (`Undo`/`Redo`), cleared on every
   `ResetBridge()` — a stale entry referencing an already-destroyed node/plank would corrupt state
@@ -451,10 +567,10 @@ swap. `MinimapCamera` needs no such toggle — it's a real `Camera` with its own
 never needs to show the playground in any state, so its exclusion stays a permanent Editor setting.
 
 ### Singletons
-`GameManager`, `DialogueManager`, `PlanningUI`, `MissionBoardUI`, `ReflectionPopupUI`, `DayCompleteUI`, `InventorySystem`, `TrustSystem`, `InfoBoardUI`, `StageManager`, `TrashSpawner`, `BridgeBuilderSystem`, `FarmRoutineSystem` all follow the same pattern: static `Instance`, destroyed if a duplicate exists in `Awake`.
+`GameManager`, `DialogueManager`, `PlanningUI`, `MissionBoardUI`, `ReflectionPopupUI`, `DayCompleteUI`, `InventorySystem`, `TrustSystem`, `InfoBoardUI`, `StageManager`, `TrashSpawner`, `BridgeBuilderSystem`, `FarmRoutineSystem`, `KanbanBuilderSystem` all follow the same pattern: static `Instance`, destroyed if a duplicate exists in `Awake`.
 
 ### IInteractable
-`NPCController`, `MissionBoardInteractable`, `RiverInteractable`, `WastePiece`, `MachinePart`, `AssemblyPoint`, `PlacementPoint`, `TrashPiece`, `TrashCollectionSite`, `TownHallInteractable`, `ContextInteractable`, `BrickPickup`, `WellPatchSite`, `InfoBoardInteractable`, `BridgeInteractable`, and `RoutineBoardInteractable` all implement `IInteractable`. `InputManager` detects them via `Physics2D.OverlapPoint` and calls `Interact()` when the player is within 1 grid cell (or routes the player adjacent first). `ContextInteractable` is the odd one out: it's narrative-only (dialogue with no associated `MissionData`), so `DialogueManager` returns straight to `Exploration` afterward instead of opening `PlanningUI` — it never starts or resolves a mission.
+`NPCController`, `MissionBoardInteractable`, `RiverInteractable`, `WastePiece`, `MachinePart`, `AssemblyPoint`, `PlacementPoint`, `TrashPiece`, `TrashCollectionSite`, `TownHallInteractable`, `ContextInteractable`, `BrickPickup`, `WellPatchSite`, `InfoBoardInteractable`, `BridgeInteractable`, `RoutineBoardInteractable`, and `MarketStall` all implement `IInteractable`. (`MarketStall`'s own `Interact()` currently goes unused in Mission 4's Do phase — see Mission 4 below — but the component is kept IInteractable-ready for the planned post-5-missions farming/market sandbox, see `Docs/TODO.md`.) `InputManager` detects them via `Physics2D.OverlapPoint` and calls `Interact()` when the player is within 1 grid cell (or routes the player adjacent first). `ContextInteractable` is the odd one out: it's narrative-only (dialogue with no associated `MissionData`), so `DialogueManager` returns straight to `Exploration` afterward instead of opening `PlanningUI` — it never starts or resolves a mission.
 
 ### Info Board
 A walk-up-and-interact help/tutorial panel, architecturally a clone of the Mission Board: `InfoBoardInteractable` (`IInteractable`) shows `InfoBoardUI` and changes state to `InfoBoard`; `InfoBoardState` is ESC-only, same shape as `MissionBoardState`. `InfoBoardUI` isn't dialogue-typed — it's a static paged reference (`InfoPage[] pages`, each a `title`/`body`), navigated with Next/Previous buttons wired directly to `ShowNextPage()`/`ShowPreviousPage()` in the Inspector, covering movement, the 5 Whys mechanic, the PDCA cycle, gold coins & trust, trash & inventory, town hall, and a catalog of interactable types. The default page content is a C# field initializer on `InfoBoardUI.pages`, not scene-authored data.
