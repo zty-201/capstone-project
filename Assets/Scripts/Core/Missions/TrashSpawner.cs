@@ -12,36 +12,39 @@ public class TrashSpawner : MonoBehaviour
     [Header("Spawn Timing")]
     [SerializeField] private float minSpawnInterval = 25f;
     [SerializeField] private float maxSpawnInterval = 45f;
+    // Spawn interval multiplier per town level (index = TownUpgradeSystem level): each upgrade
+    // makes litter pile up less often — the 5S "a sorted town stays clean" payoff for investing.
+    [SerializeField] private float[] intervalMultiplierPerTownLevel = { 1f, 2f, 4f };
 
     private readonly Dictionary<Transform, TrashPiece> occupied = new Dictionary<Transform, TrashPiece>();
     private readonly List<Transform> freePointsBuffer = new List<Transform>();
 
     private float spawnTimer;
     private float nextSpawnInterval;
-
-    public bool HasLiveTrash => occupied.Count > 0;
+    private int townLevel;
 
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
 
-        nextSpawnInterval = Random.Range(minSpawnInterval, maxSpawnInterval);
+        RollNextSpawnInterval();
     }
 
-    private void OnEnable() => EventBus.OnDayCompleted += HandleDayCompleted;
-    private void OnDisable() => EventBus.OnDayCompleted -= HandleDayCompleted;
+    private void OnEnable() => EventBus.OnTownUpgraded += HandleTownUpgraded;
+    private void OnDisable() => EventBus.OnTownUpgraded -= HandleTownUpgraded;
 
-    // Trash is town-wide, not mission-scoped. It only needs clearing when a stage actually
-    // passes — any piece still sitting on the ground unpicked at that point is destroyed outright
-    // rather than carried into the next stage. A mission being flagged for review doesn't clear
-    // trash, so it's untouched then.
-    private void HandleDayCompleted(int day)
+    // Re-rolls immediately rather than waiting out the old interval, so the upgrade's effect
+    // starts right away.
+    private void HandleTownUpgraded(int level)
     {
-        foreach (var piece in occupied.Values)
-            if (piece != null) Destroy(piece.gameObject);
-        occupied.Clear();
+        townLevel = level;
+        RollNextSpawnInterval();
     }
+
+    private void RollNextSpawnInterval() =>
+        nextSpawnInterval = Random.Range(minSpawnInterval, maxSpawnInterval) * intervalMultiplierPerTownLevel[townLevel];
+
 
     private void Update()
     {
@@ -51,7 +54,7 @@ public class TrashSpawner : MonoBehaviour
         if (spawnTimer >= nextSpawnInterval)
         {
             spawnTimer = 0f;
-            nextSpawnInterval = Random.Range(minSpawnInterval, maxSpawnInterval);
+            RollNextSpawnInterval();
             TrySpawnTrash();
         }
     }

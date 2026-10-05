@@ -551,6 +551,7 @@ Transform:
   - {fileID: 1766073786}
   - {fileID: 299708962}
   - {fileID: 1229170902}
+  - {fileID: 2088553645}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &59689802
@@ -1668,6 +1669,10 @@ MonoBehaviour:
   - {fileID: 1353010124}
   minSpawnInterval: 60
   maxSpawnInterval: 90
+  intervalMultiplierPerTownLevel:
+  - 1
+  - 2
+  - 4
 --- !u!1 &144465579
 GameObject:
   m_ObjectHideFlags: 0
@@ -18999,7 +19004,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac63ac62cc0f8cf43ab10d06615e8ce8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TownHallUpgrade
-  stages:
+  tiers:
   - {fileID: 342859777}
   - {fileID: 1349991389}
 --- !u!114 &643763723
@@ -19014,20 +19019,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 971793a96e625584b8784469ff4e2eb0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TownHallInteractable
-  incompleteStageLines:
-  - The town hall ledger isn't ready for review yet.
-  - Come back once every outstanding problem in the village has been addressed.
-  allStagesCompleteLines:
-  - The town hall has nothing left to review right now.
-  - Every stage on record has already been settled. The village thanks you for your
-    work.
-  trashOnGroundLines:
-  - The ledger's ready, but the streets aren't.
-  - Clear every last scrap of litter before I can sign off on this stage.
   notEnoughCoinsLines:
   - The streets are clean and every problem's been solved at the root - well done.
   - But the ledger isn't just signatures. Bring two gold coins before I can close
     out this stage.
+  villageCompleteLines:
+  - Every problem solved at its root, every coin reinvested.
+  - There's nothing left to build - the village thanks you for your work.
   interactSfx: {fileID: 8300000, guid: 9d7e0cfa3cb1b4046aa469a8b0ef2115, type: 3}
 --- !u!61 &643763724
 BoxCollider2D:
@@ -28339,7 +28337,7 @@ Tilemap:
       - {fileID: 1098752744, guid: 3a01b65dbbda8a1448d9e44b3005cc4f, type: 3}
       - {fileID: 1044900149, guid: 3a01b65dbbda8a1448d9e44b3005cc4f, type: 3}
       - {fileID: -1757551469, guid: 3a01b65dbbda8a1448d9e44b3005cc4f, type: 3}
-      m_AnimationSpeed: 12
+      m_AnimationSpeed: 12.000001
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: -14, y: 4, z: 0}
@@ -40989,6 +40987,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DayCompleteUI
   titleText: {fileID: 278220489}
   subtitleText: {fileID: 1803577849}
+  missionRegistry: {fileID: 11400000, guid: 1dde49613927ac641b7467bb4000095a, type: 2}
+  upgradeNotices:
+  - title: The Village Is Improving!
+    body: Coins earned by fixing problems at their root have gone back into the town.
+      A tidier town stays tidy - litter will pile up far less often now.
+  - title: A Village Built to Last
+    body: Every problem solved at its root, every coin reinvested. This is what steady,
+      continuous improvement builds.
+  breakdownTitle: A Quick Fix Gave Way
+  breakdownBody: '{0}: the rushed fix didn''t hold. Take another look - this time,
+    find the root cause.'
 --- !u!225 &1206395806
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -45573,7 +45582,7 @@ GameObject:
   - component: {fileID: 1428271519}
   - component: {fileID: 1428271521}
   m_Layer: 0
-  m_Name: StageManager
+  m_Name: MissionReviewSystem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45606,9 +45615,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3a14b7864c7dcc4ea2939f313a70fc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StageManager
-  stageRegistry: {fileID: 11400000, guid: 1428bb34cf5a69c4097236f972290dcd, type: 2}
-  goldCoinItem: {fileID: 11400000, guid: 3b05c0d2e8702c143808c0cb30f7ff20, type: 2}
-  coinsRequiredToSubmit: 2
+  missionRegistry: {fileID: 11400000, guid: 1dde49613927ac641b7467bb4000095a, type: 2}
 --- !u!1 &1432111291
 GameObject:
   m_ObjectHideFlags: 0
@@ -49941,7 +49948,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1206395805}
-        m_TargetAssemblyTypeName: DayCompleteUI, Assembly-CSharp
+        m_TargetAssemblyTypeName: TownNoticeUI, Assembly-CSharp
         m_MethodName: OnDismiss
         m_Mode: 1
         m_Arguments:
@@ -50909,6 +50916,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InventorySystem
   slotCount: 8
+  reservedSlotItem: {fileID: 11400000, guid: 3b05c0d2e8702c143808c0cb30f7ff20, type: 2}
 --- !u!114 &1768373359
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -56577,7 +56585,7 @@ MonoBehaviour:
   exclusiveSource: {fileID: 2017819220}
   missionCompletedOptimalClip: {fileID: 0}
   missionCompletedTrivialClip: {fileID: 0}
-  dayCompletedClip: {fileID: 0}
+  townUpgradedClip: {fileID: 0}
   uiClickClip: {fileID: 8300000, guid: 5e18f00b1f4b2dd4c9ebb708a002f135, type: 3}
 --- !u!82 &2017819220
 AudioSource:
@@ -89536,6 +89544,52 @@ Sprite:
   m_Bones: []
   m_ScriptableObjects: []
   m_SpriteID: 
+--- !u!1 &2088553644
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2088553645}
+  - component: {fileID: 2088553646}
+  m_Layer: 0
+  m_Name: TownUpgradeSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2088553645
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2088553644}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 48792638}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2088553646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2088553644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4242e0a942ca91c4a80e39595d5b9302, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TownUpgradeSystem
+  goldCoinItem: {fileID: 11400000, guid: 3b05c0d2e8702c143808c0cb30f7ff20, type: 2}
+  upgradeCosts: 0300000002000000
 --- !u!213 &2090861600
 Sprite:
   m_ObjectHideFlags: 0

@@ -13,10 +13,10 @@ The core rhetorical trick of the design: **the player never picks trivial vs. op
 ## 2. Pillars
 
 1. **Diagnose, don't choose.** The 5 Whys quiz *is* the decision point. There is no separate "pick a solution" UI. (Advanced Missions repurpose the quiz score into something other than the decision point itself — see §9's Missions 3 and 5 and the rationale note in §12 — but diagnosis still always has to happen before the fix.)
-2. **Consequences persist, but aren't punitive dead ends.** A trivial fix isn't a fail state — it's a deferred one. The Stage Gate System (§6) resurfaces it for a redo instead of blocking progress silently or permanently penalizing the player.
-3. **Everything is diegetic where possible.** Progress is a real inventory of Gold Coins the player earns and physically carries to Town Hall, not an abstract score; trash is a physical nuisance that has to be picked up and carried to a collection site, not a number that just decays; upgrades are visible town-hall sprites, not a menu screen.
+2. **Consequences persist, but aren't punitive dead ends.** A trivial fix isn't a fail state — it's a deferred one. A rushed fix breaks down after the player's next mission (§7) and resurfaces for a redo, instead of blocking progress silently or permanently penalizing the player.
+3. **Everything is diegetic where possible.** Progress is a real inventory of Gold Coins the player earns and physically carries to Town Hall to invest in the village, not an abstract score; trash is a physical nuisance that has to be picked up and carried to a collection site, not a number that just decays; upgrades are the village's own buildings visibly improving, not a menu screen.
 4. **One state, one responsibility.** Every mode of play (exploring, talking, planning, puzzling, reading a reflection) is an explicit state so input routing never has to guess what the player is currently doing.
-5. **No dead-ends from imperfect play.** A wrong 5-Whys answer doesn't block progress mid-quiz (it always advances) and a wrong overall outcome doesn't block the day (it just withholds full credit and reopens later).
+5. **No dead-ends from imperfect play.** A wrong 5-Whys answer doesn't block progress mid-quiz (it always advances) and a wrong overall outcome doesn't block anything else (it just withholds full credit and reopens later).
 
 ## 3. Player Fantasy & Loop
 
@@ -26,11 +26,17 @@ The player is an unnamed problem-solver dropped into a village where infrastruct
 Explore village → find NPC/problem site → Dialogue → 5 Whys quiz (Planning)
    → system scores diagnosis → routes to Trivial or Optimal minigame
    → minigame resolves → Reflection popup states the Kaizen lesson
-   → Mission Board updates → repeat for remaining missions in the stage
-   → visit Town Hall → gate checks (see §6) → Day Complete / send player back to fix trivial work
+   → Mission Board updates → pick any other mission
+   → (a rushed fix from earlier breaks down and reopens — see §7)
+   → visit Town Hall with enough coins → the whole village upgrades
 ```
 
-A session-level loop wraps this: **Stage → Day → next Stage**, with the town hall's sprite literally upgrading as stages clear, so architectural progress is the visible reward layer on top of the Gold Coin economy (§8).
+There are no stages or days. Missions can be played in any order, and the session-level structure
+is two interlocking tracks: **quality** (the Check — rushed fixes break down and come back until
+they're solved at the root, §7) and **investment** (the Act — Gold Coins earned from root-cause
+fixes are spent at Town Hall to move every building from rundown → improved → well built, §8).
+Buying the final upgrade, which takes all 5 coins and therefore every mission solved optimally, is
+the game's ending.
 
 ## 4. Core Systems
 
@@ -47,12 +53,12 @@ A session-level loop wraps this: **Stage → Day → next Stage**, with the town
 | `RoutineBuilder` | ESC returns to Exploration; card drag/drop routes directly via Unity's drag-and-drop handlers on the Canvas panel, not through `Tick()` polling |
 | `Reflection` | Dismiss the post-mission feedback popup |
 | `MissionBoard` | Read-only board overlay; ESC to close |
-| `DayComplete` | Stage-clear / needs-review summary panel |
+| `TownNotice` | Full-screen announcement: town upgraded (the final one is the ending) or a rushed fix broke down |
 | `InfoBoard` | In-game tutorial/reference pages; ESC to close |
 | `SettingsMenu` | BGM/SFX volume sliders; ESC or an on-screen Close button (Android has no ESC-equivalent) returns to Exploration |
 
 ### 4.2 Event Bus
-A static `EventBus` class of C# events is the *only* coupling mechanism between systems — no domain references another domain's concrete type. Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionSelected`, `OnMissionCompleted`, `OnMissionsNeedReview`, `OnDayCompleted`, `OnInventoryChanged`, `OnTrustChanged`, `OnPDCAPhaseChanged`. This is what lets, e.g., the river visuals, the inventory HUD, the trust pips, and the mission board all react to a single `OnMissionCompleted` firing without knowing about each other.
+A static `EventBus` class of C# events is the *only* coupling mechanism between systems — no domain references another domain's concrete type. Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionSelected`, `OnMissionCompleted`, `OnMissionsNeedReview`, `OnReflectionDismissed`, `OnTownUpgraded`, `OnInventoryChanged`, `OnTrustChanged`, `OnPDCAPhaseChanged`. This is what lets, e.g., the river visuals, the inventory HUD, the trust pips, and the mission board all react to a single `OnMissionCompleted` firing without knowing about each other.
 
 ### 4.3 Pathfinding & Movement
 A* over a `GridSystem` built from a collision `Tilemap`, using a binary min-heap for the open set. `PlayerController` walks paths via coroutine and reroutes around moving NPCs by waiting exactly one frame before recomputing — long enough to avoid a same-frame recursive stack overflow if the NPC is still blocking the new path's first step. NPCs that should physically block a route sit on a dedicated `NPC` trigger layer so they're avoided without ragdoll-style physics response.
@@ -60,12 +66,10 @@ A* over a `GridSystem` built from a collision `Tilemap`, using a binary min-heap
 `GetRandomWalkableCoordinates` BFS-flood-fills from a start point so patrol/wander targets are always drawn from the *reachable* set — no failed A* search against an unreachable island tile.
 
 ### 4.4 Data Layer
-All mission and stage content is authored as ScriptableObjects, not hardcoded — a content designer can add a Mission 3 without touching a state machine or minigame script:
+All mission content is authored as ScriptableObjects, not hardcoded — a content designer can add a Mission 3 without touching a state machine or minigame script:
 
 - **`MissionData`** — complaint text, root cause, the 5-Whys chain (`WhyStage[5]`: question/correctAnswer/distractors/hint), both solution names, both reflection texts. No longer carries any reward numbers — see §8, Gold Coins are a flat, mission-agnostic reward now.
 - **`MissionRegistry`** — flat array of `MissionData`, looked up by `missionID`.
-- **`StageData`** — a stage number/name and the `missionIDs[]` that must all resolve optimally before the stage can close.
-- **`StageRegistry`** — array of `StageData`, indexed sequentially.
 - **`ItemData`** — one inventory item's identity (`itemID`/`itemName`/`icon`) and stacking rules (`stackable`/`maxStack`). Two assets exist: **Gold Coin** (stackable) and **Trash** (not stackable, so litter piles up one slot per piece instead of quietly stacking away).
 
 ## 5. The 5 Whys Mechanic (the game's signature system)
@@ -78,8 +82,8 @@ Run by `PlanningUI` after it types out both solution names for flavor. Five sequ
 - `outcomeIsOptimal = (correctCount == 5)`. Anything less routes to the trivial fix. This is deliberately unforgiving — one slip anywhere in the chain denies full credit, which is the game's thesis: surface-level root-causing isn't root-causing.
 - That boolean is what feeds `RaiseSolutionSelected(missionID, outcomeIsOptimal)`, which `MinigameActivator` uses to activate the correct minigame container and switch state.
 
-**Redo behavior differs from a first attempt** (driven by the Stage Gate System, §6):
-- `hintText` is suppressed on a first attempt and only shown once `StageManager.IsMissionUnderReview(missionID)` is true — so a first pass is a genuine cold diagnosis, and a forced redo gets scaffolding rather than repeating the same blind guess.
+**Redo behavior differs from a first attempt** (driven by Rushed-Fix Breakdown, §7):
+- `hintText` is suppressed on a first attempt and only shown once `MissionReviewSystem.IsMissionUnderReview(missionID)` is true — so a first pass is a genuine cold diagnosis, and a forced redo gets scaffolding rather than repeating the same blind guess.
 - Each stage's distractor pool excludes whatever the player specifically picked wrong on a prior attempt at that exact stage (`RecordWrongAnswer` / `GetExcludedDistractors`), with a floor guard so a question can never degrade to "only the correct answer is shown." This makes a redo strictly about correcting the specific misunderstanding that failed last time, not re-rolling the same trap.
 
 **Content example — Mission 1 (`M1_ParchedCrops`):** the chain walks from "not enough water reaching crops" → "well isn't drawing enough water" → "water leaking out of the well" → "cracked stone lining" → "old and never reinforced" → root cause: *no proper pulley/filter system to reduce strain on the aging structure.* The distractor set at every stage is designed to tempt shallow-but-plausible answers (rain, pests, tools) that a careless player would pick if they weren't tracing the causal chain the complaint text actually implies.
@@ -96,25 +100,18 @@ Run by `PlanningUI` after it types out both solution names for flavor. Five sequ
 
 A trivial resolution is *not* final — see §7.
 
-## 7. Stage Gate System (the retention/replay layer)
+## 7. Rushed-Fix Breakdown (the retention/replay layer)
 
 This is the mechanism that keeps a "good enough" trivial fix from quietly counting as done — without ever hard-blocking the player from continuing to explore and act on other missions.
 
-`StageManager` groups missions by `StageData` and tracks each mission's most recent outcome. **Only a fully-optimal stage submits.**
+**A trivial resolution is a rushed fix, and rushed fixes don't last.** The next time the player completes *any other* mission, every rushed fix still standing breaks down: the well starts leaking again, the river jams again. A notice announces it ("A Quick Fix Gave Way"), and the mission reopens in place for a redo. If the rushed mission is the only one left unsolved, it breaks down straight away, so the player can never get stuck. `MissionReviewSystem` runs this, and only announces breakdowns once the player closes the reflection popup — the quiet moment after a mission, not in the middle of it.
 
-**Town Hall gates `Interact()` through four checks, in order, before allowing submission:**
-1. `AllStagesComplete` → shows a closing dialogue, stops (game is content-complete).
-2. `AllMissionsCompleteForCurrentStage()` → if any mission hasn't been touched at all yet, shows an "outstanding problems" dialogue.
-3. `TrashSpawner.HasLiveTrash` → if any trash piece is on the ground, shows a "clear the streets first" dialogue.
-4. `AllMissionsOptimalForCurrentStage() && !HasEnoughCoins()` → every mission is solved optimally but the player isn't carrying enough Gold Coins yet, shows a "bring two gold coins" dialogue.
+**Why this replaced stages.** The game used to group missions into stages, each submitted at Town Hall: every mission optimal *and* no trash on the ground, or the trivial ones got sent back. Once coins moved to town upgrades (§8) and missions became playable in any order, stages were mostly extra rules — and the no-trash requirement felt like a bug whenever a piece spawned just as the player walked up to submit, which they couldn't prevent. Breakdown keeps the one thing stages did that mattered (rushed work comes back) and improves on it:
+- **It happens in the world, not at a desk.** It's the core Kaizen lesson made literal: band-aid fixes don't hold.
+- **It's paced, not spammable.** A retry only opens after the player has done something else, so a redo is a considered second look rather than an immediate re-roll.
+- **Trivial completions never earned a Gold Coin**, so there's nothing to claw back when a fix breaks down.
 
-Only once all four pass does `SubmitStage()` run.
-
-**`SubmitStage()` branches on the stage's mission outcomes:**
-- **All optimal** → consumes `coinsRequiredToSubmit` (2) Gold Coins from `InventorySystem` (guaranteed to succeed — Town Hall already confirmed there were enough before calling in), advances `currentDay`, fires `OnDayCompleted`, clears per-stage tracking state, advances to the next `StageData` (or flips `AllStagesComplete`).
-- **Any still trivial** → fires `OnMissionsNeedReview(missionIDs[])`. There's nothing to claw back on a failed redo: trivial completions never earned a Gold Coin in the first place (see §8), so the coin count already reflects exactly what the player has actually earned — no separate retraction step needed, unlike the old satisfaction system this replaced.
-
-**`OnMissionsNeedReview` puts the flagged mission back to its pre-completion state in place** — no scene reload, no re-walking to a checkpoint:
+**`OnMissionsNeedReview` puts the broken-down mission back to its pre-completion state in place** — no scene reload, no re-walking to a checkpoint:
 - `NPCController` clears its completed flag and re-shows its interaction indicator.
 - `RiverInteractable` re-activates itself.
 - `PipePuzzleSystem` resets every pipe to its *cached original* rotation/bitmask.
@@ -123,7 +120,7 @@ Only once all four pass does `SubmitStage()` run.
 
 Components that live inside a `MinigameActivator` container that gets *disabled* on completion subscribe to `OnMissionsNeedReview` in `Awake`/`OnDestroy` rather than `OnEnable`/`OnDisable` — an `OnEnable` subscription would already be torn down by the time a review request (which can only fire after completion) needs to reach a disabled object.
 
-The redo then runs through the *same* 5 Whys quiz, with the hint/distractor-exclusion scaffolding from §5 active. This is the design's actual "Check → Act" loop made mechanical: fail the check, get a scaffolded second attempt, re-submit.
+The redo then runs through the *same* 5 Whys quiz, with the hint/distractor-exclusion scaffolding from §5 active. This is the design's actual "Check → Act" loop made mechanical: the fix fails in the world, the player gets a scaffolded second attempt.
 
 ## 8. Gold Coin Economy & Inventory
 
@@ -134,7 +131,9 @@ Pillar 3 (diegetic feedback over HUD abstraction).
 **`InventorySystem`** (singleton) owns a fixed array of 8 `InventorySlot` (plain `ItemData item` +
 `int count`, not a `MonoBehaviour`). `TryAddItem` stacks into an existing slot when the item is
 stackable and there's room, otherwise claims the first empty slot, and returns `false` if nothing
-fits. Every mutation fires `OnInventoryChanged` (no payload — subscribers just re-read `Slots`).
+fits. **Slot 0 is reserved for Gold Coins** (`reservedSlotItem`): nothing else may occupy it and
+coins only ever go there, so a coin can never be lost because trash filled the inventory at the
+moment a mission awarded it — once coins are a real budget, losing one that way would feel unfair. Every mutation fires `OnInventoryChanged` (no payload — subscribers just re-read `Slots`).
 `InventoryUI` is a fixed array of slot `Image`/count-text pairs that refresh on that event,
 occupying the screen position the old satisfaction bar used to hold.
 
@@ -145,22 +144,33 @@ means there's nothing to claw back later if that mission gets flagged for review
 the root cause. The Gold Coin `ItemData` is stackable, so every coin the player is carrying lives
 in a single slot.
 
-**Spending coins:** Town Hall requires `coinsRequiredToSubmit` (2) Gold Coins on hand — on top of
-every mission in the stage being resolved optimally — before a stage submission is allowed to go
-through (§7). This is the game's one hard, numeric gate; everything else about "how the day went"
-is legible directly from the mission board and the village itself rather than a summarized score.
+**Spending coins — the town upgrade (the "Act" step):** coins are the village's improvement
+budget, spent at Town Hall via `TownUpgradeSystem`. Every building starts rundown; **3 coins** buy
+the first upgrade and **2 more** (all 5 in the game) buy the final one. Each purchase raises
+`OnTownUpgraded(level)` and every building with a `BuildingUpgrade` swaps to that tier at once.
+- *Why it's the progression spine:* it gives the player a visible goal they choose when to cash
+  in, and since trivial fixes earn no coin, a player who takes shortcuts *sees* the town lag
+  behind — the lesson shows up in the world, not only in reflection text. The final upgrade is
+  the ending.
+- *Tier effects:* each upgrade also slows trash spawning (×2 interval at tier 1, ×4 at tier 2 —
+  `TrashSpawner.intervalMultiplierPerTownLevel`), the 5S idea that a sorted, well-kept town stays
+  clean. Tier 2 is only affordable once every mission is solved optimally, so its effect is
+  deliberately a post-missions reward rather than something that helps with missions.
+- *Rejected alternative:* per-building upgrades chosen by the player. With only 5 coins there are
+  too few picks for real strategy, most playthroughs would end with part of the town still
+  rundown (undercutting the final payoff), and it needs a picker UI.
 
 **Trash** is now something the player physically carries rather than a satisfaction penalty.
 `TrashSpawner` periodically spawns a piece at a random unoccupied point — spawning is purely
 presence-based now, no numeric penalty on spawn, and it still pauses outside `Exploration` so
 nothing punishes the player for being mid-dialogue or mid-minigame. `TrashPiece.Interact()` tries
 to add itself to the inventory (the Trash `ItemData` is **not** stackable, so every piece claims
-its own slot — letting litter pile up meaningfully crowds out Gold Coins and other items); on
+its own slot — letting litter pile up crowds out mission items, though never Gold Coins, which have their reserved slot); on
 success it's removed from the ground, on failure (inventory full) it's left untouched rather than
 lost. **`TrashCollectionSite`** is a plain interactable placed in the village — one interact clears
-every Trash slot in the inventory at once. A mission being sent back for review does *not* touch
-trash or the player's coins — those are consequences of *day advancement*, not of catching a bad
-diagnosis, exactly as satisfaction/trash used to work under the old system.
+every Trash slot in the inventory at once. Trash gates nothing — no submission or check
+waits on clean streets (that requirement was removed with stages, §7) — its cost is purely
+inventory pressure on the fetch/collect missions, eased by each town upgrade.
 
 ## 9. Missions
 
@@ -257,7 +267,7 @@ Presented as a full-screen popup so the player can focus on the structural puzzl
 ## 10. Ancillary Systems
 
 ### Mission Board
-One `MissionEntryUI` per mission, Inspector-assigned. On completion, the entry greys (`alpha 0.4`) and reads **"Resolved"** (optimal) or **"Needs Review"** (trivial). `NPCController.HandleSolutionSelected` sets a `missionCompleted` no-op flag and hides the NPC's `InteractionIndicator` on selection — but the NPC GameObject stays active and, if it has `NPCPatrol`, keeps wandering. A "Needs Review" entry can *only* be reopened via the Stage Gate System rejecting a stage submission — there's no manual "redo mission" button, which keeps the Check/Act step tied to the Town Hall checkpoint rather than something the player can trivially spam.
+One `MissionEntryUI` per mission, Inspector-assigned. On completion, the entry greys (`alpha 0.4`) and reads **"Resolved"** (optimal) or **"Needs Review"** (trivial). `NPCController.HandleSolutionSelected` sets a `missionCompleted` no-op flag and hides the NPC's `InteractionIndicator` on selection — but the NPC GameObject stays active and, if it has `NPCPatrol`, keeps wandering. A "Needs Review" entry can *only* be reopened by its rushed fix breaking down (§7) — there's no manual "redo mission" button, which keeps a retry something that happens to the player after they've moved on, rather than something they can trivially spam.
 
 ### Info Board
 A walk-up tutorial panel (architectural clone of the Mission Board: `InfoBoardInteractable` → `InfoBoardUI` + `InfoBoardState`, ESC-only). A static, paged reference (`InfoPage[]`, Next/Previous buttons) covering: Welcome, Getting Around, Talking to Villagers, The 5 Whys, Missions & the Mission Board, The PDCA Cycle, Gold Coins & Trust, Trash & Your Inventory, Town Hall & New Days, What You'll Find Around Town. Exists so the game can explain its own mechanics diegetically instead of a forced onboarding sequence.
@@ -266,9 +276,9 @@ A walk-up tutorial panel (architectural clone of the Mission Board: `InfoBoardIn
 `TrustSystem` (singleton) tracks a `0..maxTrust` (default 5, starting at 2) trust value per
 `missionID`: `+1` on an optimal resolution, `-1` on a trivial one, clamped, firing
 `OnTrustChanged(missionID, newTrust)`. It's intentionally **visual-only** — trust reflects mission
-outcome history but doesn't gate anything; reattempting a trivial mission is still handled
-entirely by the Stage Gate System (§7). Trust also persists across stages/days, since it's a
-standing relationship signal rather than per-stage bookkeeping. `NPCTrustUI` renders it as a row
+outcome history but doesn't gate anything; reattempting a trivial mission is handled entirely by
+Rushed-Fix Breakdown (§7). Trust persists for the whole game, since it's a standing relationship
+signal rather than per-attempt bookkeeping. `NPCTrustUI` renders it as a row
 of pip `SpriteRenderer`s (not UI `Image`s — see below) on the mission-giving object for each
 mission, reading the starting value in `Start()` and then listening for updates.
 
@@ -300,8 +310,8 @@ Every `IInteractable` exposes an `AudioClip InteractSfx` — `InputManager` play
 interact audio across all 13 interactable types, and each type can carry its own distinct clip (or
 none, silently) without duplicating playback logic per script.
 
-### Day Progression & Town Hall Upgrade
-`TownHallUpgrade` listens for `OnDayCompleted(day)` and swaps the active sprite set by index (0 = default, 1 = Day-1 upgrade, 2 = Day-2 upgrade). The town hall is built from separate Base/Roof sprites on `EntityTilemap`/`ForeGroundTilemap` sorting layers specifically so the roof can still render in front of the player while the base renders behind — i.e. stage progress is legible from across the map without breaking depth sorting.
+### Town Upgrade Tiers
+`BuildingUpgrade` sits on every upgradable building and listens for `OnTownUpgraded(level)`, activating the matching child tier (0 = rundown, 1 = improved, 2 = well built). Each tier can be built from separate Base/Roof sprites on `EntityTilemap`/`ForeGroundTilemap` sorting layers so the roof still renders in front of the player while the base renders behind — town progress is legible from across the map without breaking depth sorting. (It replaced `TownHallUpgrade`, which only covered the town hall and swapped by *day* index — the first stage pass raised day 2 and so skipped straight past the middle tier.)
 
 ### Minimap
 A second camera (`MinimapCamera`) tracks the `Player` tag every `LateUpdate` and renders to a `RawImage` pinned top-right — a live, zoomed-out view of the same scene rather than an icon-based abstraction, consistent with the game's preference for diegetic feedback over HUD abstraction.
@@ -314,24 +324,24 @@ A persistent HUD button (reachable from anywhere, unlike the walk-up-triggered M
 
 ## 11. Content Inventory (current scene)
 
-- **Stage 1** (`Stage1.asset`): missions `[1, 2]` — both must resolve optimally to submit.
-- **Stage 2** (`Stage2.asset`): missions `[3, 4, 5]` — all three are now authored and implemented:
+- **Missions are unordered** — no stages. Missions 1–2 are classic (the quiz picks the path);
   **`3`** ("The Farmer's Broken Routine"), **`4`** ("The Tangled Marketplace"), and **`5`** ("The
-  Broken Bridge"). All three are Advanced Missions, so Stage 2 reads as three consecutive
-  diagnosis-doesn't-decide-the-path missions — a deliberate tradeoff accepted when Mission 4 was
-  converted from classic to Advanced (see §9's Mission 4 design note), on the reasoning that the
-  five missions are no longer intended to be the entire game once the post-5-missions farming/market
-  sandbox ships (see `Docs/TODO.md`).
+  Broken Bridge") are Advanced Missions. A player may start with an Advanced one; the quiz still
+  runs first, and a weak diagnosis just means fewer bonus attempts and a likelier rushed fix that
+  comes back later with hints. Three Advanced missions in a row was a tradeoff accepted when
+  Mission 4 was converted (see §9's Mission 4 design note), on the reasoning that the five missions
+  are no longer intended to be the entire game once the post-5-missions farming/market sandbox
+  ships (see `Docs/TODO.md`).
 - **Missions authored:** `M1_ParchedCrops` (well/farm), `M2_CleaningRiver` (asset name predates the "Blocked River" rework in §9 — content and 5-Whys chain updated in place, filename unchanged), `M3_BrokenRoutine` (see §9 — full 5-Whys chain, `isAdvancedMission` checked, per-submit CG still a placeholder), `M4_KanBanMarket` (see §9 — full 5-Whys chain, `isAdvancedMission` checked; asset renamed in-place from the original `M4_1` stub), `M5_BrokenBridge` (see §9 — full 5-Whys chain, `isAdvancedMission` checked) — all five have complete 5-Whys chains and their solution path(s) implemented and wired in-scene.
-- **Notable scene objects:** `Farmer_NPC` (Mission 1 trigger, patrols), `RiverBlockagePoint`/`VIllagerComplaintPoint`/`RiverDryPoint` (Mission 2 trigger + 2 context points, reworked fiction — see §9), `Container_Trivial_M1`/`M1PipePanel` (renamed in-scene from `Container_Optimal_M1`), `Container_Trivial_M2`/`Container_Optimal_M2`, `Container_Optimal_M3` (the routine builder's single minigame container — a Canvas panel, not world-space; see `CLAUDE.md`), `Merchant_NPC` (Mission 4 trigger) and `M4KanbanPanel` (the Kanban panel's single container, renamed in-scene from `Container_Optimal_M4`; Mission 4's original two-container "Restock by Feel" trivial path was removed from the scene entirely when the mission converted to the Advanced shape — see §9), `Container_Optimal_M5` (the bridge's single minigame container, holding the anchor nodes, plank/node prefabs, the test cart, and the second popup-framing camera), `TownHall` (with `blackSmithBase_1`/`blackSmithRoof_1`-style stage sprites), `TrashManager` (hosts `TrashSpawner`), `TrashCollectionSite`, `CoinRewardSystem`, `TrustSystem`, `InventorySystem`/`InventoryUI`, `MissionBoard`, `InfoBoard`, `MinimapCamera`. `PDCAIndicatorUI` is implemented (§10) but not yet wired into this scene.
-- **Tuned values:** 8 inventory slots; 2 Gold Coins required to submit a stage; trash spawn interval randomized 25–45s, paused outside Exploration, no numeric penalty on spawn; trust starts at 2/5 per mission, ±1 per outcome; Gold Coin reward is a flat 1 per optimal mission (no per-mission tuning, unlike the old satisfaction rewards).
+- **Notable scene objects:** `Farmer_NPC` (Mission 1 trigger, patrols), `RiverBlockagePoint`/`VIllagerComplaintPoint`/`RiverDryPoint` (Mission 2 trigger + 2 context points, reworked fiction — see §9), `Container_Trivial_M1`/`M1PipePanel` (renamed in-scene from `Container_Optimal_M1`), `Container_Trivial_M2`/`Container_Optimal_M2`, `Container_Optimal_M3` (the routine builder's single minigame container — a Canvas panel, not world-space; see `CLAUDE.md`), `Merchant_NPC` (Mission 4 trigger) and `M4KanbanPanel` (the Kanban panel's single container, renamed in-scene from `Container_Optimal_M4`; Mission 4's original two-container "Restock by Feel" trivial path was removed from the scene entirely when the mission converted to the Advanced shape — see §9), `Container_Optimal_M5` (the bridge's single minigame container, holding the anchor nodes, plank/node prefabs, the test cart, and the second popup-framing camera), `TownHall` (the upgrade shop; with `blackSmithBase_1`/`blackSmithRoof_1`-style tier sprites), `TrashManager` (hosts `TrashSpawner`), `TrashCollectionSite`, `CoinRewardSystem`, `TrustSystem`, `InventorySystem`/`InventoryUI`, `MissionBoard`, `InfoBoard`, `MinimapCamera`. `PDCAIndicatorUI` is implemented (§10) but not yet wired into this scene.
+- **Tuned values:** 8 inventory slots (slot 0 reserved for Gold Coins); town upgrades cost 3 then 2 Gold Coins; a rushed fix breaks down after 1 other completed mission; trash spawn interval randomized 25–45s (×2 after the first town upgrade, ×4 after the final), paused outside Exploration, no numeric penalty on spawn; trust starts at 2/5 per mission, ±1 per outcome; Gold Coin reward is a flat 1 per optimal mission (no per-mission tuning, unlike the old satisfaction rewards).
 
 ## 12. Design Rationale Notes (why it's built this way)
 
 - **Quiz-drives-outcome instead of a solution picker** removes the "just pick optimal, it sounds better" meta-strategy a menu invites — the player has to actually reason through causality to earn it, which is the whole point of teaching 5 Whys.
 - **All-5-or-trivial (no partial credit tiers)** was a deliberate design choice, not a missed nuance — the note in `PlanningUI`'s design ("hitting all 5 is intentionally hard") signals the team wants root-causing to feel genuinely hard to nail, not a coin-flip.
 - **Rejection reopens in place rather than restarting the mission** keeps the loop's cost proportional to the mistake — the player doesn't replay dialogue or re-walk across the map, only re-answers the quiz (now scaffolded) and, for Mission 1, re-solves a puzzle that's been reset to its original layout.
-- **Gold Coins only ever reward optimal work, never trivial** — this is what makes the Stage Gate's review flow (§7) simple: there's no reward to retract when a trivial mission gets sent back, because it never earned one. The old satisfaction system needed a `pendingRetraction` flag to avoid double-dipping on a redo; the coin economy doesn't need an equivalent at all, since a wrong outcome just banks nothing instead of banking something that then has to be clawed back.
-- **Event bus as the sole coupling layer** is what makes the Stage Gate reset (§7) tractable at all: `OnMissionsNeedReview` reaches five-plus unrelated systems (NPC, river, puzzle, part/waste collection, mission board) without any of them referencing each other or the `StageManager` directly.
+- **Gold Coins only ever reward optimal work, never trivial** — this is what makes rushed-fix breakdown (§7) simple: there's no reward to retract when a trivial mission breaks down, because it never earned one. The old satisfaction system needed a `pendingRetraction` flag to avoid double-dipping on a redo; the coin economy doesn't need an equivalent at all, since a wrong outcome just banks nothing instead of banking something that then has to be clawed back.
+- **Event bus as the sole coupling layer** is what made replacing stages with breakdown cheap (§7): `OnMissionsNeedReview` reaches five-plus unrelated systems (NPC, river, puzzle, part/waste collection, mission board) without any of them referencing each other or whatever raises it — so only the trigger changed, not a single reset.
 - **Match existing structure over "more correct" in the abstract** — when a new feature could reasonably be built more than one way, the codebase prefers whichever way is consistent with how similar things already work, even over an option that's more textbook-correct. The clearest example: NPC trust pips could have used a UI `Image` + World Space `Canvas` (the generically "proper" way to float UI over a world object), but every other world-attached visual in this game is a `SpriteRenderer` on a sorting layer — so trust pips are `SpriteRenderer`s too (§10), keeping "how do I show something above an object in the world" answered one way instead of two. Consistency for future maintainers outranks architectural purity. **This is a code-architecture convention only** — it governs *how* an already-chosen design gets implemented, not *what* the design should be. Brainstorming a new mission or mechanic should be judged on its own design merits (does it teach its Kaizen concept well, is it fun, is it mechanically distinct from other missions) rather than on how closely it resembles an existing mission's shape.
 - **Missions 3, 4, and 5 deliberately break Pillar 1 ("the quiz *is* the decision point"), and that's the point of calling them Advanced Missions rather than quietly making an exception.** For a bridge, a multiple-choice diagnosis can't actually stand in for "does the structure hold" the way it can for "did you pick the well-cleaning approach that addresses the root cause" — an engineering fix is either load-bearing or it isn't, and the most honest way to test that is to actually build it and load-test it, not answer a question about it. Mission 3 makes the same call for a different reason: "get the order of daily chores right" isn't a diagnosis you can multiple-choice your way through either — it's a sequencing skill you either demonstrate by actually arranging the stations correctly or you don't. Mission 4 makes the same call for a third reason, discovered mid-development rather than planned from the start: it was originally built as a classic mission with a separate real-time trivial minigame, but that minigame's background clock could resolve the mission while the player was off exploring elsewhere — converting it to the Advanced shape removed that failure mode at the root, on top of the same "a quiz can't prove the tuning is actually correct" reasoning the other two Advanced Missions already use. In all three cases the quiz still runs (root-cause diagnosis is still practiced every time), but its score is repurposed into bonus attempts rather than pre-selecting the outcome — the minigame's own pass/fail becomes the "did you actually fix the root cause" check. This keeps the *spirit* of Pillar 1 (reasoning has to happen before the fix, and a bad diagnosis costs you something concrete) while dropping the specific mechanism (quiz score *is* the outcome) for the mission types where that mechanism would have been a worse simulation of the real lesson, not a better one. Stage 2 (`[3, 4, 5]`) being uniformly Advanced-shaped as a result is a known, accepted tradeoff — see §11.

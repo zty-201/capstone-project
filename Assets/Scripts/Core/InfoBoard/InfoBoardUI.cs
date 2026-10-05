@@ -70,24 +70,27 @@ public class InfoBoardUI : MonoBehaviour
         new InfoPage
         {
             title = "Gold Coins & Trust",
-            body = "Solve a mission's true root cause and you'll earn a Gold Coin, kept in your inventory. Town " +
-                   "Hall needs two Gold Coins on hand - one earned from each of this stage's missions solved " +
-                   "optimally - before it will let the day move on. Villagers also remember how you helped " +
-                   "them: a trivial fix costs you their trust, while finding the real root cause earns it back."
+            body = "Solve a mission's true root cause and you'll earn a Gold Coin - it always has its own " +
+                   "inventory slot, so litter can never crowd it out. Spend coins at Town Hall to upgrade the " +
+                   "whole village: 3 coins for the first upgrade, 2 more for the final one. Villagers also " +
+                   "remember how you helped them: a trivial fix costs you their trust, while finding the real " +
+                   "root cause earns it back."
         },
         new InfoPage
         {
             title = "Trash & Your Inventory",
             body = "Rubbish appears randomly around town. Click a piece to pick it up - it'll take a slot in " +
                    "your inventory until you drop it off at the Trash Collection Site. Let it pile up and " +
-                   "it'll crowd out the Gold Coins you're trying to carry, so don't let litter sit too long."
+                   "you'll run out of room for mission items. A better-kept town makes less litter, so each " +
+                   "Town Hall upgrade slows it down."
         },
         new InfoPage
         {
-            title = "Town Hall & New Days",
-            body = "When every mission in the current stage is solved optimally, the streets are clear, and " +
-                   "you're carrying two Gold Coins, visit Town Hall to close out the stage and move to the " +
-                   "next day - the Town Hall itself grows and upgrades as the village progresses."
+            title = "Quick Fixes & Town Hall",
+            body = "Tackle missions in any order. A quick fix might look fine at first, but it won't last: " +
+                   "after you finish your next mission, it breaks down and you'll need to take another look - " +
+                   "with hints this time. Bring Gold Coins to Town Hall to upgrade the village. Upgrade it all " +
+                   "the way and the village is complete."
         },
         new InfoPage
         {
@@ -98,7 +101,7 @@ public class InfoBoardUI : MonoBehaviour
                    "- Trash piles: pick these up before they crowd your inventory.\n" +
                    "- Trash Collection Site: empty every trash item out of your inventory at once.\n" +
                    "- Mission Board: check the status of every mission.\n" +
-                   "- Town Hall: submit your Gold Coins to end the day and see the village grow."
+                   "- Town Hall: spend Gold Coins to upgrade the village."
         },
     };
 

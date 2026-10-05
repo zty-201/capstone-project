@@ -10,8 +10,13 @@ public static class EventBus
     public static event Action OnGameInitialized;
     public static event Action<int> OnDayEnded;
     public static event Action OnNextDayStarted;
-    public static event Action<int> OnDayCompleted;
-    public static void RaiseDayCompleted(int day) => OnDayCompleted?.Invoke(day);
+    // New town level (1 = first upgrade, 2 = final) — raised by TownUpgradeSystem.
+    public static event Action<int> OnTownUpgraded;
+    public static void RaiseTownUpgraded(int level) => OnTownUpgraded?.Invoke(level);
+    // Raised by ReflectionPopupUI once the player closes the reflection — the quiet moment
+    // MissionReviewSystem uses to break down rushed fixes.
+    public static event Action OnReflectionDismissed;
+    public static void RaiseReflectionDismissed() => OnReflectionDismissed?.Invoke();
 
     // ==========================================
     // MISSION & PDCA EVENTS

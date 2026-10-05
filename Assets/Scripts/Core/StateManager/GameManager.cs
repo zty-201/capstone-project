@@ -23,7 +23,7 @@ public class GameManager : MonoBehaviour
             { GameStateType.KanbanBuilder,  new KanbanBuilderState()  },
             { GameStateType.Reflection,     new ReflectionState()     },
             { GameStateType.MissionBoard,   new MissionBoardState()   },
-            { GameStateType.DayComplete,    new DayCompleteState()    },
+            { GameStateType.TownNotice,     new TownNoticeState()     },
             { GameStateType.InfoBoard,      new InfoBoardState()      },
             { GameStateType.SettingsMenu,   new SettingsMenuState()   },
         });

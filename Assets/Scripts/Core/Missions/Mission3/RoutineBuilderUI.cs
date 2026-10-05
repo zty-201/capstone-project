@@ -4,7 +4,7 @@ using TMPro;
 
 // HUD for the routine builder: status/attempts/hint readouts, and a Submit button wired straight
 // into FarmRoutineSystem in the Inspector — same "buttons call straight into the owning system"
-// pattern as BridgeBuilderUI/DayCompleteUI/InfoBoardUI. Polls the system each frame rather than
+// pattern as BridgeBuilderUI/TownNoticeUI/InfoBoardUI. Polls the system each frame rather than
 // needing its own event, same reasoning as BridgeBuilderUI: this is a single dedicated UI for a
 // single system, not a cross-domain listener (that's what EventBus is for elsewhere).
 public class RoutineBuilderUI : MonoBehaviour

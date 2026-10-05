@@ -42,10 +42,11 @@ of runway as of 2026-10-01, so this can be scoped properly rather than minimally
 Core loop: till soil → plant a seed (consumes a `Seed` `ItemData`) → wait real in-game
 days → harvest (produces a `Crop` `ItemData`) → sell.
 
-- **Growth stages reuse `EventBus.OnDayCompleted(int)`** — already drives day-indexed
-  state elsewhere (`TownHallUpgrade` swaps sprites by day index on this exact event). A
-  planted tile stores `plantedDay`; `currentDay - plantedDay` crossing authored thresholds
-  swaps the sprite seed → sprout → ready-to-harvest. No new day-tracking system needed.
+- **Growth stages need a time source of their own.** The game no longer has days —
+  `OnDayCompleted` was removed along with stages (see `CLAUDE.md`, Rushed-Fix Breakdown).
+  A planted tile could store a planted time and swap seed → sprout → ready-to-harvest as
+  in-game time passes (paused outside `Exploration`, like `TrashSpawner`'s timer), or the
+  sandbox could reintroduce a simple day cycle (e.g. sleeping) that raises a new day event.
 - **Selling reuses the existing Gold Coin economy** (`InventorySystem`, `CoinRewardSystem`'s
   pattern) — and should tie back to Mission 4's marketplace fiction directly: sell
   harvested crops at the same marketplace, closing the loop between the Kaizen campaign and

@@ -7,6 +7,12 @@ public class InventorySystem : MonoBehaviour
 
     [Header("Settings")]
     [SerializeField] private int slotCount = 8;
+    // Slot 0 belongs to this item alone (the Gold Coin), and this item only ever goes there.
+    // Coins are the town's upgrade budget, so one must never be lost because trash filled every
+    // slot at the moment a mission awarded it.
+    [SerializeField] private ItemData reservedSlotItem;
+
+    private const int ReservedSlotIndex = 0;
 
     private InventorySlot[] slots;
 
@@ -16,6 +22,8 @@ public class InventorySystem : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+
+        if (reservedSlotItem == null) Debug.LogError($"[{name}] reservedSlotItem is not assigned!", this);
 
         slots = new InventorySlot[slotCount];
         for (int i = 0; i < slotCount; i++) slots[i] = new InventorySlot();
@@ -37,9 +45,11 @@ public class InventorySystem : MonoBehaviour
             }
         }
 
-        foreach (var slot in slots)
+        for (int i = 0; i < slots.Length; i++)
         {
+            InventorySlot slot = slots[i];
             if (!slot.IsEmpty) continue;
+            if ((i == ReservedSlotIndex) != (item == reservedSlotItem)) continue;
             slot.item = item;
             slot.count = amount;
             EventBus.RaiseInventoryChanged();

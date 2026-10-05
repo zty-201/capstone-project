@@ -61,5 +61,8 @@ public class ReflectionPopupUI : MonoBehaviour
     {
         HidePanel();
         GameManager.Instance.StateManager.ChangeState(GameStateType.Exploration);
+        // After the state change, so a breakdown notice opened in response isn't immediately
+        // overwritten by the return to Exploration.
+        EventBus.RaiseReflectionDismissed();
     }
 }

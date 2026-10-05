@@ -25,7 +25,7 @@ public class MarketStallTrivialSystem : MonoBehaviour
 
     // Subscribed in Awake/OnDestroy, not OnEnable/OnDisable: this container is disabled by
     // MinigameActivator once the mission completes, and an OnEnable/OnDisable subscription would
-    // already be torn down by the time a later Stage Gate review request needs to reach it.
+    // already be torn down by the time a later breakdown (review) request needs to reach it.
     private void Awake() => EventBus.OnMissionsNeedReview += HandleMissionsNeedReview;
     private void OnDestroy() => EventBus.OnMissionsNeedReview -= HandleMissionsNeedReview;
 

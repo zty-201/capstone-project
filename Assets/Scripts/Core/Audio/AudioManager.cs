@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class AudioManager : MonoBehaviour
 {
@@ -15,7 +16,8 @@ public class AudioManager : MonoBehaviour
     [Header("Mission Stingers")]
     [SerializeField] private AudioClip missionCompletedOptimalClip;
     [SerializeField] private AudioClip missionCompletedTrivialClip;
-    [SerializeField] private AudioClip dayCompletedClip;
+    [FormerlySerializedAs("dayCompletedClip")]
+    [SerializeField] private AudioClip townUpgradedClip;
 
     [Header("UI")]
     [SerializeField] private AudioClip uiClickClip;
@@ -59,19 +61,19 @@ public class AudioManager : MonoBehaviour
     private void OnEnable()
     {
         EventBus.OnMissionCompleted += HandleMissionCompleted;
-        EventBus.OnDayCompleted += HandleDayCompleted;
+        EventBus.OnTownUpgraded += HandleTownUpgraded;
     }
 
     private void OnDisable()
     {
         EventBus.OnMissionCompleted -= HandleMissionCompleted;
-        EventBus.OnDayCompleted -= HandleDayCompleted;
+        EventBus.OnTownUpgraded -= HandleTownUpgraded;
     }
 
     private void HandleMissionCompleted(int missionID, bool wasOptimal)
         => PlaySFX(wasOptimal ? missionCompletedOptimalClip : missionCompletedTrivialClip);
 
-    private void HandleDayCompleted(int day) => PlaySFX(dayCompletedClip);
+    private void HandleTownUpgraded(int level) => PlaySFX(townUpgradedClip);
 
     public void PlayMusic(AudioClip clip, bool loop = true)
     {

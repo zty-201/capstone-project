@@ -48,13 +48,13 @@ Open the project in the Unity Editor (Unity 6). There are no CLI build or test c
 | `KanbanBuilder` | ESC returns to Exploration (guarded — only while not mid-simulation); threshold-marker dragging and the Run Day button route directly via Unity's own UGUI handlers on the Canvas panel, not through `Tick()` polling |
 | `Reflection` | Delegates left-click to `ReflectionPopupUI.OnDismiss()` |
 | `MissionBoard` | ESC returns to Exploration |
-| `DayComplete` | Empty stub — the day-complete panel is dismissed via a UI Button wired directly to `DayCompleteUI.OnDismiss()` in the Inspector, not through `Tick()` |
+| `TownNotice` | Empty stub — the town notice panel (upgrades, rushed-fix breakdowns) is dismissed via a UI Button wired directly to `TownNoticeUI.OnDismiss()` in the Inspector, not through `Tick()` (was `DayComplete`; renamed in place so the enum's int value is unchanged) |
 | `InfoBoard` | ESC returns to Exploration (same shape as `MissionBoard`) |
 
 ### Event Bus
 `EventBus` is a static class of C# events. Systems subscribe in `OnEnable`/`OnDisable` and raise via the `Raise*` helpers. This is the only coupling layer between systems — no direct references across domains.
 
-Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionSelected`, `OnMissionCompleted`, `OnMissionsNeedReview`, `OnDayCompleted`, `OnInventoryChanged`, `OnTrustChanged`, `OnPDCAPhaseChanged`, `OnObjectiveProgress`.
+Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionSelected`, `OnMissionCompleted`, `OnMissionsNeedReview`, `OnReflectionDismissed`, `OnTownUpgraded`, `OnInventoryChanged`, `OnTrustChanged`, `OnPDCAPhaseChanged`, `OnObjectiveProgress`.
 
 ### Mission Flow (complete happy path)
 1. Player clicks NPC (`IInteractable.Interact()`) → `DialogueState`
@@ -67,7 +67,7 @@ Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionS
 6. `ReflectionPopupUI` listens, shows feedback text from `MissionData`, changes state to `Reflection`
 7. Player clicks to dismiss → `Exploration`; `MissionBoardUI` listens to grey out the entry
 
-A trivial resolution isn't necessarily final — see Stage Gate System below for how submitting a stage at Town Hall with any trivial mission still outstanding reopens it for a redo.
+A trivial resolution isn't final — see Rushed-Fix Breakdown below: it breaks down and reopens after the player completes their next mission.
 
 ### PDCA Phase Indicator
 A HUD element (`PDCAIndicatorUI`) makes the Plan-Do-Check-Act framing visible while playing,
@@ -123,9 +123,9 @@ sub-stage state worth preserving across the reset.
 `missionID`, listening to `OnMissionCompleted`: `+trustGainOnOptimal` if optimal,
 `-trustLossOnTrivial` if trivial, clamped, raising `EventBus.OnTrustChanged(missionID, newTrust)`.
 It's intentionally **visual-only** — trust reflects mission outcome history but doesn't gate
-anything; reattempting a trivial mission is still handled entirely by the Stage Gate System above.
-Trust also persists across stages/days (not reset by `SubmitStage()`), since it's a standing
-relationship signal rather than per-stage bookkeeping. `NPCTrustUI` is a companion component
+anything; reattempting a trivial mission is handled entirely by Rushed-Fix Breakdown below.
+Trust persists for the whole game, since it's a standing relationship signal rather than
+per-attempt bookkeeping. `NPCTrustUI` is a companion component
 (same "attach alongside, don't couple to" pattern as `InteractionIndicator`) on `NPCController`
 (mission 1) and `RiverInteractable` (mission 2), rendering trust as a row of pip `SpriteRenderer`s
 (toggled via `.enabled`, not UI `Image`s — see World-Attached NPC UI below). It reads
@@ -146,37 +146,52 @@ world-attached visuals across two parallel rendering systems.
 ### 5 Whys Quiz (PlanningUI)
 After typing both solution names, `PlanningUI` runs 5 sequential "Why" stages sourced from `MissionData.fiveWhys` (a `WhyStage[5]`, each with `question`, `correctAnswer`, `distractors[]`, `hint`). Picking any option always advances to the next stage — there is no blocking retry on a wrong pick — but `PlanningUI` tallies `correctCount` across the 5 stages. After the last stage, `outcomeIsOptimal = correctCount >= 5`, and that's what gets passed to `RaiseSolutionSelected`; hitting all 5 is intentionally hard.
 
-The quiz behaves differently on a redo (see Stage Gate System below): `hintText` only shows `WhyStage.hint` when `StageManager.IsMissionUnderReview(missionID)` is true, so a first attempt gets no hint but a review redo does; and each stage's distractor pool excludes whatever the player already picked wrong on a prior attempt at that stage (`StageManager.RecordWrongAnswer`/`GetExcludedDistractors`), with a floor guard so a question never collapses down to just the correct answer alone.
+The quiz behaves differently on a redo (see Rushed-Fix Breakdown below): `hintText` only shows `WhyStage.hint` when `MissionReviewSystem.IsMissionUnderReview(missionID)` is true, so a first attempt gets no hint but a review redo does; and each stage's distractor pool excludes whatever the player already picked wrong on a prior attempt at that stage (`MissionReviewSystem.RecordWrongAnswer`/`GetExcludedDistractors`), with a floor guard so a question never collapses down to just the correct answer alone.
 
 **Advanced missions** (`MissionData.isAdvancedMission`, e.g. Mission 5) don't use `correctCount` for path selection at all: `PlanningUI.SelectAdvancedMission()` runs instead of the block above, always raising `OnSolutionSelected(missionID, SolutionType.Optimal)` — a routing placeholder into that mission's single container, not a claim about the eventual result — then `OnFiveWhysCompleted(missionID, correctCount)` so the minigame itself can spend the score on something else (Mission 5 turns it into bonus test attempts; see Mission 5: Bridge Building). `OnSolutionSelected` has to fire first: it's what activates the until-now-inactive container, synchronously running that object's `OnEnable` before the next line executes — only after that does the container's own `OnFiveWhysCompleted` subscription actually exist.
 
 ### Mission Board
 `MissionBoardUI` holds one `MissionEntryUI` per mission (assigned in Inspector). On `OnMissionCompleted`, the matching entry greys out (`alpha = 0.4`) and its status label reads "Resolved" (optimal) or "Needs Review" (trivial). On `OnSolutionSelected`, `NPCController.HandleSolutionSelected` sets an internal `missionCompleted` flag (so `Interact()` becomes a no-op) and hides its `InteractionIndicator`, but the NPC's GameObject itself stays active — it remains visible (and keeps patrolling, if it has an `NPCPatrol`) rather than disappearing.
 
-A "Needs Review" (trivial) mission *can* now be reopened, but only through the Stage Gate System (see below) rejecting a stage submission at Town Hall — there's no way to manually revisit a trivial mission before then. Once `OnMissionsNeedReview` fires for it, `MissionEntryUI.ResetVisual()` un-greys the entry and the mission's own interactable/minigame resets itself so it can be replayed.
+A "Needs Review" (trivial) mission reopens only when its rushed fix breaks down (see Rushed-Fix Breakdown below) — there's no way to manually revisit it before then. Once `OnMissionsNeedReview` fires for it, `MissionEntryUI.ResetVisual()` un-greys the entry and the mission's own interactable/minigame resets itself so it can be replayed.
 
 ### Data Layer (ScriptableObjects)
-- **`MissionData`** — all text content for one mission: complaint, root cause, 5 Whys quiz data (`fiveWhys: WhyStage[5]`, each with `question`/`correctAnswer`/`distractors[]`/`hint`), an optional `minigameHint` (shown only mid-minigame when `StageManager.IsMissionUnderReview` is true — for advanced missions whose action-phase minigame isn't structured as discrete Why stages the way the quiz is, so there's no per-question `hint` slot to reuse; see Mission 3 below), solution names, reflection texts. Create via `Kaizen Systems/Mission Data`. `M1_ParchedCrops`, `M2_CleaningRiver`, `M3_BrokenRoutine`, `M4_KanBanMarket`, and `M5_BrokenBridge` have their 5 Whys chains populated, each one ending at the mission's `actualRootCause`.
-- **`MissionRegistry`** — array of `MissionData`, looked up by `missionID`. Create via `Kaizen Systems/Mission Registry`. Assign in Inspector on `ReflectionPopupUI`.
-- **`StageData`** — one stage's `stageNumber`, `stageName`, and `missionIDs[]` (the missions that must all be resolved optimally before the stage can be submitted). Create via `Kaizen Systems/Stage Data`.
-- **`StageRegistry`** — array of `StageData`, looked up by index (`GetByIndex`). Create via `Kaizen Systems/Stage Registry`. Assign in Inspector on `StageManager`.
-- **`ItemData`** — one inventory item's `itemID`, `itemName`, `icon`, and stacking rules (`stackable`, `maxStack`). Create via `Kaizen Systems/Item Data`. Five assets exist: **Gold Coin** (stackable) and **Trash** (not stackable, so litter piles up one slot per piece), assigned in Inspector on `CoinRewardSystem`, `TrashPiece`, `TrashCollectionSite`, and `StageManager`; **Brick** (not stackable, only ever one needed) for Mission 1's trivial fetch quest, assigned on `BrickPickup` and `WellPatchSite`; **Machine Part** (stackable) and **Winch** (not stackable) for Mission 2's optimal path, assigned on `MachinePart`, `AssemblyPoint`, and `PlacementPoint` — `AssemblyPoint.Interact()` trades 3 Machine Parts for 1 Winch, and `PlacementPoint.Interact()` consumes the Winch on final placement.
+- **`MissionData`** — all text content for one mission: complaint, root cause, 5 Whys quiz data (`fiveWhys: WhyStage[5]`, each with `question`/`correctAnswer`/`distractors[]`/`hint`), an optional `minigameHint` (shown only mid-minigame when `MissionReviewSystem.IsMissionUnderReview` is true — for advanced missions whose action-phase minigame isn't structured as discrete Why stages the way the quiz is, so there's no per-question `hint` slot to reuse; see Mission 3 below), solution names, reflection texts. Create via `Kaizen Systems/Mission Data`. `M1_ParchedCrops`, `M2_CleaningRiver`, `M3_BrokenRoutine`, `M4_KanBanMarket`, and `M5_BrokenBridge` have their 5 Whys chains populated, each one ending at the mission's `actualRootCause`.
+- **`MissionRegistry`** — array of `MissionData`, looked up by `missionID`. Create via `Kaizen Systems/Mission Registry`. Assign in Inspector on `ReflectionPopupUI`, `MissionReviewSystem`, and `TownNoticeUI`.
+- **`ItemData`** — one inventory item's `itemID`, `itemName`, `icon`, and stacking rules (`stackable`, `maxStack`). Create via `Kaizen Systems/Item Data`. Five assets exist: **Gold Coin** (stackable) and **Trash** (not stackable, so litter piles up one slot per piece), assigned in Inspector on `CoinRewardSystem`, `TrashPiece`, `TrashCollectionSite`, `TownUpgradeSystem`, and `InventorySystem.reservedSlotItem`; **Brick** (not stackable, only ever one needed) for Mission 1's trivial fetch quest, assigned on `BrickPickup` and `WellPatchSite`; **Machine Part** (stackable) and **Winch** (not stackable) for Mission 2's optimal path, assigned on `MachinePart`, `AssemblyPoint`, and `PlacementPoint` — `AssemblyPoint.Interact()` trades 3 Machine Parts for 1 Winch, and `PlacementPoint.Interact()` consumes the Winch on final placement.
 - **`BridgeMaterialData`** — one bridge-plank material's `materialID`/`materialName`/`icon`, plus the actual cost-vs-strength tradeoff: `costPerUnitLength` (spent from `BridgeBuilderSystem.budget`), `breakForce` (that plank's `HingeJoint2D.breakForce`), `plankColor`, and `isRoad` (default true — false marks a reinforcement-only material, see Mission 5: Bridge Building for what that changes about collision). Create via `Kaizen Systems/Bridge Material Data`. No registry asset — low cardinality (2-3 materials), so `BridgeBuilderSystem.materials` just holds the array directly, referenced only within Mission 5's own minigame. See Mission 5: Bridge Building.
 
-### Stage Gate System
-`StageManager` (singleton) groups missions into stages via `StageData`, tracks each mission's most recent outcome (`missionOutcomes: Dictionary<int, bool>`), and gates day advancement on every mission in the current stage having been resolved *optimally* — resolving a mission trivially no longer quietly counts toward finishing the day.
+### Rushed-Fix Breakdown (Mission Review)
+There are no stages or days — missions can be played in any order, and progress is the coin-funded
+town upgrade (see Gold Coin Economy below). Stages (`StageManager`/`StageData`/`StageRegistry`: a
+Town Hall submission gated on every mission in a batch being optimal *and* no trash on the ground)
+were removed. Once coins moved to upgrades and missions became order-free, they were mostly extra
+rules, and the no-trash gate felt like a bug whenever a piece spawned just as the player walked up
+to submit.
 
-**Town Hall interact routes through the gate**, not straight to `RaiseDayCompleted` anymore. `TownHallInteractable.Interact()` checks, in order: `StageManager.AllStagesComplete` (shows a closing-out dialogue and stops), `StageManager.AllMissionsCompleteForCurrentStage()` (shows an "outstanding problems" dialogue if any mission in the stage hasn't been completed at all yet), `TrashSpawner.Instance.HasLiveTrash` (shows a "clear the streets" dialogue if any trash piece is currently on the ground), `StageManager.AllMissionsOptimalForCurrentStage() && !StageManager.HasEnoughCoins()` (shows a "bring two gold coins" dialogue if every mission is optimal but the player isn't carrying enough — see Gold Coin Economy below) — and only calls `StageManager.SubmitStage()` once all four pass.
+What stages *did* provide — sending trivial fixes back — is now `MissionReviewSystem` (singleton;
+`StageManager.cs` renamed in place, GUID kept, so the scene object carried over), and it happens in
+the world instead of at a desk: **a trivial resolution is a rushed fix, and it breaks down after the
+player completes their next mission** (any other mission, optimal or not). If the rushed mission is
+the only one not yet optimal, there's no "next mission" to wait for, so it breaks down right away —
+otherwise the game could never be finished. Rules, in `HandleMissionCompleted`:
+- record `missionOutcomes[id]`;
+- every *other* rushed fix still standing (`standingRushedFixes`) moves to `pendingBreakdowns`;
+- if this completion was trivial: straight to `pendingBreakdowns` when every other
+  `MissionRegistry` mission is optimal, otherwise into `standingRushedFixes`.
 
-**`SubmitStage()`** partitions the stage's missions into those completed optimally and those still flagged trivial:
-- **All optimal** → consumes `coinsRequiredToSubmit` Gold Coins from `InventorySystem` (guaranteed to succeed — `TownHallInteractable` already confirmed there are enough before calling in), advances `currentDay`, raises `OnDayCompleted`, clears `missionOutcomes`/`excludedDistractors`, and advances `currentStageIndex` (or sets `AllStagesComplete` once the registry is exhausted).
-- **Some still trivial** → raises `OnMissionsNeedReview(int[] missionIDs)`. Trivial completions never earned a Gold Coin in the first place (see below), so there's nothing to retract on a failed redo — the coin count simply reflects however many missions have been solved optimally so far.
+**Breakdowns are raised on `EventBus.OnReflectionDismissed`, not inside the `OnMissionCompleted`
+dispatch.** Raising `OnMissionsNeedReview` mid-dispatch would race the completing mission's own
+teardown (subscriber order across `MinigameActivator`/interactables disabling themselves isn't
+guaranteed — e.g. a reset re-activating `RiverInteractable` before its own completion handler
+deactivates it), and `TownNoticeUI` changing state would fight `ReflectionPopupUI`'s.
+`ReflectionPopupUI.OnDismiss()` raises `OnReflectionDismissed` *after* its own
+`ChangeState(Exploration)` — raising it first would let that Exploration change overwrite the
+notice's `TownNotice` state.
 
-**`OnMissionsNeedReview` reopens the flagged missions in place.** Every mission-specific system listens for it and resets itself to pre-completion state: `NPCController` (Mission 1's NPC) clears `missionCompleted` and calls `InteractionIndicator.ResetVisibility()`; `RiverInteractable` (Mission 2's trigger) re-`SetActive(true)`s itself; `PipePuzzleSystem` resets every `PipeVisual` to its cached original rotation/bitmask (`ResetPuzzle()`); `PartCollectionSystem`/`WastePickupSystem` reset their collected counts and re-show their pieces (`MachinePart.ResetPart()`, `WastePiece.ResetPiece()`, `AssemblyPoint.ResetPoint()`, `PlacementPoint.ResetPoint()`); `MissionBoardUI`/`MissionEntryUI` un-grey the entry (`ResetVisual()`). Components living inside a container `MinigameActivator` disables after mission completion (`PartCollectionSystem`, `WastePickupSystem`) or that disable themselves on completion (`RiverInteractable`, `PipePuzzleSystem`) subscribe to `OnMissionsNeedReview` in `Awake`/`OnDestroy` rather than `OnEnable`/`OnDisable`, since an `OnEnable`/`OnDisable` subscription would already be torn down by the time a review request — which can only happen after the mission is complete — needs to reach it.
+**`OnMissionsNeedReview` reopens the broken-down missions in place.** Every mission-specific system listens for it and resets itself to pre-completion state: `NPCController` (Mission 1's NPC) clears `missionCompleted` and calls `InteractionIndicator.ResetVisibility()`; `RiverInteractable` (Mission 2's trigger) re-`SetActive(true)`s itself; `PipePuzzleSystem` resets every `PipeVisual` to its cached original rotation/bitmask (`ResetPuzzle()`); `PartCollectionSystem`/`WastePickupSystem` reset their collected counts and re-show their pieces (`MachinePart.ResetPart()`, `WastePiece.ResetPiece()`, `AssemblyPoint.ResetPoint()`, `PlacementPoint.ResetPoint()`); `MissionBoardUI`/`MissionEntryUI` un-grey the entry (`ResetVisual()`); `TownNoticeUI` announces it ("A Quick Fix Gave Way", naming the missions via `MissionData.missionName`). Components living inside a container `MinigameActivator` disables after mission completion (`PartCollectionSystem`, `WastePickupSystem`) or that disable themselves on completion (`RiverInteractable`, `PipePuzzleSystem`) subscribe to `OnMissionsNeedReview` in `Awake`/`OnDestroy` rather than `OnEnable`/`OnDisable`, since an `OnEnable`/`OnDisable` subscription would already be torn down by the time a review request — which can only happen after the mission is complete — needs to reach it.
 
-**A redo runs through the same 5 Whys quiz** with hint/distractor differences from a first attempt — see 5 Whys Quiz above.
-
-**`TrashSpawner`** is a singleton (`Instance`) exposing `HasLiveTrash`; it also listens for `OnDayCompleted` and destroys every live *ground* trash piece (litter never picked up). It does not touch trash already sitting in the player's inventory — that only clears at the Trash Collection Site, see Gold Coin Economy & Inventory below. A mission being flagged for review does *not* clear trash — only a full stage pass does.
+**A redo runs through the same 5 Whys quiz** with hint/distractor differences from a first attempt — see 5 Whys Quiz above. `MissionReviewSystem` owns that scaffolding too (`IsMissionUnderReview`, `RecordWrongAnswer`/`GetExcludedDistractors`). Trivial completions never earned a Gold Coin, so there's nothing to retract on a breakdown.
 
 ### Pathfinding & Grid
 - **`GridSystem`** (pure C#) — 2D array of `GridNode`; converts between world positions and grid coordinates.
@@ -225,7 +240,7 @@ Since two things now need to be clickable at the same world position (the dialog
 then whatever the chosen path activates there), `HandleSolutionSelected` disables the well's
 own `Collider2D` once a solution is picked — `Physics2D.OverlapPoint` doesn't guarantee which
 of two perfectly-overlapping colliders it returns, so leaving both live would make clicks land
-on the wrong one unpredictably. `HandleMissionsNeedReview` re-enables it for a stage-gate redo.
+on the wrong one unpredictably. `HandleMissionsNeedReview` re-enables it for a breakdown redo.
 
 **Trivial — Fetch a Brick, Patch the Well:** a two-stage fetch quest through the real
 inventory (see Gold Coin Economy & Inventory below), matching Mission 2 optimal's "collect
@@ -321,7 +336,7 @@ Submitting a wrong order doesn't end the attempt loop immediately — `FarmRouti
 `attemptsUsed` and lets the player try again until attempts run out, at which point
 `RaiseMissionCompleted(3, false)` fires (the trivial outcome, same "exhausted attempts" shape
 `BridgeBuilderSystem.HandleTestFailed` uses). `MissionData.minigameHint` is shown only when
-`StageManager.IsMissionUnderReview(3)` is true (the design doc's "hint on the second attempt"),
+`MissionReviewSystem.IsMissionUnderReview(3)` is true (the design doc's "hint on the second attempt"),
 same review-only-hint convention as `WhyStage.hint`.
 
 **The per-submit "small CG" the design doc calls for — an NPC visibly executing the tasks in
@@ -567,7 +582,7 @@ swap. `MinimapCamera` needs no such toggle — it's a real `Camera` with its own
 never needs to show the playground in any state, so its exclusion stays a permanent Editor setting.
 
 ### Singletons
-`GameManager`, `DialogueManager`, `PlanningUI`, `MissionBoardUI`, `ReflectionPopupUI`, `DayCompleteUI`, `InventorySystem`, `TrustSystem`, `InfoBoardUI`, `StageManager`, `TrashSpawner`, `BridgeBuilderSystem`, `FarmRoutineSystem`, `KanbanBuilderSystem` all follow the same pattern: static `Instance`, destroyed if a duplicate exists in `Awake`.
+`GameManager`, `DialogueManager`, `PlanningUI`, `MissionBoardUI`, `ReflectionPopupUI`, `TownNoticeUI`, `InventorySystem`, `TrustSystem`, `InfoBoardUI`, `MissionReviewSystem`, `TownUpgradeSystem`, `TrashSpawner`, `BridgeBuilderSystem`, `FarmRoutineSystem`, `KanbanBuilderSystem` all follow the same pattern: static `Instance`, destroyed if a duplicate exists in `Awake`.
 
 ### IInteractable
 `NPCController`, `MissionBoardInteractable`, `RiverInteractable`, `WastePiece`, `MachinePart`, `AssemblyPoint`, `PlacementPoint`, `TrashPiece`, `TrashCollectionSite`, `TownHallInteractable`, `ContextInteractable`, `BrickPickup`, `WellPatchSite`, `InfoBoardInteractable`, `BridgeInteractable`, `RoutineBoardInteractable`, and `MarketStall` all implement `IInteractable`. (`MarketStall`'s own `Interact()` currently goes unused in Mission 4's Do phase — see Mission 4 below — but the component is kept IInteractable-ready for the planned post-5-missions farming/market sandbox, see `Docs/TODO.md`.) `InputManager` detects them via `Physics2D.OverlapPoint` and calls `Interact()` when the player is within 1 grid cell (or routes the player adjacent first). `ContextInteractable` is the odd one out: it's narrative-only (dialogue with no associated `MissionData`), so `DialogueManager` returns straight to `Exploration` afterward instead of opening `PlanningUI` — it never starts or resolves a mission.
@@ -592,7 +607,9 @@ outright and replaced with a real inventory the player carries.
 **`InventorySystem`** (singleton) owns a fixed array of 8 `InventorySlot` (plain `ItemData item` +
 `int count`, not a `MonoBehaviour`). `TryAddItem(ItemData, amount)` stacks into an existing slot
 if `item.stackable` and there's room, otherwise claims the first empty slot; returns `false` if
-nothing fits. `CountItem`, `TryRemoveItem`, and `RemoveAllOfItem` round out the API. Every
+nothing fits. Slot 0 is reserved for `reservedSlotItem` (the Gold Coin): nothing else may claim
+it, and that item only ever goes there — coins are the town's upgrade budget, so one must never be
+lost because trash filled every slot at the moment a mission awarded it. `CountItem`, `TryRemoveItem`, and `RemoveAllOfItem` round out the API. Every
 mutation raises `EventBus.OnInventoryChanged` (no payload — subscribers just re-read `Slots`).
 `InventoryUI` (HUD element, occupies the screen position the satisfaction bar used to) is a fixed
 array of slot `Image`/count-text pairs that refresh on that event — the same fixed-array pattern
@@ -611,26 +628,38 @@ spawn timer lives in `Update()`, gated by
 `GameManager.Instance.StateManager.CurrentStateType != GameStateType.Exploration` (early return),
 so spawning pauses during any non-Exploration state and resumes only in `Exploration`.
 `TrashPiece.Interact()` tries `InventorySystem.TryAddItem(trashItem, 1)` (the Trash `ItemData` is
-**not** stackable, so every piece claims its own slot — letting litter pile up meaningfully
-crowds out Gold Coins); on success it removes itself from the spawner's occupied set and destroys
+**not** stackable, so every piece claims its own slot — letting litter pile up crowds out
+mission items, never Gold Coins, which have the reserved slot); on success it removes itself from the spawner's occupied set and destroys
 its GameObject exactly as before, on failure (inventory full) it's left on the ground untouched.
 **`TrashCollectionSite`** is a plain `IInteractable` (same shape as `WellPatchSite`/
 `RiverInteractable`) placed in the village — one interact calls
-`InventorySystem.RemoveAllOfItem(trashItem)`, clearing every trash slot at once.
+`InventorySystem.RemoveAllOfItem(trashItem)`, clearing every trash slot at once. Trash gates
+nothing — its cost is purely inventory pressure on the fetch/collect missions.
 
-**Spending coins**: see Stage Gate System above — `StageManager` requires
-`coinsRequiredToSubmit` (2) Gold Coins on hand, on top of every mission being optimal, before
-`TownHallInteractable` will let `SubmitStage()` run.
+**Spending coins — town upgrades.** `TownUpgradeSystem` (singleton) holds the town's
+`CurrentLevel` (0 = rundown) and `upgradeCosts` (`{3, 2}` — all 5 coins in the game). Coins used to
+be a 2-coin stage-submission fee, removed because it was redundant (coins only come from optimal
+fixes and submission already required all-optimal) and so never asked the player anything. Buying
+the final upgrade is the game's ending (all 5 coins = every mission optimal).
+`PurchaseNextUpgrade()` (called only from `TownHallInteractable`, throws if unaffordable) removes
+the coins, increments the level, and raises `EventBus.OnTownUpgraded(level)`. Everything that
+reacts listens to that event rather than referencing the system: every `BuildingUpgrade` swaps
+tier, and `TrashSpawner` scales its spawn interval by `intervalMultiplierPerTownLevel[level]`
+(`{1, 2, 4}`) and re-rolls immediately so the effect starts right away. Tier 2 is only affordable
+once every mission is optimal, so its trash effect is intentionally a post-missions reward.
 
-### Day Progression & Town Hall Upgrade
-Day-end is player-controlled, and now gated by the Stage Gate System above: `TownHallInteractable` (on the `TownHall` GameObject, alongside `TownHallUpgrade`) routes `Interact()` through `StageManager.SubmitStage()` instead of firing `RaiseDayCompleted` unconditionally. Only a full stage pass (every mission in the current stage resolved optimally, no live trash) actually advances the day; walking up to Town Hall before that just shows a dialogue explaining what's still outstanding.
+### Town Hall & Town Upgrade Tiers
+`TownHallInteractable` is purely the upgrade shop: if `TownUpgradeSystem.IsMaxLevel`, it shows
+`villageCompleteLines`; if the next upgrade isn't affordable, `notEnoughCoinsLines` (each line run
+through `string.Format` with `CoinsNeededForNextUpgrade` as `{0}`); otherwise it calls
+`PurchaseNextUpgrade()` and shows no dialogue of its own — `TownNoticeUI` announces the upgrade.
 
-`DayCompleteUI` handles two distinct outcomes:
-- `OnDayCompleted` (stage passed): shows a flat congratulatory subtitle — passing already implies every mission was optimal and both Gold Coins were paid in, so there's no separate score left to tier.
-- `OnMissionsNeedReview` (stage rejected): shows a distinct "Needs Review" panel instead, reporting the count of missions still flagged.
+`TownNoticeUI` (was `DayCompleteUI`; file + `.meta` renamed, GUID kept) is the full-screen panel
+for both town-wide moments: `OnTownUpgraded` (title/body from `upgradeNotices[level - 1]`, the last
+being the ending) and `OnMissionsNeedReview` (breakdown notice). Both change state to
+`GameStateType.TownNotice`. `AudioManager` plays `townUpgradedClip`
+(`[FormerlySerializedAs("dayCompletedClip")]`) on `OnTownUpgraded`.
 
-Both handlers change state to `GameStateType.DayComplete`.
+`BuildingUpgrade` goes on every upgradable building and listens to `OnTownUpgraded(int level)`, activating the matching child in its `tiers` array (0 = rundown, 1 = improved, 2 = well built) and deactivating the rest; it also applies `TownUpgradeSystem.Instance.CurrentLevel` in `Start()` (safe — every `Awake` has run by then, same reasoning as `NPCTrustUI`), so a building's Editor-authored active child doesn't matter. It throws if the level exceeds its tier count rather than silently showing nothing. It replaced `TownHallUpgrade` (file + `.meta` renamed, GUID kept, `[FormerlySerializedAs("stages")]` preserves the old array), which only covered the town hall and indexed by *day* — the old stage system started at day 1 and incremented before raising, so the first stage pass raised day 2 and skipped the middle tier. Each tier child is a multi-child SpriteRenderer GameObject (not tilemaps) so it can have a Base sprite (EntityTilemap sorting layer) and a Roof sprite (ForeGroundTilemap sorting layer) to preserve player depth layering.
 
-`TownHallUpgrade` (on the town hall entity) listens to `OnDayCompleted(int day)` and activates the matching index in its `stages` array, deactivating all others. Index 0 = default, index 1 = Day 1 upgrade, index 2 = Day 2 upgrade. The town hall is built as a multi-child SpriteRenderer GameObject (not tilemaps) so each stage can have a Base sprite (EntityTilemap sorting layer) and a Roof sprite (ForeGroundTilemap sorting layer) to preserve player depth layering.
-
-`EventBus.OnDayCompleted` (`Action<int>`) is the hook for any other system that needs to respond to day advancement.
+There is no day event any more (`OnDayCompleted` was removed with stages); `OnTownUpgraded(int level)` is the hook for anything that should react to town progress.

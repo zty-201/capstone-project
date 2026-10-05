@@ -76,7 +76,7 @@ public class PlanningUI : MonoBehaviour
         stage = Stage.Why;
         whyIndex = 0;
         correctCount = 0;
-        if (hintText != null) hintText.gameObject.SetActive(StageManager.Instance.IsMissionUnderReview(currentMission.missionID));
+        if (hintText != null) hintText.gameObject.SetActive(MissionReviewSystem.Instance.IsMissionUnderReview(currentMission.missionID));
         BeginWhyStage();
     }
 
@@ -137,7 +137,7 @@ public class PlanningUI : MonoBehaviour
         currentOptions.Clear();
 
         var distractors = data.distractors ?? System.Array.Empty<string>();
-        var excluded = StageManager.Instance.GetExcludedDistractors(currentMission.missionID, whyIndex);
+        var excluded = MissionReviewSystem.Instance.GetExcludedDistractors(currentMission.missionID, whyIndex);
         foreach (string distractor in distractors)
             if (excluded == null || !excluded.Contains(distractor))
                 currentOptions.Add(distractor);
@@ -196,7 +196,7 @@ public class PlanningUI : MonoBehaviour
         else
         {
             AudioManager.Instance.PlaySFX(wrongChoiceClip);
-            StageManager.Instance.RecordWrongAnswer(currentMission.missionID, whyIndex, currentOptions[optionIndex]);
+            MissionReviewSystem.Instance.RecordWrongAnswer(currentMission.missionID, whyIndex, currentOptions[optionIndex]);
         }
 
         StartCoroutine(FlashChoiceThenAdvance(choiceButton.label, isCorrect));

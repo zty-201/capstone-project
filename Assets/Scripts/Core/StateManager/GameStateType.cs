@@ -7,7 +7,7 @@ public enum GameStateType
     BridgeBuilder,
     Reflection,
     MissionBoard,
-    DayComplete,
+    TownNotice,
     InfoBoard,
     SettingsMenu,
     // Appended, not inserted: MinigameActivator.targetState serializes this enum by its raw int

@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Visual-feedback-only relationship meter per mission: rises on an optimal solve, drops on a
-// trivial one. Deliberately decoupled from StageManager's mission-outcome bookkeeping — trust is
-// a standing signal that persists across stages/days, it doesn't gate reattempts (that's still
-// entirely handled by StageManager -> OnMissionsNeedReview).
+// trivial one. Deliberately decoupled from MissionReviewSystem's mission-outcome bookkeeping —
+// trust is a standing signal that persists for the whole game, it doesn't gate reattempts (that's
+// entirely handled by MissionReviewSystem -> OnMissionsNeedReview).
 public class TrustSystem : MonoBehaviour
 {
     public static TrustSystem Instance { get; private set; }

@@ -63,7 +63,7 @@ public class MissionDirectoryUI : MonoBehaviour
 
         // Optimal: fully resolved, nothing left to track — drop the line entirely.
         // Trivial: matches MissionEntryUI's exact wording, since it's the same outstanding
-        // state (still needs a Stage Gate redo) shown by the Mission Board.
+        // state (the rushed fix will break down for a redo) shown by the Mission Board.
         if (wasOptimal) entry.lineText.gameObject.SetActive(false);
         else SetLine(entry, "Needs Review");
     }

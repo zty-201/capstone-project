@@ -1,33 +1,22 @@
 using UnityEngine;
 
+// The town's upgrade shop: interacting spends Gold Coins on the next TownUpgradeSystem upgrade if
+// the player can afford it (TownNoticeUI announces it), otherwise explains what's still needed.
 public class TownHallInteractable : MonoBehaviour, IInteractable
 {
-    [TextArea(2, 4)]
-    [SerializeField] private string[] incompleteStageLines = new[]
-    {
-        "The town hall ledger isn't ready for review yet.",
-        "Come back once every outstanding problem in the village has been addressed."
-    };
-
-    [TextArea(2, 4)]
-    [SerializeField] private string[] allStagesCompleteLines = new[]
-    {
-        "The town hall has nothing left to review right now.",
-        "Every stage on record has already been settled. The village thanks you for your work."
-    };
-
-    [TextArea(2, 4)]
-    [SerializeField] private string[] trashOnGroundLines = new[]
-    {
-        "The ledger's ready, but the streets aren't.",
-        "Clear every last scrap of litter before I can sign off on this stage."
-    };
-
+    // {0} = coins still needed for the next upgrade.
     [TextArea(2, 4)]
     [SerializeField] private string[] notEnoughCoinsLines = new[]
     {
-        "The streets are clean and every problem's been solved at the root - well done.",
-        "But the ledger isn't just signatures. Bring two gold coins before I can close out this stage."
+        "Welcome! The town's improvement fund is open.",
+        "Bring {0} more gold coin(s) - earned by fixing problems at their root - and we'll put them to work."
+    };
+
+    [TextArea(2, 4)]
+    [SerializeField] private string[] villageCompleteLines = new[]
+    {
+        "Every problem solved at its root, every coin reinvested.",
+        "There's nothing left to build - the village thanks you for your work."
     };
 
     [Header("Audio")]
@@ -36,31 +25,28 @@ public class TownHallInteractable : MonoBehaviour, IInteractable
 
     public void Interact()
     {
-        if (StageManager.Instance.AllStagesComplete)
+        TownUpgradeSystem upgrades = TownUpgradeSystem.Instance;
+
+        if (upgrades.IsMaxLevel)
         {
-            ShowLines(allStagesCompleteLines);
+            ShowLines(villageCompleteLines);
             return;
         }
 
-        if (!StageManager.Instance.AllMissionsCompleteForCurrentStage())
+        if (!upgrades.CanAffordNextUpgrade())
         {
-            ShowLines(incompleteStageLines);
+            ShowLines(FormatLines(notEnoughCoinsLines, upgrades.CoinsNeededForNextUpgrade));
             return;
         }
 
-        if (TrashSpawner.Instance.HasLiveTrash)
-        {
-            ShowLines(trashOnGroundLines);
-            return;
-        }
+        upgrades.PurchaseNextUpgrade();
+    }
 
-        if (StageManager.Instance.AllMissionsOptimalForCurrentStage() && !StageManager.Instance.HasEnoughCoins())
-        {
-            ShowLines(notEnoughCoinsLines);
-            return;
-        }
-
-        StageManager.Instance.SubmitStage();
+    private static string[] FormatLines(string[] lines, int coinsNeeded)
+    {
+        string[] formatted = new string[lines.Length];
+        for (int i = 0; i < lines.Length; i++) formatted[i] = string.Format(lines[i], coinsNeeded);
+        return formatted;
     }
 
     private void ShowLines(string[] lines)

@@ -76,7 +76,7 @@ public class FarmRoutineSystem : MonoBehaviour
     public string StatusMessage { get; private set; } = "";
     public int MaxAttempts => baseAttempts + correctWhysCount * bonusAttemptsPerCorrectWhy;
     public int RemainingAttempts => MaxAttempts - attemptsUsed;
-    public bool ShowHint => StageManager.Instance != null && StageManager.Instance.IsMissionUnderReview(missionID);
+    public bool ShowHint => MissionReviewSystem.Instance.IsMissionUnderReview(missionID);
     public string HintText { get; private set; } = "";
 
     private void Awake()
@@ -178,8 +178,8 @@ public class FarmRoutineSystem : MonoBehaviour
         if (attemptsUsed >= MaxAttempts)
         {
             // Out of attempts: the routine never worked out under test, so this mission resolves
-            // trivially and waits for a Stage Gate redo (see design doc: "the player will have to
-            // wait till next day to retry").
+            // trivially; the rushed fix breaks down after the player completes another mission
+            // (MissionReviewSystem), which is when the retry opens up.
             EventBus.RaiseMissionCompleted(missionID, false);
             yield break;
         }
@@ -200,7 +200,7 @@ public class FarmRoutineSystem : MonoBehaviour
     }
 
     // ==========================================
-    // RESET — first activation and every Stage Gate redo
+    // RESET — first activation and every breakdown redo
     // ==========================================
 
     private void ResetRoutine()

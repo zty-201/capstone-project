@@ -216,7 +216,7 @@ public class KanbanBuilderSystem : MonoBehaviour
         if (attemptsUsed >= MaxAttempts)
         {
             // Out of attempts: the system never held up under test, so this mission resolves
-            // trivially and waits for a Stage Gate redo, same "exhausted attempts" shape
+            // trivially and waits for its rushed fix to break down (MissionReviewSystem), same "exhausted attempts" shape
             // BridgeBuilderSystem/FarmRoutineSystem use.
             StatusMessage = string.Join("\n", failureLines) + "\nOut of attempts.";
             EventBus.RaiseMissionCompleted(missionID, false);

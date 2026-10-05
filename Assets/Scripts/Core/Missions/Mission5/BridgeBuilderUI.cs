@@ -4,7 +4,7 @@ using TMPro;
 
 // HUD for the bridge builder: budget + status readouts, and buttons wired directly to
 // BridgeBuilderSystem in the Inspector, same "buttons call straight into the owning system"
-// pattern as DayCompleteUI/InfoBoardUI. Polls the system each frame rather than needing its own
+// pattern as TownNoticeUI/InfoBoardUI. Polls the system each frame rather than needing its own
 // event — this is a single dedicated UI for a single system, not a cross-domain listener (that's
 // what EventBus is for elsewhere, e.g. MissionDirectoryUI).
 public class BridgeBuilderUI : MonoBehaviour

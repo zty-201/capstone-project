@@ -29,7 +29,7 @@ public class MissionData : ScriptableObject
     public WhyStage[] fiveWhys = new WhyStage[5];
 
     [Header("Advanced Mission Minigame Hint")]
-    // Shown only mid-minigame when StageManager.IsMissionUnderReview(missionID) is true — same
+    // Shown only mid-minigame when MissionReviewSystem.IsMissionUnderReview(missionID) is true — same
     // review-only-hint convention as WhyStage.hint, but for a single mission-wide minigame hint
     // rather than a per-Why-stage one, since an advanced mission's action-phase minigame (e.g.
     // FarmRoutineSystem) isn't structured as discrete Why stages the way the quiz is. Missions
