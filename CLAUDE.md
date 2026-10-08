@@ -218,8 +218,12 @@ and calls `WastePickupSystem.OnWasteRemoved()`. When remaining count hits zero, 
 itself stays put, so the river keeps stagnating.
 
 **Optimal — Rig a Cliffside Winch:** `MinigameActivator` activates `OptimalContainer`, which holds
-`PartCollectionSystem` and 3 `MachinePart` IInteractables placed at fixed positions in the editor.
-Each `MachinePart.Interact()` collects itself and calls `PartCollectionSystem.OnPartCollected()`.
+`PartCollectionSystem`; its 3 `MachinePart` IInteractables live *outside* the container, lying in
+the town from the start (assigned to `PartCollectionSystem.parts`). Each part is locked —
+`Interact()` no-op, `InteractionIndicator` force-hidden — until `OnSolutionSelected(2, Optimal)`
+(i.e. 5/5 on the quiz) unlocks it and shows its indicator. An unlocked `MachinePart.Interact()`
+adds itself to the inventory, disappears, and calls `PartCollectionSystem.OnPartCollected()`;
+`ResetPart()` on a breakdown re-shows it locked again.
 At 3/3, `PartCollectionSystem` activates `AssemblyPoint` near the cliff lip. `AssemblyPoint.Interact()`
 shows the assembled winch visual and activates `PlacementPoint` at the falls. `PlacementPoint.Interact()`
 shows the anchored winch visual and fires `RaiseMissionCompleted(2, true)` — the winch levers the

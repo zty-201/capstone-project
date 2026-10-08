@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f2ff758357ded7468c9e6bc2bc34d5c, type: 3}
-  m_Name: Winch
+  m_Name: Seabin
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  itemID: winch
-  itemName: Winch
-  icon: {fileID: 4532789881113386269, guid: d870fd7420184f94d8db2c7b17bc6a8d, type: 3}
+  itemID: seabin
+  itemName: Seabin
+  icon: {fileID: 8451087173156164243, guid: 628658e2914b8da44bec08d93d293a71, type: 3}
   stackable: 0
   maxStack: 99

@@ -5,6 +5,9 @@ public class PartCollectionSystem : MonoBehaviour
     [SerializeField] private int missionID = 2;
     [SerializeField] private int totalParts = 3;
     [SerializeField] private AssemblyPoint assemblyPoint;
+    // Parts lie in the town outside this container (visible but locked until the Optimal path
+    // is chosen — see MachinePart), so they're assigned here rather than found as children.
+    [SerializeField] private MachinePart[] parts;
 
     private int collectedCount;
 
@@ -37,7 +40,7 @@ public class PartCollectionSystem : MonoBehaviour
     {
         if (System.Array.IndexOf(missionIDs, missionID) < 0) return;
         collectedCount = 0;
-        foreach (var part in GetComponentsInChildren<MachinePart>(true))
+        foreach (var part in parts)
             part.ResetPart();
         assemblyPoint.ResetPoint();
     }
