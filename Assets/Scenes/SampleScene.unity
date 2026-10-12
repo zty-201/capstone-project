@@ -34256,7 +34256,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46821c8f93f726c49b350be5f64383da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPCTrustUI
-  missionID: 2
+  missionID: 4
   trustPips:
   - {fileID: 1741056545}
   - {fileID: 1084676093}
