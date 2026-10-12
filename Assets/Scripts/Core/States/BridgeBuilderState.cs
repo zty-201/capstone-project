@@ -46,16 +46,9 @@ public class BridgeBuilderState : IState
             else if (ctrl && Keyboard.current.yKey.wasPressedThisFrame) system.Redo();
         }
 
-        // ESC is only honored mid-Building: while a physics test is running, leaving to
-        // Exploration would strand the test's pass/fail resolution off-screen (physics keeps
-        // simulating regardless of GameStateType) with no way back into this state to see it.
-        bool canLeave = system == null || system.Phase == BridgeBuilderSystem.BuildPhase.Building;
-
-        if (canLeave && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-        {
-            Debug.Log("<color=orange>[BridgeBuilderState]</color> ESC pressed. Transitioning back to Exploration State...");
-            GameManager.Instance.StateManager.ChangeState(GameStateType.Exploration);
-        }
+        // No ESC exit: the only way into this state is MinigameActivator on OnSolutionSelected,
+        // and BridgeInteractable has already disabled itself by then, so leaving would strand
+        // the player with no way back into the build.
     }
 
     public void Exit()

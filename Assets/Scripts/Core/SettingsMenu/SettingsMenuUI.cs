@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// The in-game settings overlay — currently just BGM/SFX volume sliders. Unlike MissionBoard/
-// InfoBoard, this isn't triggered by walking up to a world IInteractable — OnOpenButtonPressed
+// The in-game settings overlay — currently just BGM/SFX volume sliders. Unlike InfoBoard,
+// this isn't triggered by walking up to a world IInteractable — OnOpenButtonPressed
 // is wired to a persistent HUD button instead, since a settings menu needs to be reachable
 // anytime, not from one specific spot in the village. Closing has two paths: ESC via
 // SettingsMenuState (desktop) and OnCloseButtonPressed below (works everywhere, including

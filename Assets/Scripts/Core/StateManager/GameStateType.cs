@@ -6,7 +6,7 @@ public enum GameStateType
     Puzzle,
     BridgeBuilder,
     Reflection,
-    MissionBoard,
+    MissionDirectory, // Was MissionBoard; renamed in place so its int value is unchanged.
     TownNotice,
     InfoBoard,
     SettingsMenu,

@@ -16908,9 +16908,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TownHallInteractable
   notEnoughCoinsLines:
-  - The streets are clean and every problem's been solved at the root - well done.
-  - But the ledger isn't just signatures. Bring two gold coins before I can close
-    out this stage.
+  - Welcome! The town's improvement fund is open.
+  - Bring {0} more gold coin(s) - earned by fixing problems at their root - and we'll
+    put them to work.
   villageCompleteLines:
   - Every problem solved at its root, every coin reinvested.
   - There's nothing left to build - the village thanks you for your work.
@@ -32866,7 +32866,7 @@ Tilemap:
       - {fileID: -612158996, guid: 3a01b65dbbda8a1448d9e44b3005cc4f, type: 3}
       - {fileID: 2135784659, guid: 3a01b65dbbda8a1448d9e44b3005cc4f, type: 3}
       - {fileID: -1656510800, guid: 3a01b65dbbda8a1448d9e44b3005cc4f, type: 3}
-      m_AnimationSpeed: 12
+      m_AnimationSpeed: 12.000001
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: -16, y: 4, z: 0}

@@ -69,5 +69,5 @@ MonoBehaviour:
     a look.
   trivialObjectives: []
   optimalObjectives:
-  - Build a braced bridge across the gorge ({0}/{1} planks used).
+  - Build a braced bridge across the gorge ({0}/{1} budget spent).
   - Send the test cart across to check it holds!

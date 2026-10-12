@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// Same shape as InfoBoardState/MissionBoardState — the one thing that differs from those two is
+// Same shape as InfoBoardState — the one thing that differs from it is
 // how this state gets *entered* (SettingsMenuUI.OnOpenButtonPressed, wired to a persistent HUD
 // button, rather than walking up to a world IInteractable), not how it's left. ESC is honored
 // here same as everywhere else, but it's not the only way out: this game targets Android too,
