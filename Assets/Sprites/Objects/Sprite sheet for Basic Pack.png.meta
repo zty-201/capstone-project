@@ -1137,7 +1137,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sprite sheet for Basic Pack_3
+      name: missiondirbg
       rect:
         serializedVersion: 2
         x: 153
@@ -1146,7 +1146,7 @@ TextureImporter:
         height: 30
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      border: {x: 7, y: 7, z: 7, w: 7}
       customData: 
       outline: []
       physicsShape: []
@@ -2312,7 +2312,7 @@ TextureImporter:
         height: 30
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      border: {x: 7, y: 7, z: 7, w: 7}
       customData: 
       outline: []
       physicsShape: []
@@ -7899,7 +7899,7 @@ TextureImporter:
         width: 55
         height: 38
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -8152,7 +8152,6 @@ TextureImporter:
       Sprite sheet for Basic Pack_297: -2835697712499595942
       Sprite sheet for Basic Pack_298: -543308979777662209
       Sprite sheet for Basic Pack_299: 973137067303841597
-      Sprite sheet for Basic Pack_3: 4015890691810010894
       Sprite sheet for Basic Pack_30: -4324058390895741048
       Sprite sheet for Basic Pack_300: -4323408645800882940
       Sprite sheet for Basic Pack_301: -8062706803577628682
@@ -8245,6 +8244,7 @@ TextureImporter:
       Sprite sheet for Basic Pack_98: 7489332872151407656
       Sprite sheet for Basic Pack_99: -5591413008191143388
       VerticalPlank: -6692764446425269218
+      missiondirbg: 4015890691810010894
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
