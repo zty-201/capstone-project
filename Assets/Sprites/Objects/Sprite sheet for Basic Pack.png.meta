@@ -1643,7 +1643,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sprite sheet for Basic Pack_26
+      name: crossbutton
       rect:
         serializedVersion: 2
         x: 871
@@ -1652,7 +1652,7 @@ TextureImporter:
         height: 18
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      border: {x: 3, y: 3, z: 3, w: 3}
       customData: 
       outline: []
       physicsShape: []
@@ -2281,7 +2281,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sprite sheet for Basic Pack_55
+      name: missiondir
       rect:
         serializedVersion: 2
         x: 107
@@ -2290,7 +2290,7 @@ TextureImporter:
         height: 26
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      border: {x: 3, y: 3, z: 3, w: 3}
       customData: 
       outline: []
       physicsShape: []
@@ -5678,7 +5678,7 @@ TextureImporter:
         height: 27
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      border: {x: 3, y: 5, z: 3, w: 3}
       customData: 
       outline: []
       physicsShape: []
@@ -8108,7 +8108,6 @@ TextureImporter:
       Sprite sheet for Basic Pack_257: 7944614725547936546
       Sprite sheet for Basic Pack_258: 9059110772289909816
       Sprite sheet for Basic Pack_259: -1987419313278891046
-      Sprite sheet for Basic Pack_26: 3612160393987254932
       Sprite sheet for Basic Pack_260: 2277783566549147659
       Sprite sheet for Basic Pack_261: 9112307365691447780
       Sprite sheet for Basic Pack_262: -212474119783382077
@@ -8195,7 +8194,6 @@ TextureImporter:
       Sprite sheet for Basic Pack_52: 1777822873037277624
       Sprite sheet for Basic Pack_53: 8912871993682082549
       Sprite sheet for Basic Pack_54: -4696938085139771822
-      Sprite sheet for Basic Pack_55: 146714340974517803
       Sprite sheet for Basic Pack_56: 1346611816950730608
       Sprite sheet for Basic Pack_57: 5670068193287907289
       Sprite sheet for Basic Pack_58: 6763454953463638839
@@ -8244,6 +8242,8 @@ TextureImporter:
       Sprite sheet for Basic Pack_98: 7489332872151407656
       Sprite sheet for Basic Pack_99: -5591413008191143388
       VerticalPlank: -6692764446425269218
+      crossbutton: 3612160393987254932
+      missiondir: 146714340974517803
       missiondirbg: 4015890691810010894
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
