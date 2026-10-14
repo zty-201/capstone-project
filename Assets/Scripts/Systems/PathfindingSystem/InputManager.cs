@@ -18,7 +18,6 @@ public class InputManager : MonoBehaviour
 
     private void HandleMapClicked(Vector3 worldPos)
     {
-        Debug.Log(worldPos); // TEMP — remove after noting bridge cell coords
         if (pathfindingSystem == null || playerTransform == null) return;
 
         pathfindingSystem.GetGridCoordinates(worldPos, out int targetX, out int targetY);
@@ -45,6 +44,8 @@ public class InputManager : MonoBehaviour
             }
         }
 
-        EventBus.RaisePathRequested(new Vector2Int(startX, startY), new Vector2Int(targetX, targetY));
+        Vector2Int start = new Vector2Int(startX, startY);
+        Vector2Int target = pathfindingSystem.GetNearestReachableTowards(start, new Vector2Int(targetX, targetY));
+        EventBus.RaisePathRequested(start, target);
     }
 }

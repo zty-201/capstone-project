@@ -134,17 +134,43 @@ public class PathfindingSystem : MonoBehaviour
     // logic never targets a walkable "island" cut off by unwalkable tiles.
     public Vector2Int GetRandomWalkableCoordinates(Vector2Int from)
     {
+        List<GridNode> reachable = new List<GridNode>(GetReachableNodes(from));
+        GridNode picked = reachable[Random.Range(0, reachable.Count)];
+        return new Vector2Int(picked.x, picked.y);
+    }
+
+    // Resolves a click on a cell `from` can't reach (unwalkable, off-grid, or a walkable pocket
+    // boxed in by walls) to the first cell on the straight line from `target` back to `from` that
+    // `from` can reach — the near side of whatever was clicked. Checking reachability rather than
+    // just walkability is what keeps a boxed-in pocket from being picked and then failing A*,
+    // leaving the player standing still. `from` itself is always reachable, so the walk always
+    // ends on some cell.
+    public Vector2Int GetNearestReachableTowards(Vector2Int from, Vector2Int target)
+    {
+        HashSet<GridNode> reachable = GetReachableNodes(from);
+        int steps = Mathf.Max(Mathf.Abs(from.x - target.x), Mathf.Abs(from.y - target.y));
+        if (steps == 0) return from;
+        for (int i = 0; i <= steps; i++)
+        {
+            Vector2 point = Vector2.Lerp(target, from, (float)i / steps);
+            GridNode node = gridSystem.GetNode(Mathf.RoundToInt(point.x), Mathf.RoundToInt(point.y));
+            if (node != null && reachable.Contains(node)) return new Vector2Int(node.x, node.y);
+        }
+        return from;
+    }
+
+    // Flood-fill over walkable neighbors; `from` itself is always included.
+    private HashSet<GridNode> GetReachableNodes(Vector2Int from)
+    {
         GridNode startNode = gridSystem.GetNode(from.x, from.y);
 
         HashSet<GridNode> visited = new HashSet<GridNode> { startNode };
         Queue<GridNode> frontier = new Queue<GridNode>();
-        List<GridNode> reachable = new List<GridNode>();
         frontier.Enqueue(startNode);
 
         while (frontier.Count > 0)
         {
             GridNode current = frontier.Dequeue();
-            reachable.Add(current);
 
             foreach (GridNode neighbor in GetNeighbors(current))
             {
@@ -154,8 +180,7 @@ public class PathfindingSystem : MonoBehaviour
             }
         }
 
-        GridNode picked = reachable[Random.Range(0, reachable.Count)];
-        return new Vector2Int(picked.x, picked.y);
+        return visited;
     }
 
     private List<GridNode> GetNeighbors(GridNode node)

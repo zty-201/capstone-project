@@ -133,6 +133,12 @@ public class InfoBoardUI : MonoBehaviour
         canvasGroup.blocksRaycasts = false;
     }
 
+    // Wired to the full-screen backdrop Button's OnClick in the Inspector (tap outside the
+    // window) — same shape as MissionDirectoryUI.Close. The touch-reachable exit alongside
+    // InfoBoardState's ESC, since Android's back button isn't reliably delivered to
+    // Keyboard.current.escapeKey. InfoBoardState.Exit hides the panel.
+    public void Close() => GameManager.Instance.StateManager.ChangeState(GameStateType.Exploration);
+
     // Wire directly to the Next/Previous buttons' OnClick() in the Inspector
     public void ShowNextPage()
     {
