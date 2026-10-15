@@ -6,6 +6,9 @@ using UnityEngine;
 // don't track a non-physics parent's transform, and Unity would force a RectTransform on anything
 // reparented under a Canvas anyway), so its background doesn't get stretch-anchoring for free the
 // way a UI panel's would.
+// Resizes through SpriteRenderer.size, not transform.localScale, so a 9-sliced sprite keeps its
+// border at native size instead of stretching it — which is why Draw Mode must be Sliced (size
+// has no effect in Simple mode), and the sprite's Mesh Type must be Full Rect for slicing to work.
 [ExecuteAlways]
 [RequireComponent(typeof(SpriteRenderer))]
 public class FitSpriteToCamera : MonoBehaviour
@@ -36,10 +39,16 @@ public class FitSpriteToCamera : MonoBehaviour
         lastScreenWidth = Screen.width;
         lastScreenHeight = Screen.height;
 
+        if (spriteRenderer.drawMode != SpriteDrawMode.Sliced)
+        {
+            Debug.LogError($"[{name}] FitSpriteToCamera needs the SpriteRenderer's Draw Mode set to Sliced.", this);
+            return;
+        }
+
         float viewHeight = targetCamera.orthographicSize * 2f;
         float viewWidth = viewHeight * targetCamera.aspect;
 
-        Vector2 spriteSize = spriteRenderer.sprite.bounds.size;
-        transform.localScale = new Vector3(viewWidth / spriteSize.x, viewHeight / spriteSize.y, 1f);
+        transform.localScale = Vector3.one;
+        spriteRenderer.size = new Vector2(viewWidth, viewHeight);
     }
 }
