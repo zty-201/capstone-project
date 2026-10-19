@@ -23,53 +23,41 @@ MonoBehaviour:
     speculative orders instead of pulling exactly enough stock, exactly when it's
     actually needed.
   fiveWhys:
-  - question: Why do buyers walk off empty-handed at some stalls while others waste
-      unsold stock?
-    correctAnswer: Every stall either runs dry mid-day or ends up overstocked with
-      goods that spoil unsold.
+  - question: Why do some stalls sell out while others waste stock?
+    correctAnswer: Stalls either run dry or end up overstocked.
     distractors:
-    - The market just doesn't get enough visitors some days.
-    - The stalls are poorly placed and buyers can't find them.
-    - Merchants are simply lazy about tending their stalls.
-    hint: Look at what's actually happening at the stalls themselves — too little
-      stock, or too much.
-  - question: Why do stalls run dry or end up overstocked?
-    correctAnswer: Merchants restock by feel, whenever they happen to notice or remember
-      — not based on what's actually selling.
+    - Not enough buyers visit the market.
+    - Buyers can't find some of the stalls.
+    - The merchants are just lazy.
+    hint: "Look at the stock itself — too little, or too much."
+  - question: Why do stalls run dry or get overstocked?
+    correctAnswer: Merchants restock by feel, not by what sells.
     distractors:
-    - Suppliers deliver goods on an unpredictable schedule.
-    - Some merchants just don't care about their stock levels.
-    - The market has too few merchants to keep every stall full.
-    hint: Think about how a merchant decides when to order more, not who delivers
-      it.
-  - question: Why do merchants restock by feel instead of by need?
-    correctAnswer: There's no signal that tells a merchant exactly when a stall has
-      actually gotten low.
+    - Suppliers deliver at random times.
+    - Merchants don't care about their stock.
+    - There are too few merchants.
+    hint: How does a merchant decide when to reorder?
+  - question: Why do merchants restock by feel?
+    correctAnswer: Nothing signals when a stall is running low.
     distractors:
-    - Merchants haven't been trained properly.
-    - The market has no clock or calendar to track the day.
-    - Buyers don't tell merchants what they want in advance.
-    hint: Consider what information a merchant would need in order to restock at
-      the right moment.
+    - Merchants were never trained.
+    - The market has no clock.
+    - Buyers don't say what they want.
+    hint: What would a merchant need to know to restock on time?
   - question: Why is there no such signal?
-    correctAnswer: Nobody's ever set a reorder point — every order is a bulk guess
-      made whenever a merchant thinks to place one.
+    correctAnswer: No stall has a set reorder point.
     distractors:
-    - The market has no storage space for extra signals or tools.
-    - Suppliers refuse to deliver small orders.
-    - Merchants believe bulk buying is always cheaper.
-    hint: Think about whether anyone ever decided "restock exactly here" for any
-      stall.
-  - question: Why has no one ever set a reorder point for any stall?
-    correctAnswer: No one's ever separated "how much stock is sitting here" from
-      "how much do we actually need right now" — every order tries to guess both
-      at once.
+    - There's no room to store any tools.
+    - Suppliers refuse small orders.
+    - Merchants think bulk buying is cheaper.
+    hint: Has anyone ever decided "restock at this level"?
+  - question: Why has no one set a reorder point?
+    correctAnswer: No one tracks stock against real demand.
     distractors:
-    - The market has never had a bad enough day to force a change.
-    - Nobody in the market has ever run a business before.
-    - There's no market official responsible for such decisions.
-    hint: Think about what kind of system would actually fix this for good, not just
-      for one day.
+    - The market never had a bad enough day.
+    - No one here has run a business before.
+    - No official is in charge of it.
+    hint: What kind of system would fix this for good?
   trivialReflectionText: No matter how you adjusted the signals, they never quite
     held up — a stall would run dry one day and drown in stock the next. After one
     bad day too many, the merchants gave up on the system and went back to just
