@@ -26,7 +26,7 @@ The player is an unnamed problem-solver dropped into a village where infrastruct
 Explore village → find NPC/problem site → Dialogue → 5 Whys quiz (Planning)
    → system scores diagnosis → routes to Trivial or Optimal minigame
    → minigame resolves → Reflection popup states the Kaizen lesson
-   → Mission Board updates → pick any other mission
+   → Mission Directory updates → pick any other mission
    → (a rushed fix from earlier breaks down and reopens — see §7)
    → visit Town Hall with enough coins → the whole village upgrades
 ```
@@ -45,25 +45,28 @@ the game's ending.
 
 | State | Responsibility |
 |---|---|
-| `Exploration` | Free roam; click-to-move / click-to-interact via `InputManager` |
+| `Exploration` | Free roam; click-to-move / click-to-interact via `InputManager` (taps on HUD elements are ignored, so opening the Mission Directory or Settings never also walks the player) |
 | `Dialogue` | Advances NPC/complaint dialogue lines on click |
 | `Planning` | 5 Whys quiz UI; ESC returns to Exploration |
-| `Puzzle` | Pipe clicks route directly via `IPointerClickHandler` on each Canvas-based `PipeVisual`, not through `Tick()` polling |
-| `BridgeBuilder` | Forwards press/hold/release world positions into `BridgeBuilderSystem`'s drag placement; ESC returns to Exploration (guarded — only while still building) |
-| `RoutineBuilder` | ESC returns to Exploration; card drag/drop routes directly via Unity's drag-and-drop handlers on the Canvas panel, not through `Tick()` polling |
+| `Puzzle` | Pipe clicks route directly via `IPointerClickHandler` on each Canvas-based `PipeVisual`, not through `Tick()` polling; no ESC exit |
+| `BridgeBuilder` | Forwards press/hold/release world positions into `BridgeBuilderSystem`'s drag placement; no ESC exit |
+| `RoutineBuilder` | Card drag/drop routes directly via Unity's drag-and-drop handlers on the Canvas panel, not through `Tick()` polling; no ESC exit |
+| `KanbanBuilder` | Threshold dragging and Run Day route through Unity's UGUI handlers on the Canvas panel; no ESC exit |
 | `Reflection` | Dismiss the post-mission feedback popup |
-| `MissionBoard` | Read-only board overlay; ESC to close |
+| `MissionDirectory` | Expanded Mission Directory overlay (§10); ESC or tap outside the window to close |
 | `TownNotice` | Full-screen announcement: town upgraded (the final one is the ending) or a rushed fix broke down |
-| `InfoBoard` | In-game tutorial/reference pages; ESC to close |
+| `InfoBoard` | In-game tutorial/reference pages; ESC or tap outside the window to close |
 | `SettingsMenu` | BGM/SFX volume sliders; ESC or an on-screen Close button (Android has no ESC-equivalent) returns to Exploration |
 
 ### 4.2 Event Bus
-A static `EventBus` class of C# events is the *only* coupling mechanism between systems — no domain references another domain's concrete type. Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionSelected`, `OnMissionCompleted`, `OnMissionsNeedReview`, `OnReflectionDismissed`, `OnTownUpgraded`, `OnInventoryChanged`, `OnTrustChanged`, `OnPDCAPhaseChanged`. This is what lets, e.g., the river visuals, the inventory HUD, the trust pips, and the mission board all react to a single `OnMissionCompleted` firing without knowing about each other.
+A static `EventBus` class of C# events is the *only* coupling mechanism between systems — no domain references another domain's concrete type. Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionSelected`, `OnMissionCompleted`, `OnMissionsNeedReview`, `OnReflectionDismissed`, `OnTownUpgraded`, `OnInventoryChanged`, `OnTrustChanged`, `OnPDCAPhaseChanged`. This is what lets, e.g., the river visuals, the inventory HUD, the trust pips, and the mission directory all react to a single `OnMissionCompleted` firing without knowing about each other.
 
 ### 4.3 Pathfinding & Movement
 A* over a `GridSystem` built from a collision `Tilemap`, using a binary min-heap for the open set. `PlayerController` walks paths via coroutine and reroutes around moving NPCs by waiting exactly one frame before recomputing — long enough to avoid a same-frame recursive stack overflow if the NPC is still blocking the new path's first step. NPCs that should physically block a route sit on a dedicated `NPC` trigger layer so they're avoided without ragdoll-style physics response.
 
 `GetRandomWalkableCoordinates` BFS-flood-fills from a start point so patrol/wander targets are always drawn from the *reachable* set — no failed A* search against an unreachable island tile.
+
+The same reachable set backs player clicks: a click on a wall, off the map, or a walled-off pocket resolves to the nearest reachable cell on the line back toward the player (`GetNearestReachableTowards`), so the player walks to the near side of whatever they tapped instead of standing still.
 
 ### 4.4 Data Layer
 All mission content is authored as ScriptableObjects, not hardcoded — a content designer can add a Mission 3 without touching a state machine or minigame script:
@@ -96,7 +99,7 @@ Run by `PlanningUI` after it types out both solution names for flavor. Five sequ
 4. On the 5th answer, `PlanningUI` computes the outcome and fires `RaiseSolutionSelected`. `MinigameActivator` activates the matching container (trivial or optimal) and switches to that container's inspector-assigned target state (`Exploration` for click-driven minigames, `Puzzle` for the pipe grid).
 5. The minigame resolves → `RaiseMissionCompleted(missionID, wasOptimal)`.
 6. `ReflectionPopupUI` shows the matching reflection text from `MissionData`, switches to `Reflection`.
-7. Click to dismiss → back to `Exploration`. `MissionBoardUI` greys out that entry.
+7. Click to dismiss → back to `Exploration`. The Mission Directory shows the mission as "Resolved" or "Needs Review".
 
 A trivial resolution is *not* final — see §7.
 
@@ -116,7 +119,8 @@ This is the mechanism that keeps a "good enough" trivial fix from quietly counti
 - `RiverInteractable` re-activates itself.
 - `PipePuzzleSystem` resets every pipe to its *cached original* rotation/bitmask.
 - `PartCollectionSystem` / `WastePickupSystem` reset collected counts and re-show pieces.
-- `MissionEntryUI` un-greys.
+- The Mission Directory resets that mission's line to its intro objective.
+- `BridgeManager` (Mission 5) restores the broken-bridge visual — but leaves the far bank walkable, so a player already over there isn't stranded.
 
 Components that live inside a `MinigameActivator` container that gets *disabled* on completion subscribe to `OnMissionsNeedReview` in `Awake`/`OnDestroy` rather than `OnEnable`/`OnDisable` — an `OnEnable` subscription would already be torn down by the time a review request (which can only fire after completion) needs to reach a disabled object.
 
@@ -262,15 +266,23 @@ Mission 5 is the game's first **Advanced Mission** (`MissionData.isAdvancedMissi
 
 **Reflection:** *(trivial)* "The design never held up under the test cart's weight, so the crew threw together a quick plank crossing instead. It creaks with every step, and it's only a matter of time before it gives way again." *(optimal)* "The reinforced bridge holds firm under real weight. Properly braced, it'll carry carts and livestock for years to come." Same band-aid-vs-root-cause framing every other mission's reflection carries — earned here by an actually-working structure instead of a dialogue choice.
 
+**Aftermath — the far bank.** Either outcome physically gets the player across, so either one opens the eastern fields for exploration — but what the player walks over differs: a creaky lashed-plank crossing (trivial) or the properly braced bridge (optimal). If a trivial bridge later breaks down for a redo (§7), the broken visual returns but the crossing stays walkable, so a player already over there is never stranded. Waiting on the far bank is a one-time chest with a Seed Pouch and a note from the fields' old farmer — a small reward for crossing, and a deliberate foreshadow of the post-missions farming sandbox (`Docs/TODO.md`).
+
 Presented as a full-screen popup so the player can focus on the structural puzzle without village distraction underneath it — the same instinct behind treating the pipe puzzle as its own focused space in Mission 1, reached architecturally the opposite way round since this puzzle is real physics, not a fixed rotate-the-pipes board (see `CLAUDE.md` for the implementation).
 
 ## 10. Ancillary Systems
 
-### Mission Board
-One `MissionEntryUI` per mission, Inspector-assigned. On completion, the entry greys (`alpha 0.4`) and reads **"Resolved"** (optimal) or **"Needs Review"** (trivial). `NPCController.HandleSolutionSelected` sets a `missionCompleted` no-op flag and hides the NPC's `InteractionIndicator` on selection — but the NPC GameObject stays active and, if it has `NPCPatrol`, keeps wandering. A "Needs Review" entry can *only* be reopened by its rushed fix breaking down (§7) — there's no manual "redo mission" button, which keeps a retry something that happens to the player after they've moved on, rather than something they can trivially spam.
+### Mission Directory
+Mission status lives in one place: `MissionDirectoryUI`, which replaced the old walk-up Mission Board. Two views over the same data:
+- **Collapsed** — a small top-left HUD showing only the few most recently active *unresolved* missions and their current objective, tracked at sub-step granularity ("Collect the parts to build the machine (1/3)"). Resolved missions drop off, so the HUD stays short however many missions exist.
+- **Expanded** — tapping the HUD opens a centered panel listing every mission by name with its objective or status: **"Resolved"** (optimal, dimmed) or **"Needs Review"** (trivial — still outstanding until its rushed fix breaks down, §7). Tap outside the window (or ESC) to close. It only opens from free exploration, never mid-minigame.
+
+`NPCController.HandleSolutionSelected` sets a `missionCompleted` no-op flag and hides the NPC's `InteractionIndicator` on selection — but the NPC GameObject stays active and, if it has `NPCPatrol`, keeps wandering. A "Needs Review" mission can *only* be reopened by its rushed fix breaking down (§7) — there's no manual "redo mission" button, which keeps a retry something that happens to the player after they've moved on, rather than something they can trivially spam.
+
+**No backing out of a minigame.** Once the quiz routes the player into a minigame (pipe puzzle, routine builder, Kanban panel, bridge builder), there's no ESC exit: the mission's trigger has already locked itself by then, so leaving would strand the player with no way back in. The minigame ends only by resolving the mission, one way or the other.
 
 ### Info Board
-A walk-up tutorial panel (architectural clone of the Mission Board: `InfoBoardInteractable` → `InfoBoardUI` + `InfoBoardState`, ESC-only). A static, paged reference (`InfoPage[]`, Next/Previous buttons) covering: Welcome, Getting Around, Talking to Villagers, The 5 Whys, Missions & the Mission Board, The PDCA Cycle, Gold Coins & Trust, Trash & Your Inventory, Town Hall & New Days, What You'll Find Around Town. Exists so the game can explain its own mechanics diegetically instead of a forced onboarding sequence.
+A walk-up tutorial panel (`InfoBoardInteractable` → `InfoBoardUI` + `InfoBoardState`; closes with ESC or by tapping outside the window, since Android has no reliable ESC). A static, paged reference (`InfoPage[]`, Next/Previous buttons) covering: Welcome, Getting Around, Talking to Villagers, The 5 Whys, Missions & the Mission Directory, The PDCA Cycle, Gold Coins & Trust, Trash & Your Inventory, Quick Fixes & Town Hall, What You'll Find Around Town. Exists so the game can explain its own mechanics diegetically instead of a forced onboarding sequence.
 
 ### NPC Trust Meter
 `TrustSystem` (singleton) tracks a `0..maxTrust` (default 5, starting at 2) trust value per
@@ -320,7 +332,7 @@ A second camera (`MinimapCamera`) tracks the `Player` tag every `LateUpdate` and
 `NPCPatrol` wanders NPCs between random walkable tiles, but only while the global state is `Exploration` — NPCs freeze mid-step the instant dialogue or a minigame opens, so nothing looks like it's sliding around behind a modal panel. Patrol targets come from the same BFS-reachability-checked `GetRandomWalkableCoordinates` the pathfinding system exposes, so an NPC never picks a target isolated by unwalkable tiles.
 
 ### Settings Menu
-A persistent HUD button (reachable from anywhere, unlike the walk-up-triggered Mission/Info Boards) opens `SettingsMenuUI`, currently just BGM/SFX volume sliders backed by `AudioManager`/`PlayerPrefs` so the choice survives a restart. Closing has two paths on purpose: ESC via `SettingsMenuState` for desktop, and an on-screen Close button for Android, which has no ESC/back-key equivalent to fall back on. Opening reads `AudioManager`'s current volume back into the sliders (`SetValueWithoutNotify`, so it doesn't loop back into the volume-change handlers) rather than resetting them to a fixed default every time.
+A persistent HUD button (reachable from anywhere, like the Mission Directory, unlike the walk-up Info Board) opens `SettingsMenuUI`, currently just BGM/SFX volume sliders backed by `AudioManager`/`PlayerPrefs` so the choice survives a restart. Closing has two paths on purpose: ESC via `SettingsMenuState` for desktop, and an on-screen Close button for Android, which has no ESC/back-key equivalent to fall back on. Opening reads `AudioManager`'s current volume back into the sliders (`SetValueWithoutNotify`, so it doesn't loop back into the volume-change handlers) rather than resetting them to a fixed default every time.
 
 ## 11. Content Inventory (current scene)
 
@@ -333,7 +345,7 @@ A persistent HUD button (reachable from anywhere, unlike the walk-up-triggered M
   are no longer intended to be the entire game once the post-5-missions farming/market sandbox
   ships (see `Docs/TODO.md`).
 - **Missions authored:** `M1_ParchedCrops` (well/farm), `M2_CleaningRiver` (asset name predates the "Blocked River" rework in §9 — content and 5-Whys chain updated in place, filename unchanged), `M3_BrokenRoutine` (see §9 — full 5-Whys chain, `isAdvancedMission` checked, per-submit CG still a placeholder), `M4_KanBanMarket` (see §9 — full 5-Whys chain, `isAdvancedMission` checked; asset renamed in-place from the original `M4_1` stub), `M5_BrokenBridge` (see §9 — full 5-Whys chain, `isAdvancedMission` checked) — all five have complete 5-Whys chains and their solution path(s) implemented and wired in-scene.
-- **Notable scene objects:** `Farmer_NPC` (Mission 1 trigger, patrols), `RiverBlockagePoint`/`VIllagerComplaintPoint`/`RiverDryPoint` (Mission 2 trigger + 2 context points, reworked fiction — see §9), `Container_Trivial_M1`/`M1PipePanel` (renamed in-scene from `Container_Optimal_M1`), `Container_Trivial_M2`/`Container_Optimal_M2`, `Container_Optimal_M3` (the routine builder's single minigame container — a Canvas panel, not world-space; see `CLAUDE.md`), `Merchant_NPC` (Mission 4 trigger) and `M4KanbanPanel` (the Kanban panel's single container, renamed in-scene from `Container_Optimal_M4`; Mission 4's original two-container "Restock by Feel" trivial path was removed from the scene entirely when the mission converted to the Advanced shape — see §9), `Container_Optimal_M5` (the bridge's single minigame container, holding the anchor nodes, plank/node prefabs, the test cart, and the second popup-framing camera), `TownHall` (the upgrade shop; with `blackSmithBase_1`/`blackSmithRoof_1`-style tier sprites), `TrashManager` (hosts `TrashSpawner`), `TrashCollectionSite`, `CoinRewardSystem`, `TrustSystem`, `InventorySystem`/`InventoryUI`, `MissionBoard`, `InfoBoard`, `MinimapCamera`. `PDCAIndicatorUI` is implemented (§10) but not yet wired into this scene.
+- **Notable scene objects:** `Farmer_NPC` (Mission 1 trigger, patrols), `RiverBlockagePoint`/`VIllagerComplaintPoint`/`RiverDryPoint` (Mission 2 trigger + 2 context points, reworked fiction — see §9), `Container_Trivial_M1`/`M1PipePanel` (renamed in-scene from `Container_Optimal_M1`), `Container_Trivial_M2`/`Container_Optimal_M2`, `Container_Optimal_M3` (the routine builder's single minigame container — a Canvas panel, not world-space; see `CLAUDE.md`), `Merchant_NPC` (Mission 4 trigger) and `M4KanbanPanel` (the Kanban panel's single container, renamed in-scene from `Container_Optimal_M4`; Mission 4's original two-container "Restock by Feel" trivial path was removed from the scene entirely when the mission converted to the Advanced shape — see §9), `Container_Optimal_M5` (the bridge's single minigame container, holding the anchor nodes, plank/node prefabs, the test cart, and the second popup-framing camera), `TownHall` (the upgrade shop; with `blackSmithBase_1`/`blackSmithRoof_1`-style tier sprites), `TrashManager` (hosts `TrashSpawner`), `TrashCollectionSite`, `CoinRewardSystem`, `TrustSystem`, `InventorySystem`/`InventoryUI`, `MissionDirectoryUI` (HUD + expanded panel), `BridgeManager`, `SeedChest` (far bank), `InfoBoard`, `MinimapCamera`. `PDCAIndicatorUI` is implemented (§10) but not yet wired into this scene.
 - **Tuned values:** 8 inventory slots (slot 0 reserved for Gold Coins); town upgrades cost 3 then 2 Gold Coins; a rushed fix breaks down after 1 other completed mission; trash spawn interval randomized 25–45s (×2 after the first town upgrade, ×4 after the final), paused outside Exploration, no numeric penalty on spawn; trust starts at 2/5 per mission, ±1 per outcome; Gold Coin reward is a flat 1 per optimal mission (no per-mission tuning, unlike the old satisfaction rewards).
 
 ## 12. Design Rationale Notes (why it's built this way)
@@ -342,6 +354,6 @@ A persistent HUD button (reachable from anywhere, unlike the walk-up-triggered M
 - **All-5-or-trivial (no partial credit tiers)** was a deliberate design choice, not a missed nuance — the note in `PlanningUI`'s design ("hitting all 5 is intentionally hard") signals the team wants root-causing to feel genuinely hard to nail, not a coin-flip.
 - **Rejection reopens in place rather than restarting the mission** keeps the loop's cost proportional to the mistake — the player doesn't replay dialogue or re-walk across the map, only re-answers the quiz (now scaffolded) and, for Mission 1, re-solves a puzzle that's been reset to its original layout.
 - **Gold Coins only ever reward optimal work, never trivial** — this is what makes rushed-fix breakdown (§7) simple: there's no reward to retract when a trivial mission breaks down, because it never earned one. The old satisfaction system needed a `pendingRetraction` flag to avoid double-dipping on a redo; the coin economy doesn't need an equivalent at all, since a wrong outcome just banks nothing instead of banking something that then has to be clawed back.
-- **Event bus as the sole coupling layer** is what made replacing stages with breakdown cheap (§7): `OnMissionsNeedReview` reaches five-plus unrelated systems (NPC, river, puzzle, part/waste collection, mission board) without any of them referencing each other or whatever raises it — so only the trigger changed, not a single reset.
+- **Event bus as the sole coupling layer** is what made replacing stages with breakdown cheap (§7): `OnMissionsNeedReview` reaches five-plus unrelated systems (NPC, river, puzzle, part/waste collection, mission directory) without any of them referencing each other or whatever raises it — so only the trigger changed, not a single reset.
 - **Match existing structure over "more correct" in the abstract** — when a new feature could reasonably be built more than one way, the codebase prefers whichever way is consistent with how similar things already work, even over an option that's more textbook-correct. The clearest example: NPC trust pips could have used a UI `Image` + World Space `Canvas` (the generically "proper" way to float UI over a world object), but every other world-attached visual in this game is a `SpriteRenderer` on a sorting layer — so trust pips are `SpriteRenderer`s too (§10), keeping "how do I show something above an object in the world" answered one way instead of two. Consistency for future maintainers outranks architectural purity. **This is a code-architecture convention only** — it governs *how* an already-chosen design gets implemented, not *what* the design should be. Brainstorming a new mission or mechanic should be judged on its own design merits (does it teach its Kaizen concept well, is it fun, is it mechanically distinct from other missions) rather than on how closely it resembles an existing mission's shape.
 - **Missions 3, 4, and 5 deliberately break Pillar 1 ("the quiz *is* the decision point"), and that's the point of calling them Advanced Missions rather than quietly making an exception.** For a bridge, a multiple-choice diagnosis can't actually stand in for "does the structure hold" the way it can for "did you pick the well-cleaning approach that addresses the root cause" — an engineering fix is either load-bearing or it isn't, and the most honest way to test that is to actually build it and load-test it, not answer a question about it. Mission 3 makes the same call for a different reason: "get the order of daily chores right" isn't a diagnosis you can multiple-choice your way through either — it's a sequencing skill you either demonstrate by actually arranging the stations correctly or you don't. Mission 4 makes the same call for a third reason, discovered mid-development rather than planned from the start: it was originally built as a classic mission with a separate real-time trivial minigame, but that minigame's background clock could resolve the mission while the player was off exploring elsewhere — converting it to the Advanced shape removed that failure mode at the root, on top of the same "a quiz can't prove the tuning is actually correct" reasoning the other two Advanced Missions already use. In all three cases the quiz still runs (root-cause diagnosis is still practiced every time), but its score is repurposed into bonus attempts rather than pre-selecting the outcome — the minigame's own pass/fail becomes the "did you actually fix the root cause" check. This keeps the *spirit* of Pillar 1 (reasoning has to happen before the fix, and a bad diagnosis costs you something concrete) while dropping the specific mechanism (quiz score *is* the outcome) for the mission types where that mechanism would have been a worse simulation of the real lesson, not a better one. Stage 2 (`[3, 4, 5]`) being uniformly Advanced-shaped as a result is a known, accepted tradeoff — see §11.

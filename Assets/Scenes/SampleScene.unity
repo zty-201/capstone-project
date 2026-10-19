@@ -27443,10 +27443,11 @@ MonoBehaviour:
       Answer all 5 correctly and you'll unlock the optimal, root-cause fix. Miss
       even one, and you're stuck patching the symptom instead - a quick fix that
       doesn't actually solve the problem.
-  - title: Missions & the Mission Board
-    body: Every villager's problem is a mission. Check the Mission Board in town
-      any time to see which missions are open, resolved, or still "Needs Review"
-      after a trivial fix.
+  - title: Missions & the Mission Directory
+    body: Every villager's problem is a mission. The tracker in the top-left corner
+      shows your next step on the missions you're working on. Tap it to see every
+      mission - whether it's open, resolved, or still "Needs Review" after a quick
+      fix.
   - title: The PDCA Cycle
     body: 'Every mission runs through Plan, Do, and Check: Plan while you dig through
       the 5 Whys and choose a fix, Do while you carry that fix out, and Check when
@@ -27479,9 +27480,6 @@ MonoBehaviour:
 
       -
       Trash Collection Site: empty every trash item out of your inventory at once.
-
-      -
-      Mission Board: check the status of every mission.
 
       - Town Hall: spend
       Gold Coins to upgrade the village.'

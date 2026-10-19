@@ -39,17 +39,29 @@ Open the project in the Unity Editor (Unity 6). There are no CLI build or test c
 **States and their responsibilities:**
 | State | What it does |
 |---|---|
-| `Exploration` | Polls mouse clicks, fires `RaiseMapClicked` |
+| `Exploration` | Polls mouse clicks, fires `RaiseMapClicked` — a press over any UI raycast target (`EventSystem.IsPointerOverGameObject()`) is skipped, so tapping a HUD element (Mission Directory, Settings) isn't also read as a walk/interact order (same guard as `BridgeBuilder`) |
 | `Dialogue` | Delegates left-click to `DialogueManager.OnAdvanceDialogue()` |
 | `Planning` | Delegates left-click to `PlanningUI.OnAdvance()`; ESC returns to Exploration |
-| `Puzzle` | ESC returns to Exploration; pipe clicks route directly via `IPointerClickHandler` on each Canvas-based `PipeVisual`, not through `Tick()` polling |
-| `BridgeBuilder` | Forwards press/hold/release world positions into `BridgeBuilderSystem.HandleDragStart/Update/End` — a press over any UI raycast target (`EventSystem.IsPointerOverGameObject()`) is skipped so HUD button clicks aren't also read as build gestures; ESC returns to Exploration (guarded — only while `Phase == Building`) |
-| `RoutineBuilder` | ESC returns to Exploration; card drag/drop routes directly via Unity's `IBeginDragHandler`/`IDropHandler` on the Canvas panel, not through `Tick()` polling |
-| `KanbanBuilder` | ESC returns to Exploration (guarded — only while not mid-simulation); threshold-marker dragging and the Run Day button route directly via Unity's own UGUI handlers on the Canvas panel, not through `Tick()` polling |
+| `Puzzle` | Empty `Tick()` — pipe clicks route directly via `IPointerClickHandler` on each Canvas-based `PipeVisual`, not through `Tick()` polling. No ESC exit (see below) |
+| `BridgeBuilder` | Forwards press/hold/release world positions into `BridgeBuilderSystem.HandleDragStart/Update/End` — a press over any UI raycast target (`EventSystem.IsPointerOverGameObject()`) is skipped so HUD button clicks aren't also read as build gestures. No ESC exit (see below) |
+| `RoutineBuilder` | Empty `Tick()` — card drag/drop routes directly via Unity's `IBeginDragHandler`/`IDropHandler` on the Canvas panel, not through `Tick()` polling. No ESC exit (see below) |
+| `KanbanBuilder` | Empty `Tick()` — threshold-marker dragging and the Run Day button route directly via Unity's own UGUI handlers on the Canvas panel, not through `Tick()` polling. No ESC exit (see below) |
 | `Reflection` | Delegates left-click to `ReflectionPopupUI.OnDismiss()` |
-| `MissionBoard` | ESC returns to Exploration |
+| `MissionDirectory` | The expanded Mission Directory overlay (see Mission Directory HUD below). ESC, or tapping the backdrop (`MissionDirectoryUI.Close()`), returns to Exploration; `Exit()` calls `MissionDirectoryUI.HideExpanded()` (was `MissionBoard`; renamed in place so the enum's int value is unchanged) |
 | `TownNotice` | Empty stub — the town notice panel (upgrades, rushed-fix breakdowns) is dismissed via a UI Button wired directly to `TownNoticeUI.OnDismiss()` in the Inspector, not through `Tick()` (was `DayComplete`; renamed in place so the enum's int value is unchanged) |
-| `InfoBoard` | ESC returns to Exploration (same shape as `MissionBoard`) |
+| `InfoBoard` | ESC, or tapping the backdrop (`InfoBoardUI.Close()`), returns to Exploration |
+| `SettingsMenu` | ESC, or the on-screen Close button (`SettingsMenuUI.OnCloseButtonPressed`), returns to Exploration; entered from a persistent HUD button rather than a world `IInteractable` |
+
+**Minigame states have no ESC exit.** `Puzzle`, `BridgeBuilder`, `RoutineBuilder`, and
+`KanbanBuilder` are only ever entered by `MinigameActivator` on `OnSolutionSelected`, and by then
+the mission's trigger (`NPCController`, `BridgeInteractable`, `RoutineBoardInteractable`) has
+already locked/disabled itself — leaving to Exploration would strand the player with no way back
+into the minigame. They previously had (guarded) ESC exits; those were removed for this reason.
+
+**Overlays need a touch-reachable exit.** The game targets Android, where the back button isn't
+reliably delivered to `Keyboard.current.escapeKey`, so every ESC-closable overlay (`MissionDirectory`,
+`InfoBoard`, `SettingsMenu`) also has an on-screen way out — a full-screen backdrop `Button`
+("tap outside the window") or a Close button wired in the Inspector.
 
 ### Event Bus
 `EventBus` is a static class of C# events. Systems subscribe in `OnEnable`/`OnDisable` and raise via the `Raise*` helpers. This is the only coupling layer between systems — no direct references across domains.
@@ -65,7 +77,7 @@ Key events: `OnMapClicked → OnPathRequested → OnPathGenerated`, `OnSolutionS
 (Advanced missions — `MissionData.isAdvancedMission`, e.g. Mission 5 — diverge starting at step 3: the quiz no longer picks the path. See 5 Whys Quiz below and Mission 5: Bridge Building.)
 5. Puzzle solved / well patched → `RaiseMissionCompleted(missionID, wasOptimal)`
 6. `ReflectionPopupUI` listens, shows feedback text from `MissionData`, changes state to `Reflection`
-7. Player clicks to dismiss → `Exploration`; `MissionBoardUI` listens to grey out the entry
+7. Player clicks to dismiss → `Exploration`; `MissionDirectoryUI` (already updated on `OnMissionCompleted`) shows the mission as "Resolved" / "Needs Review"
 
 A trivial resolution isn't final — see Rushed-Fix Breakdown below: it breaks down and reopens after the player completes their next mission.
 
@@ -84,8 +96,23 @@ missions) → `Do`; `ReflectionPopupUI.HandleMissionCompleted` → `Check`;
 `ReflectionPopupUI.OnDismiss()` → `None`.
 
 ### Mission Directory HUD
-A top-left HUD element (`MissionDirectoryUI`) shows a compressed one-line-per-active-mission
-objective tracker, tracking progress *within* a mission's Do phase (e.g. "Collect the parts to
+`MissionDirectoryUI` (singleton) is the mission objective tracker, and — since the walk-up Mission
+Board (`MissionBoardUI`/`MissionEntryUI`/`MissionBoardInteractable`/`MissionBoardState`) was
+deleted — the only place mission status is shown. Two views over the same per-entry data
+(`DirectoryEntry.objective`/`.resolved`):
+- **Collapsed** (top-left HUD): only the `collapsedLines.Length` most recently active *unresolved*
+  missions, objective text only. A `recency` list (most recently active first) decides which —
+  every `OnObjectiveProgress`/`OnMissionCompleted`/`OnMissionsNeedReview` for a mission moves it to
+  the front (`MarkActive`). Tapping it (a `Button` on the HUD object → `Open()`) expands.
+  `Open()` is a no-op outside `Exploration`: the HUD stays clickable during minigames, and closing
+  returns to Exploration, which would strand the player outside a minigame they can't re-enter.
+- **Expanded** (centered panel, `GameStateType.MissionDirectory`): every mission, bold
+  `missionName` plus its objective/status; resolved-optimal lines are dimmed to
+  `resolvedLineAlpha`. `expandedPanel` is a `CanvasGroup` that must be a *sibling* of the HUD
+  object, not a child — a click inside the window would otherwise bubble up to the HUD's own open
+  `Button`. It holds a full-screen backdrop `Button` wired to `Close()` (tap outside to close).
+
+It tracks progress *within* a mission's Do phase (e.g. "Collect the parts to
 build the machine (0/3)") rather than just whether the mission is done — finer-grained than
 `PDCAPhase`/`OnMissionCompleted` can express, since e.g. "0/3 parts" vs. "assemble" vs. "place"
 are all still `PDCAPhase.Do` and all still the same `missionID`. Line content is authored data on
@@ -112,9 +139,9 @@ patch, pipe puzzle) have no sub-stage granularity worth tracking, so their `triv
 `optimalObjectives` arrays are single-entry — `MinigameActivator`'s stage-0 raise is the only one
 they need.
 
-A resolved-optimal mission's line disappears (nothing left to track); a resolved-trivial mission's
-line reads "Needs Review" (matching `MissionEntryUI`'s exact wording for the same outstanding
-state). On `OnMissionsNeedReview`, the line resets to `introObjective` rather than resuming
+A resolved-optimal mission reads "Resolved" — dimmed in the expanded panel and dropped from the
+collapsed HUD (nothing left to track); a resolved-trivial mission reads "Needs Review" and stays
+in both (still outstanding — the rushed fix will break down). On `OnMissionsNeedReview`, the line resets to `introObjective` rather than resuming
 mid-path — a redo starts back at square one (re-interact to re-open dialogue), so there's no
 sub-stage state worth preserving across the reset.
 
@@ -150,15 +177,15 @@ The quiz behaves differently on a redo (see Rushed-Fix Breakdown below): `hintTe
 
 **Advanced missions** (`MissionData.isAdvancedMission`, e.g. Mission 5) don't use `correctCount` for path selection at all: `PlanningUI.SelectAdvancedMission()` runs instead of the block above, always raising `OnSolutionSelected(missionID, SolutionType.Optimal)` — a routing placeholder into that mission's single container, not a claim about the eventual result — then `OnFiveWhysCompleted(missionID, correctCount)` so the minigame itself can spend the score on something else (Mission 5 turns it into bonus test attempts; see Mission 5: Bridge Building). `OnSolutionSelected` has to fire first: it's what activates the until-now-inactive container, synchronously running that object's `OnEnable` before the next line executes — only after that does the container's own `OnFiveWhysCompleted` subscription actually exist.
 
-### Mission Board
-`MissionBoardUI` holds one `MissionEntryUI` per mission (assigned in Inspector). On `OnMissionCompleted`, the matching entry greys out (`alpha = 0.4`) and its status label reads "Resolved" (optimal) or "Needs Review" (trivial). On `OnSolutionSelected`, `NPCController.HandleSolutionSelected` sets an internal `missionCompleted` flag (so `Interact()` becomes a no-op) and hides its `InteractionIndicator`, but the NPC's GameObject itself stays active — it remains visible (and keeps patrolling, if it has an `NPCPatrol`) rather than disappearing.
+### Mission Lock-Out & Reopening
+(The walk-up Mission Board that used to live here was deleted — mission status now lives in the Mission Directory HUD above.) On `OnSolutionSelected`, `NPCController.HandleSolutionSelected` sets an internal `missionCompleted` flag (so `Interact()` becomes a no-op) and hides its `InteractionIndicator`, but the NPC's GameObject itself stays active — it remains visible (and keeps patrolling, if it has an `NPCPatrol`) rather than disappearing.
 
-A "Needs Review" (trivial) mission reopens only when its rushed fix breaks down (see Rushed-Fix Breakdown below) — there's no way to manually revisit it before then. Once `OnMissionsNeedReview` fires for it, `MissionEntryUI.ResetVisual()` un-greys the entry and the mission's own interactable/minigame resets itself so it can be replayed.
+A "Needs Review" (trivial) mission reopens only when its rushed fix breaks down (see Rushed-Fix Breakdown below) — there's no way to manually revisit it before then. Once `OnMissionsNeedReview` fires for it, `MissionDirectoryUI` resets its line to `introObjective` and the mission's own interactable/minigame resets itself so it can be replayed.
 
 ### Data Layer (ScriptableObjects)
 - **`MissionData`** — all text content for one mission: complaint, root cause, 5 Whys quiz data (`fiveWhys: WhyStage[5]`, each with `question`/`correctAnswer`/`distractors[]`/`hint`), an optional `minigameHint` (shown only mid-minigame when `MissionReviewSystem.IsMissionUnderReview` is true — for advanced missions whose action-phase minigame isn't structured as discrete Why stages the way the quiz is, so there's no per-question `hint` slot to reuse; see Mission 3 below), solution names, reflection texts. Create via `Kaizen Systems/Mission Data`. `M1_ParchedCrops`, `M2_CleaningRiver`, `M3_BrokenRoutine`, `M4_KanBanMarket`, and `M5_BrokenBridge` have their 5 Whys chains populated, each one ending at the mission's `actualRootCause`.
 - **`MissionRegistry`** — array of `MissionData`, looked up by `missionID`. Create via `Kaizen Systems/Mission Registry`. Assign in Inspector on `ReflectionPopupUI`, `MissionReviewSystem`, and `TownNoticeUI`.
-- **`ItemData`** — one inventory item's `itemID`, `itemName`, `icon`, and stacking rules (`stackable`, `maxStack`). Create via `Kaizen Systems/Item Data`. Five assets exist: **Gold Coin** (stackable) and **Trash** (not stackable, so litter piles up one slot per piece), assigned in Inspector on `CoinRewardSystem`, `TrashPiece`, `TrashCollectionSite`, `TownUpgradeSystem`, and `InventorySystem.reservedSlotItem`; **Brick** (not stackable, only ever one needed) for Mission 1's trivial fetch quest, assigned on `BrickPickup` and `WellPatchSite`; **Machine Part** (stackable) and **Winch** (not stackable) for Mission 2's optimal path, assigned on `MachinePart`, `AssemblyPoint`, and `PlacementPoint` — `AssemblyPoint.Interact()` trades 3 Machine Parts for 1 Winch, and `PlacementPoint.Interact()` consumes the Winch on final placement.
+- **`ItemData`** — one inventory item's `itemID`, `itemName`, `icon`, and stacking rules (`stackable`, `maxStack`). Create via `Kaizen Systems/Item Data`. Six assets exist: **Seed Pouch** (Mission 5's far-bank reward, assigned on `SeedChest` — see Mission 5: Bridge Building); **Gold Coin** (stackable) and **Trash** (not stackable, so litter piles up one slot per piece), assigned in Inspector on `CoinRewardSystem`, `TrashPiece`, `TrashCollectionSite`, `TownUpgradeSystem`, and `InventorySystem.reservedSlotItem`; **Brick** (not stackable, only ever one needed) for Mission 1's trivial fetch quest, assigned on `BrickPickup` and `WellPatchSite`; **Machine Part** (stackable) and **Winch** (not stackable) for Mission 2's optimal path, assigned on `MachinePart`, `AssemblyPoint`, and `PlacementPoint` — `AssemblyPoint.Interact()` trades 3 Machine Parts for 1 Winch, and `PlacementPoint.Interact()` consumes the Winch on final placement.
 - **`BridgeMaterialData`** — one bridge-plank material's `materialID`/`materialName`/`icon`, plus the actual cost-vs-strength tradeoff: `costPerUnitLength` (spent from `BridgeBuilderSystem.budget`), `breakForce` (that plank's `HingeJoint2D.breakForce`), `plankColor`, and `isRoad` (default true — false marks a reinforcement-only material, see Mission 5: Bridge Building for what that changes about collision). Create via `Kaizen Systems/Bridge Material Data`. No registry asset — low cardinality (2-3 materials), so `BridgeBuilderSystem.materials` just holds the array directly, referenced only within Mission 5's own minigame. See Mission 5: Bridge Building.
 
 ### Rushed-Fix Breakdown (Mission Review)
@@ -189,14 +216,14 @@ deactivates it), and `TownNoticeUI` changing state would fight `ReflectionPopupU
 `ChangeState(Exploration)` — raising it first would let that Exploration change overwrite the
 notice's `TownNotice` state.
 
-**`OnMissionsNeedReview` reopens the broken-down missions in place.** Every mission-specific system listens for it and resets itself to pre-completion state: `NPCController` (Mission 1's NPC) clears `missionCompleted` and calls `InteractionIndicator.ResetVisibility()`; `RiverInteractable` (Mission 2's trigger) re-`SetActive(true)`s itself; `PipePuzzleSystem` resets every `PipeVisual` to its cached original rotation/bitmask (`ResetPuzzle()`); `PartCollectionSystem`/`WastePickupSystem` reset their collected counts and re-show their pieces (`MachinePart.ResetPart()`, `WastePiece.ResetPiece()`, `AssemblyPoint.ResetPoint()`, `PlacementPoint.ResetPoint()`); `MissionBoardUI`/`MissionEntryUI` un-grey the entry (`ResetVisual()`); `TownNoticeUI` announces it ("A Quick Fix Gave Way", naming the missions via `MissionData.missionName`). Components living inside a container `MinigameActivator` disables after mission completion (`PartCollectionSystem`, `WastePickupSystem`) or that disable themselves on completion (`RiverInteractable`, `PipePuzzleSystem`) subscribe to `OnMissionsNeedReview` in `Awake`/`OnDestroy` rather than `OnEnable`/`OnDisable`, since an `OnEnable`/`OnDisable` subscription would already be torn down by the time a review request — which can only happen after the mission is complete — needs to reach it.
+**`OnMissionsNeedReview` reopens the broken-down missions in place.** Every mission-specific system listens for it and resets itself to pre-completion state: `NPCController` (Mission 1's NPC) clears `missionCompleted` and calls `InteractionIndicator.ResetVisibility()`; `RiverInteractable` (Mission 2's trigger) re-`SetActive(true)`s itself; `PipePuzzleSystem` resets every `PipeVisual` to its cached original rotation/bitmask (`ResetPuzzle()`); `PartCollectionSystem`/`WastePickupSystem` reset their collected counts and re-show their pieces (`MachinePart.ResetPart()`, `WastePiece.ResetPiece()`, `AssemblyPoint.ResetPoint()`, `PlacementPoint.ResetPoint()`); `MissionDirectoryUI` resets the line to `introObjective`; `BridgeManager` restores the broken-bridge visual (but deliberately keeps the far bank walkable — see Mission 5); `TownNoticeUI` announces it ("A Quick Fix Gave Way", naming the missions via `MissionData.missionName`). Components living inside a container `MinigameActivator` disables after mission completion (`PartCollectionSystem`, `WastePickupSystem`) or that disable themselves on completion (`RiverInteractable`, `PipePuzzleSystem`) subscribe to `OnMissionsNeedReview` in `Awake`/`OnDestroy` rather than `OnEnable`/`OnDisable`, since an `OnEnable`/`OnDisable` subscription would already be torn down by the time a review request — which can only happen after the mission is complete — needs to reach it.
 
 **A redo runs through the same 5 Whys quiz** with hint/distractor differences from a first attempt — see 5 Whys Quiz above. `MissionReviewSystem` owns that scaffolding too (`IsMissionUnderReview`, `RecordWrongAnswer`/`GetExcludedDistractors`). Trivial completions never earned a Gold Coin, so there's nothing to retract on a breakdown.
 
 ### Pathfinding & Grid
 - **`GridSystem`** (pure C#) — 2D array of `GridNode`; converts between world positions and grid coordinates.
 - **`PathfindingSystem`** (MonoBehaviour) — builds a `GridSystem` in `Start`, reads a collision `Tilemap` to mark unwalkable cells, runs A* using a `NodeMinHeap` min-heap. Two entry points into the same A* core: the `EventBus.OnPathRequested` handler (`CalculatePath`) fires `RaisePathGenerated` with the result and is what `PlayerController` uses; `RequestPathSync(start, end)` returns the path directly instead of broadcasting it, for callers that must not go through the shared event pair (see NPC Patrol below — every subscriber receives every `OnPathGenerated`, so a second broadcaster would make the player walk an NPC's path or vice versa). `GetRandomWalkableCoordinates(Vector2Int from)` does a BFS flood-fill from `from` over walkable neighbors and returns a random cell from the reachable set, so callers never get handed a walkable "island" cell that's cut off by unwalkable tiles (which would otherwise burn a full failed A* search and log a warning). Exposes `SetWalkable(Vector3 worldPos, bool walkable)` to toggle grid cells at runtime (e.g. doors, mission triggers).
-- **`InputManager`** — converts `OnMapClicked` world positions to grid coords; if an `IInteractable` is adjacent it calls `Interact()`, otherwise fires `RaisePathRequested`.
+- **`InputManager`** — converts `OnMapClicked` world positions to grid coords; if an `IInteractable` is adjacent it calls `Interact()`, otherwise fires `RaisePathRequested` — with the target first passed through `PathfindingSystem.GetNearestReachableTowards(start, target)`. That walks the straight line from the clicked cell back toward the player and returns the first cell the player can actually *reach* (flood-fill, shared with `GetRandomWalkableCoordinates` via `GetReachableNodes`), so clicking a wall, off-grid, or a walled-off walkable pocket moves the player to the near side of it instead of failing A* and standing still. Checking reachability, not just walkability, is the load-bearing part.
 - **`PlayerController`** — listens to `OnPathGenerated`, walks the path via a coroutine, flips the `SpriteRenderer` on horizontal movement. Before each step checks the next cell via `Physics2D.OverlapPoint` against an `npcLayerMask`; if blocked, it `yield return null`s once before re-requesting the path from the current position, so the player reroutes around moving entities. That single-frame wait is load-bearing, not cosmetic: re-requesting synchronously can recurse into `StartCoroutine(FollowPath(...))` again within the same call stack, and if the newly computed path is blocked at its own first step too (e.g. a patrol NPC parked on the only route), it recurses without ever yielding and overflows the native stack.
 
 ### Mission 2: The Blocked River
@@ -414,9 +441,9 @@ along that axis, and carries them through whatever rotation is currently applied
 `track.TransformPoint(...)` before comparing against the pointer in screen space — correct
 regardless of rotation angle or direction, rather than assuming a specific one.
 
-**`KanbanBuilderState`** is ESC-only outside of a running simulation (same `canLeave` guard shape
-as `RoutineBuilderState`/`BridgeBuilderState`) — all actual input (dragging thresholds, the Run Day
-button) resolves through Unity's own UGUI handlers, not `Tick()` polling.
+**`KanbanBuilderState`** has an empty `Tick()` and no ESC exit (see "Minigame states have no ESC
+exit" under State Machine) — all actual input (dragging thresholds, the Run Day button) resolves
+through Unity's own UGUI handlers, not `Tick()` polling.
 
 **`MarketAmbientSystem` is a permanent, post-completion epilogue** — entirely separate from
 `M4KanbanPanel`, listening for `OnMissionCompleted` for missionID 4 the same way `RiverManager`
@@ -507,7 +534,10 @@ Editor-authored grid:
 - **Sorting / click-blocking against `PlayerCanvas`.** `PlayerCanvas` is Screen Space - Camera on
   the `UI` sorting layer at order 0, so it sorts *with* the container's world sprites: anything
   in the container must sit above order 0 to cover the HUD (the `BackGround` parchment tied at 0
-  and drew under it). Order within the container: background → grid → planks (15) → nodes (16,
+  and drew under it). That background is sized by `FitSpriteToCamera` (the world-space stand-in
+  for a stretch-anchored Canvas `Image`), which resizes through `SpriteRenderer.size` rather than
+  `localScale` so a 9-sliced border stays at native size — the `SpriteRenderer` must be Draw Mode
+  **Sliced** (it logs an error and does nothing otherwise) and the sprite's Mesh Type **Full Rect**. Order within the container: background → grid → planks (15) → nodes (16,
   so they stay grabbable on top of beams) → cart (20). The HUD is still there underneath,
   though, and still raycastable — since the press guard above treats any raycast target as UI,
   every non-interactive `PlayerCanvas` graphic (mission directory lines, PDCA text, inventory
@@ -539,6 +569,22 @@ Editor-authored grid:
   parent/child activated together — so caching only in `Awake` intermittently threw a
   `NullReferenceException` depending on which order Unity happened to run things in that frame.
 
+**After completion — `BridgeManager` and the far bank.** Same role as Mission 2's `RiverManager`
+(lives outside the container, since `MinigameActivator` tears the container down): on
+`OnMissionCompleted(5, …)` it hides `brokenBridgeVisual` and shows `lashedBridgeVisual` (trivial)
+or `bracedBridgeVisual` (optimal) — unlike the river, the two outcomes look different — and flips
+every `unlockedCells` world position walkable via `PathfindingSystem.SetWalkable` (those cells are
+pre-authored unwalkable in the collision tilemap). Either outcome unlocks the far bank, since both
+physically get the player across. On `OnMissionsNeedReview` it restores the broken visual but
+deliberately does **not** re-lock the cells: the player may already be on the far side, and
+re-locking the only way back would strand them. On the far bank sits `SeedChest`
+(`IInteractable`), a one-time reward needing no gating of its own (the bridge unlock *is* the
+gate): `Interact()` adds a Seed Pouch `ItemData` — same gate-on-inventory-success shape as
+`BrickPickup`, so a full inventory leaves the chest closed rather than losing the pouch — swaps
+`closedVisual` → `openedVisual`, hides its `InteractionIndicator`, and plays `noteLines` through
+`DialogueManager.StartDialogue(noteLines, null)` (a `null` mission, so it returns to Exploration
+like `ContextInteractable`). It foreshadows the post-missions farming sandbox (`Docs/TODO.md`).
+
 **Presented as a popup, but for a different reason than Mission 1's pipe puzzle or Mission 3's
 routine builder reach the same look.** Both of those are pure UI now — `Container_Optimal_M1`/`M3`
 are Canvas panels, authored anywhere convenient in the scene, since a Canvas panel presents
@@ -563,7 +609,7 @@ back on Exit. `bridgeViewCamera` starts **inactive** in the Editor-authored hier
 simultaneously active would make Edit-mode camera preview ambiguous/jumpy; `Enter()`'s explicit
 `SetActive(true)` doesn't care what the object's authored starting state was, so this costs
 nothing at runtime. Because the container stays active for the entire build/test session — only
-deactivated on actual mission completion, not on an Esc-out mid-build — everything under it
+deactivated on actual mission completion (there's no ESC-out mid-build any more, but there used to be) — everything under it
 (anchors, the node/plank prefabs, the cart, the preview line, the background sprite) sits on a
 dedicated `Bridge` layer (a genuinely free/editable slot — Unity locks the names of layers 0, 1,
 2, 4, and 5 even though slots 3, 6, and 7 sit in that same reserved 0-7 range and remain editable,
@@ -586,18 +632,18 @@ swap. `MinimapCamera` needs no such toggle — it's a real `Camera` with its own
 never needs to show the playground in any state, so its exclusion stays a permanent Editor setting.
 
 ### Singletons
-`GameManager`, `DialogueManager`, `PlanningUI`, `MissionBoardUI`, `ReflectionPopupUI`, `TownNoticeUI`, `InventorySystem`, `TrustSystem`, `InfoBoardUI`, `MissionReviewSystem`, `TownUpgradeSystem`, `TrashSpawner`, `BridgeBuilderSystem`, `FarmRoutineSystem`, `KanbanBuilderSystem` all follow the same pattern: static `Instance`, destroyed if a duplicate exists in `Awake`.
+`GameManager`, `DialogueManager`, `PlanningUI`, `MissionDirectoryUI`, `ReflectionPopupUI`, `TownNoticeUI`, `InventorySystem`, `TrustSystem`, `InfoBoardUI`, `MissionReviewSystem`, `TownUpgradeSystem`, `TrashSpawner`, `BridgeBuilderSystem`, `FarmRoutineSystem`, `KanbanBuilderSystem` all follow the same pattern: static `Instance`, destroyed if a duplicate exists in `Awake`.
 
 ### IInteractable
-`NPCController`, `MissionBoardInteractable`, `RiverInteractable`, `WastePiece`, `MachinePart`, `AssemblyPoint`, `PlacementPoint`, `TrashPiece`, `TrashCollectionSite`, `TownHallInteractable`, `ContextInteractable`, `BrickPickup`, `WellPatchSite`, `InfoBoardInteractable`, `BridgeInteractable`, `RoutineBoardInteractable`, and `MarketStall` all implement `IInteractable`. (`MarketStall`'s own `Interact()` currently goes unused in Mission 4's Do phase — see Mission 4 below — but the component is kept IInteractable-ready for the planned post-5-missions farming/market sandbox, see `Docs/TODO.md`.) `InputManager` detects them via `Physics2D.OverlapPoint` and calls `Interact()` when the player is within 1 grid cell (or routes the player adjacent first). `ContextInteractable` is the odd one out: it's narrative-only (dialogue with no associated `MissionData`), so `DialogueManager` returns straight to `Exploration` afterward instead of opening `PlanningUI` — it never starts or resolves a mission.
+`NPCController`, `RiverInteractable`, `WastePiece`, `MachinePart`, `AssemblyPoint`, `PlacementPoint`, `TrashPiece`, `TrashCollectionSite`, `TownHallInteractable`, `ContextInteractable`, `BrickPickup`, `WellPatchSite`, `InfoBoardInteractable`, `BridgeInteractable`, `RoutineBoardInteractable`, `SeedChest`, and `MarketStall` all implement `IInteractable`. (`MarketStall`'s own `Interact()` currently goes unused in Mission 4's Do phase — see Mission 4 below — but the component is kept IInteractable-ready for the planned post-5-missions farming/market sandbox, see `Docs/TODO.md`.) `InputManager` detects them via `Physics2D.OverlapPoint` and calls `Interact()` when the player is within 1 grid cell (or routes the player adjacent first). `ContextInteractable` is the odd one out: it's narrative-only (dialogue with no associated `MissionData`), so `DialogueManager` returns straight to `Exploration` afterward instead of opening `PlanningUI` — it never starts or resolves a mission.
 
 ### Info Board
-A walk-up-and-interact help/tutorial panel, architecturally a clone of the Mission Board: `InfoBoardInteractable` (`IInteractable`) shows `InfoBoardUI` and changes state to `InfoBoard`; `InfoBoardState` is ESC-only, same shape as `MissionBoardState`. `InfoBoardUI` isn't dialogue-typed — it's a static paged reference (`InfoPage[] pages`, each a `title`/`body`), navigated with Next/Previous buttons wired directly to `ShowNextPage()`/`ShowPreviousPage()` in the Inspector, covering movement, the 5 Whys mechanic, the PDCA cycle, gold coins & trust, trash & inventory, town hall, and a catalog of interactable types. The default page content is a C# field initializer on `InfoBoardUI.pages`, not scene-authored data.
+A walk-up-and-interact help/tutorial panel: `InfoBoardInteractable` (`IInteractable`) shows `InfoBoardUI` and changes state to `InfoBoard`. It closes via ESC (`InfoBoardState`) or by tapping the full-screen backdrop `Button`, wired to `InfoBoardUI.Close()` — same shape as `MissionDirectoryUI.Close()`; `InfoBoardState.Exit` hides the panel. `InfoBoardUI` isn't dialogue-typed — it's a static paged reference (`InfoPage[] pages`, each a `title`/`body`), navigated with Next/Previous buttons wired directly to `ShowNextPage()`/`ShowPreviousPage()` in the Inspector, covering movement, the 5 Whys mechanic, the PDCA cycle, gold coins & trust, trash & inventory, town hall, and a catalog of interactable types. The default page content is a C# field initializer on `InfoBoardUI.pages`, not scene-authored data.
 
 ### Minimap
 `MinimapCamera` (on a dedicated second `Camera` in the scene) follows the `Player`-tagged object every `LateUpdate`, using the same tag-lookup pattern as `InteractionIndicator`. That camera renders to a RenderTexture displayed by a `RawImage` anchored top-right on the main Canvas — it's a live zoomed-out view of the same scene, not a separate icon-based map.
 
-`InteractionIndicator` is an optional companion component placed on an interactable's GameObject: it shows a bobbing prompt icon whenever the player is within `showRange` during `Exploration`. Call its `Hide()` method once the owning interactable has been permanently consumed (e.g. a collected `MachinePart`, or an `NPCController` whose mission was just resolved — see Mission Board below).
+`InteractionIndicator` is an optional companion component placed on an interactable's GameObject: it shows a bobbing prompt icon whenever the player is within `showRange` during `Exploration`. Call its `Hide()` method once the owning interactable has been permanently consumed (e.g. a collected `MachinePart`, or an `NPCController` whose mission was just resolved — see Mission Lock-Out & Reopening above).
 
 ### NPC Patrol
 `NPCPatrol` is a standalone component (added alongside `NPCController` on the same NPC GameObject) that wanders an NPC between random walkable tiles. Its coroutine `yield return null`s once before its first loop iteration, because `OnEnable` isn't guaranteed to run after every other object's `Awake` — only that object's own `Awake` is guaranteed before its own `OnEnable`, so touching `GameManager.Instance` synchronously in `OnEnable` can NRE if `GameManager`'s `Awake` hasn't run yet. Each loop iteration: gate on `GameManager.Instance.StateManager.CurrentStateType == GameStateType.Exploration` (idles otherwise, so NPCs freeze mid-step the instant dialogue/a minigame opens rather than sliding around during it), pick a destination via `PathfindingSystem.GetRandomWalkableCoordinates`, path to it via `RequestPathSync`, then step along it with the same move/animate/flip pattern as `PlayerController.FollowPath`. Disabling the NPC's GameObject (e.g. `SetActive(false)`) stops this coroutine for free.
@@ -617,7 +663,7 @@ lost because trash filled every slot at the moment a mission awarded it. `CountI
 mutation raises `EventBus.OnInventoryChanged` (no payload — subscribers just re-read `Slots`).
 `InventoryUI` (HUD element, occupies the screen position the satisfaction bar used to) is a fixed
 array of slot `Image`/count-text pairs that refresh on that event — the same fixed-array pattern
-as `MissionBoardUI.missionEntries`.
+as `MissionDirectoryUI.collapsedLines`.
 
 **`CoinRewardSystem`** listens to `OnMissionCompleted` and calls
 `InventorySystem.TryAddItem(goldCoinItem, 1)` only when `wasOptimal` — a trivial completion earns

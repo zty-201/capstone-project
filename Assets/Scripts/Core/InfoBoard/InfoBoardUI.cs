@@ -56,9 +56,10 @@ public class InfoBoardUI : MonoBehaviour
         },
         new InfoPage
         {
-            title = "Missions & the Mission Board",
-            body = "Every villager's problem is a mission. Check the Mission Board in town any time to see " +
-                   "which missions are open, resolved, or still \"Needs Review\" after a trivial fix."
+            title = "Missions & the Mission Directory",
+            body = "Every villager's problem is a mission. The tracker in the top-left corner shows your next " +
+                   "step on the missions you're working on. Tap it to see every mission - whether it's open, " +
+                   "resolved, or still \"Needs Review\" after a quick fix."
         },
         new InfoPage
         {
@@ -100,7 +101,6 @@ public class InfoBoardUI : MonoBehaviour
                    "chosen a path.\n" +
                    "- Trash piles: pick these up before they crowd your inventory.\n" +
                    "- Trash Collection Site: empty every trash item out of your inventory at once.\n" +
-                   "- Mission Board: check the status of every mission.\n" +
                    "- Town Hall: spend Gold Coins to upgrade the village."
         },
     };
