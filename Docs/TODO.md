@@ -82,3 +82,12 @@ earmarked for reuse here:
 - `MarketAttendantNPC`'s dispatch-to-a-destination movement (already decoupled from
   Mission 4 specifically) could represent an NPC buyer or delivery helper in the farming
   loop without new pathfinding code.
+
+Editor setup:
+1. On the Seed Pouch asset, assign an Icon so it shows in the inventory.
+2. Create the chest GameObject on the far bank:
+   - Add a Collider2D, because clicks can only find an object that has one.
+   - Add the SeedChest component.
+   - Optionally add InteractionIndicator for the bobbing prompt.
+3. Give it two child objects, a closed-chest sprite and an open-chest sprite. Drag them into Closed Visual and Open Visual, and drag the Seed Pouch asset into Seed Pouch Item. Unity logs an error at startup if any of these three is empty.
+4. Optionally assign an opening sound in Interact Sfx. The note text has default lines and can be edited in the Inspector.

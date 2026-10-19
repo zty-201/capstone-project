@@ -5169,13 +5169,13 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1621735655}
+  - {fileID: 2066794750}
   - {fileID: 2049310143}
   - {fileID: 1828867472}
   - {fileID: 853728827}
   - {fileID: 1227439111}
   - {fileID: 1206395804}
   - {fileID: 2079097764}
-  - {fileID: 2066794750}
   - {fileID: 1759665597}
   - {fileID: 1699591605}
   - {fileID: 846110861}
@@ -5790,7 +5790,7 @@ Transform:
   m_GameObject: {fileID: 361443345}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5, y: 1.13, z: 0}
+  m_LocalPosition: {x: -5, y: 1.04, z: 0}
   m_LocalScale: {x: 1.6844976, y: 1.8897743, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -27269,7 +27269,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 1
-  m_Size: {x: 17.760532, y: 10}
+  m_Size: {x: 17.784554, y: 10}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -35700,7 +35700,7 @@ Transform:
   m_GameObject: {fileID: 1099216969}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5, y: 1.3, z: 0}
+  m_LocalPosition: {x: -5, y: 1.04, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -37538,6 +37538,36 @@ Tilemap:
       m_TileObjectToInstantiateIndex: 65535
       dummyAlignment: 0
       m_AllTileFlags: 1073741825
+  - first: {x: 8, y: -17, z: 0}
+    second:
+      serializedVersion: 2
+      m_TileIndex: 83
+      m_TileSpriteIndex: 83
+      m_TileMatrixIndex: 0
+      m_TileColorIndex: 11
+      m_TileObjectToInstantiateIndex: 65535
+      dummyAlignment: 0
+      m_AllTileFlags: 1073741825
+  - first: {x: 9, y: -17, z: 0}
+    second:
+      serializedVersion: 2
+      m_TileIndex: 83
+      m_TileSpriteIndex: 83
+      m_TileMatrixIndex: 0
+      m_TileColorIndex: 11
+      m_TileObjectToInstantiateIndex: 65535
+      dummyAlignment: 0
+      m_AllTileFlags: 1073741825
+  - first: {x: 10, y: -17, z: 0}
+    second:
+      serializedVersion: 2
+      m_TileIndex: 83
+      m_TileSpriteIndex: 83
+      m_TileMatrixIndex: 0
+      m_TileColorIndex: 11
+      m_TileObjectToInstantiateIndex: 65535
+      dummyAlignment: 0
+      m_AllTileFlags: 1073741825
   - first: {x: 15, y: -17, z: 0}
     second:
       serializedVersion: 2
@@ -37649,6 +37679,36 @@ Tilemap:
       dummyAlignment: 0
       m_AllTileFlags: 1073741825
   - first: {x: -6, y: -16, z: 0}
+    second:
+      serializedVersion: 2
+      m_TileIndex: 83
+      m_TileSpriteIndex: 83
+      m_TileMatrixIndex: 0
+      m_TileColorIndex: 11
+      m_TileObjectToInstantiateIndex: 65535
+      dummyAlignment: 0
+      m_AllTileFlags: 1073741825
+  - first: {x: 8, y: -16, z: 0}
+    second:
+      serializedVersion: 2
+      m_TileIndex: 83
+      m_TileSpriteIndex: 83
+      m_TileMatrixIndex: 0
+      m_TileColorIndex: 11
+      m_TileObjectToInstantiateIndex: 65535
+      dummyAlignment: 0
+      m_AllTileFlags: 1073741825
+  - first: {x: 9, y: -16, z: 0}
+    second:
+      serializedVersion: 2
+      m_TileIndex: 83
+      m_TileSpriteIndex: 83
+      m_TileMatrixIndex: 0
+      m_TileColorIndex: 11
+      m_TileObjectToInstantiateIndex: 65535
+      dummyAlignment: 0
+      m_AllTileFlags: 1073741825
+  - first: {x: 10, y: -16, z: 0}
     second:
       serializedVersion: 2
       m_TileIndex: 83
@@ -44380,7 +44440,7 @@ Tilemap:
     m_RefCount: 1
     m_Data: {fileID: 11400000, guid: d1fe41f1aabae3544b92e4451fe3ffab, type: 2}
   - serializedVersion: 2
-    m_RefCount: 649
+    m_RefCount: 655
     m_Data: {fileID: 11400000, guid: e4061b83837bfab4f823d09869a24638, type: 2}
   m_TileSpriteArray:
   - serializedVersion: 2
@@ -44633,11 +44693,11 @@ Tilemap:
     m_RefCount: 1
     m_Data: {fileID: -1350190621, guid: 743c3c916d05443459a976785ffaafc5, type: 3}
   - serializedVersion: 2
-    m_RefCount: 649
+    m_RefCount: 655
     m_Data: {fileID: 526660973, guid: 743c3c916d05443459a976785ffaafc5, type: 3}
   m_TileMatrixArray:
   - serializedVersion: 2
-    m_RefCount: 832
+    m_RefCount: 838
     m_Data:
       e00: 1
       e01: 0
@@ -44690,7 +44750,7 @@ Tilemap:
     m_RefCount: 0
     m_Data: {r: 0.725345, g: 0.49238643, b: 0.53908926, a: 1}
   - serializedVersion: 2
-    m_RefCount: 832
+    m_RefCount: 838
     m_Data: {r: 1, g: 1, b: 1, a: 1}
   - serializedVersion: 2
     m_RefCount: 0
@@ -48225,7 +48285,7 @@ Transform:
   m_GameObject: {fileID: 1257729799}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.18, y: -14.06, z: 0}
+  m_LocalPosition: {x: 9.64, y: -14.06, z: 0}
   m_LocalScale: {x: 1.5, y: 1.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -49033,8 +49093,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 25.477, y: 20}
-  m_SizeDelta: {x: 1651, y: 472}
+  m_AnchoredPosition: {x: -38.14, y: 20}
+  m_SizeDelta: {x: 1523.76, y: 472}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1292683017
 MonoBehaviour:
@@ -52627,7 +52687,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1503442900
 Transform:
   m_ObjectHideFlags: 0
@@ -53492,6 +53552,11 @@ MonoBehaviour:
   - "Even the reeds along the bank are wilting \u2014 they need more than what's
     trickling through now."
   - Whatever's blocking this up top, it's been getting worse by the day.
+  resolvedByMissionID: 2
+  resolvedDialogueLines:
+  - "The water's rushing over the rocks again \u2014 you can hear it from the village
+    gate."
+  - The reeds along the bank are already perking back up.
   interactSfx: {fileID: 8300000, guid: 9d7e0cfa3cb1b4046aa469a8b0ef2115, type: 3}
 --- !u!61 &1547660243
 BoxCollider2D:
@@ -55481,7 +55546,7 @@ Transform:
   m_GameObject: {fileID: 1639665373}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6.08, y: -16.43, z: 0}
+  m_LocalPosition: {x: 6.08, y: -16.63, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -59100,12 +59165,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ContextInteractable
   dialogueLines:
-  - "This is the farmer's place \u2014 you can tell by the tools leaning against
-    the porch."
-  - Rows of crops stretch out just behind the house, though a few patches look a
-    little worse for wear.
-  - The farmer's usually out at first light and doesn't come back in until the sun's
-    low.
+  - "The market's storehouse \u2014 crates are stacked to the rafters on one side
+    and bare on the other."
+  - Merchants hurry in and out all day, grabbing whatever they think their stall
+    needs.
+  - The smell of fresh bread and spices drifts out the door.
   interactSfx: {fileID: 8300000, guid: 9d7e0cfa3cb1b4046aa469a8b0ef2115, type: 3}
 --- !u!61 &1837163442
 BoxCollider2D:
@@ -61198,10 +61262,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ContextInteractable
   dialogueLines:
-  - "Don't drink from the river right now \u2014 it's gone green and foul."
-  - We wash and draw water there every day... but not like this. Something needs
-    to change.
-  - It didn't used to be like this. The river used to run clear before that rockslide.
+  - "The river's run completely dry \u2014 we used to wash and draw all our water
+    there."
+  - Now we're rationing every bucket we've got left. Something needs to change.
+  - "It's been getting weaker for a while now \u2014 every autumn the leaves come
+    down thick up by the stream."
+  resolvedByMissionID: 2
+  resolvedDialogueLines:
+  - The river's running again! We can wash and draw water just like before.
+  - "Thank you \u2014 the whole village can breathe a little easier now."
   interactSfx: {fileID: 8300000, guid: 9d7e0cfa3cb1b4046aa469a8b0ef2115, type: 3}
 --- !u!61 &1929092977
 BoxCollider2D:
