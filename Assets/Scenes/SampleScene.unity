@@ -5303,6 +5303,8 @@ MonoBehaviour:
   - "The forge is always going here \u2014 you can feel the heat from the doorway."
   - This is where villagers bring parts to get properly put together.
   - Sparks fly, metal clangs. The blacksmith doesn't look up from the anvil.
+  resolvedByMissionID: 0
+  resolvedDialogueLines: []
   interactSfx: {fileID: 8300000, guid: 9d7e0cfa3cb1b4046aa469a8b0ef2115, type: 3}
 --- !u!61 &324872481
 BoxCollider2D:
@@ -5821,7 +5823,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 2
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 5
@@ -27481,8 +27483,8 @@ MonoBehaviour:
       -
       Trash Collection Site: empty every trash item out of your inventory at once.
 
-      - Town Hall: spend
-      Gold Coins to upgrade the village.'
+      -
+      Town Hall: spend Gold Coins to upgrade the village.'
 --- !u!225 &853728829
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -48355,6 +48357,8 @@ MonoBehaviour:
   dialogueLines:
   - Home, sweet home. Still smells faintly of yesterday's cooking.
   - Everything's right where I left it.
+  resolvedByMissionID: 0
+  resolvedDialogueLines: []
   interactSfx: {fileID: 8300000, guid: 9d7e0cfa3cb1b4046aa469a8b0ef2115, type: 3}
 --- !u!114 &1257729803
 MonoBehaviour:
@@ -52687,7 +52691,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1503442900
 Transform:
   m_ObjectHideFlags: 0
@@ -55423,6 +55427,8 @@ MonoBehaviour:
     little worse for wear.
   - The farmer's usually out at first light and doesn't come back in until the sun's
     low.
+  resolvedByMissionID: 0
+  resolvedDialogueLines: []
   interactSfx: {fileID: 8300000, guid: 9d7e0cfa3cb1b4046aa469a8b0ef2115, type: 3}
 --- !u!61 &1632599109
 BoxCollider2D:
@@ -59170,6 +59176,8 @@ MonoBehaviour:
   - Merchants hurry in and out all day, grabbing whatever they think their stall
     needs.
   - The smell of fresh bread and spices drifts out the door.
+  resolvedByMissionID: 0
+  resolvedDialogueLines: []
   interactSfx: {fileID: 8300000, guid: 9d7e0cfa3cb1b4046aa469a8b0ef2115, type: 3}
 --- !u!61 &1837163442
 BoxCollider2D:
