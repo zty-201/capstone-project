@@ -1,0 +1,546 @@
+fileFormatVersion: 2
+guid: 9828b6b131a91fd49b35b1e15d102dd8
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3273319798971259161
+    second: BlacksmithWalk_0
+  - first:
+      213: -6069471033382496697
+    second: BlacksmithWalk_1
+  - first:
+      213: 292084668180060004
+    second: BlacksmithWalk_2
+  - first:
+      213: -4518279997522555304
+    second: BlacksmithWalk_3
+  - first:
+      213: -2900434293835588732
+    second: BlacksmithWalk_4
+  - first:
+      213: -4605939043612854512
+    second: BlacksmithWalk_5
+  - first:
+      213: -6038962814035239821
+    second: BlacksmithWalk_6
+  - first:
+      213: 8357733795437801863
+    second: BlacksmithWalk_7
+  - first:
+      213: 2482878918343963073
+    second: BlacksmithWalk_8
+  - first:
+      213: 5614877670956494395
+    second: BlacksmithWalk_9
+  - first:
+      213: 5525524703945043547
+    second: BlacksmithWalk_10
+  - first:
+      213: 85577176488888761
+    second: BlacksmithWalk_11
+  - first:
+      213: 1152691915042412887
+    second: BlacksmithWalk_12
+  - first:
+      213: -8392823310229907639
+    second: BlacksmithWalk_13
+  - first:
+      213: 5020402990960181116
+    second: BlacksmithWalk_14
+  - first:
+      213: 2128465480444359443
+    second: BlacksmithWalk_15
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: BlacksmithWalk_0
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 119
+        width: 20
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e6a0125cf4d292d0800000000000000
+      internalID: -3273319798971259161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BlacksmithWalk_1
+      rect:
+        serializedVersion: 2
+        x: 50
+        y: 119
+        width: 19
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 74696b8a048e4cba0800000000000000
+      internalID: -6069471033382496697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BlacksmithWalk_2
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 119
+        width: 20
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 467d53b4571bd0400800000000000000
+      internalID: 292084668180060004
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BlacksmithWalk_3
+      rect:
+        serializedVersion: 2
+        x: 131
+        y: 119
+        width: 19
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 85e4ae7f748db41c0800000000000000
+      internalID: -4518279997522555304
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BlacksmithWalk_4
+      rect:
+        serializedVersion: 2
+        x: 12
+        y: 79
+        width: 17
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48b919d70669fb7d0800000000000000
+      internalID: -2900434293835588732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BlacksmithWalk_5
+      rect:
+        serializedVersion: 2
+        x: 52
+        y: 79
+        width: 19
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0177a58d7da6410c0800000000000000
+      internalID: -4605939043612854512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BlacksmithWalk_6
+      rect:
+        serializedVersion: 2
+        x: 92
+        y: 79
+        width: 17
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 37cd2a1015b413ca0800000000000000
+      internalID: -6038962814035239821
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BlacksmithWalk_7
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 79
+        width: 18
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 781f8541b92acf370800000000000000
+      internalID: 8357733795437801863
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BlacksmithWalk_8
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 39
+        width: 17
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c1b23ca835f47220800000000000000
+      internalID: 2482878918343963073
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BlacksmithWalk_9
+      rect:
+        serializedVersion: 2
+        x: 52
+        y: 39
+        width: 19
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3e62aa2e7d0ced40800000000000000
+      internalID: 5614877670956494395
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BlacksmithWalk_10
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 39
+        width: 17
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5e2a48517b9eac40800000000000000
+      internalID: 5525524703945043547
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BlacksmithWalk_11
+      rect:
+        serializedVersion: 2
+        x: 133
+        y: 39
+        width: 18
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b940851df7003100800000000000000
+      internalID: 85577176488888761
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BlacksmithWalk_12
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 0
+        width: 20
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7595193803f2fff00800000000000000
+      internalID: 1152691915042412887
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BlacksmithWalk_13
+      rect:
+        serializedVersion: 2
+        x: 50
+        y: 0
+        width: 19
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 947d02b9aa3b68b80800000000000000
+      internalID: -8392823310229907639
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BlacksmithWalk_14
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 0
+        width: 20
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7f7d79cbed0ca540800000000000000
+      internalID: 5020402990960181116
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BlacksmithWalk_15
+      rect:
+        serializedVersion: 2
+        x: 131
+        y: 0
+        width: 19
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 313319ec314d98d10800000000000000
+      internalID: 2128465480444359443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      BlacksmithWalk_0: -3273319798971259161
+      BlacksmithWalk_1: -6069471033382496697
+      BlacksmithWalk_10: 5525524703945043547
+      BlacksmithWalk_11: 85577176488888761
+      BlacksmithWalk_12: 1152691915042412887
+      BlacksmithWalk_13: -8392823310229907639
+      BlacksmithWalk_14: 5020402990960181116
+      BlacksmithWalk_15: 2128465480444359443
+      BlacksmithWalk_2: 292084668180060004
+      BlacksmithWalk_3: -4518279997522555304
+      BlacksmithWalk_4: -2900434293835588732
+      BlacksmithWalk_5: -4605939043612854512
+      BlacksmithWalk_6: -6038962814035239821
+      BlacksmithWalk_7: 8357733795437801863
+      BlacksmithWalk_8: 2482878918343963073
+      BlacksmithWalk_9: 5614877670956494395
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
