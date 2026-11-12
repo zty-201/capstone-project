@@ -32366,7 +32366,7 @@ Tilemap:
       - {fileID: -1571414565, guid: 3a01b65dbbda8a1448d9e44b3005cc4f, type: 3}
       - {fileID: 993939798, guid: 3a01b65dbbda8a1448d9e44b3005cc4f, type: 3}
       - {fileID: 1053207143, guid: 3a01b65dbbda8a1448d9e44b3005cc4f, type: 3}
-      m_AnimationSpeed: 12
+      m_AnimationSpeed: 12.000001
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: -16, y: 5, z: 0}
@@ -34257,7 +34257,7 @@ MonoBehaviour:
   machinePartItem: {fileID: 11400000, guid: a44940189cf641a78fa11af223e2f656, type: 2}
   partsToConsume: 3
   winchItem: {fileID: 11400000, guid: 869bf9f4d4a14c3bba52687dfbb5402f, type: 2}
-  interactSfx: {fileID: 8300000, guid: 9d7e0cfa3cb1b4046aa469a8b0ef2115, type: 3}
+  interactSfx: {fileID: 8300000, guid: 4038a4ca64b08a04ab22523534cca170, type: 3}
 --- !u!114 &1035045130
 MonoBehaviour:
   m_ObjectHideFlags: 0
