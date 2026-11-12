@@ -82,7 +82,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -96,7 +96,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -120,7 +120,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -154,19 +154,32 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: FarmerWalk_0
+      name: 1
       rect:
         serializedVersion: 2
-        x: 8
-        y: 119
-        width: 24
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 120
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -180,15 +193,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerWalk_1
+      name: 2
       rect:
         serializedVersion: 2
-        x: 48
-        y: 119
-        width: 24
-        height: 33
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 40
+        y: 120
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -202,15 +215,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerWalk_2
+      name: 3
       rect:
         serializedVersion: 2
-        x: 88
-        y: 119
-        width: 24
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 80
+        y: 120
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -224,15 +237,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerWalk_3
+      name: 4
       rect:
         serializedVersion: 2
-        x: 128
-        y: 119
-        width: 24
-        height: 33
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 120
+        y: 120
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -246,15 +259,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerWalk_4
+      name: 5
       rect:
         serializedVersion: 2
-        x: 8
-        y: 79
-        width: 24
-        height: 35
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 80
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -268,15 +281,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerWalk_5
+      name: 6
       rect:
         serializedVersion: 2
-        x: 48
-        y: 79
-        width: 24
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 40
+        y: 80
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -290,15 +303,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerWalk_6
+      name: 7
       rect:
         serializedVersion: 2
-        x: 88
-        y: 79
-        width: 24
-        height: 35
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 80
+        y: 80
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -312,15 +325,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerWalk_7
+      name: 8
       rect:
         serializedVersion: 2
-        x: 128
-        y: 79
-        width: 24
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 120
+        y: 80
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -334,15 +347,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerWalk_8
+      name: 9
       rect:
         serializedVersion: 2
-        x: 8
-        y: 39
-        width: 24
-        height: 35
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 40
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -356,15 +369,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerWalk_9
+      name: 20
       rect:
         serializedVersion: 2
-        x: 48
-        y: 39
-        width: 24
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 40
+        y: 40
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -378,15 +391,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerWalk_10
+      name: 11
       rect:
         serializedVersion: 2
-        x: 88
-        y: 39
-        width: 24
-        height: 35
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 80
+        y: 40
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -400,15 +413,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerWalk_11
+      name: 12
       rect:
         serializedVersion: 2
-        x: 128
-        y: 39
-        width: 24
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 120
+        y: 40
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -422,15 +435,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerWalk_12
+      name: 13
       rect:
         serializedVersion: 2
-        x: 8
+        x: 0
         y: 0
-        width: 24
-        height: 33
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -444,15 +457,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerWalk_13
+      name: 14
       rect:
         serializedVersion: 2
-        x: 48
+        x: 40
         y: 0
-        width: 24
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -466,15 +479,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerWalk_14
+      name: 15
       rect:
         serializedVersion: 2
-        x: 88
+        x: 80
         y: 0
-        width: 24
-        height: 33
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -488,15 +501,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerWalk_15
+      name: 16
       rect:
         serializedVersion: 2
-        x: 128
+        x: 120
         y: 0
-        width: 24
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -513,7 +526,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: a89786ec89e27f9418dbd8d9e892b819
     internalID: 0
     vertices: []
     indices: 
@@ -521,24 +534,26 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":4.0,"y":4.0},"gridSpriteSize":{"x":40.0,"y":40.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.20000000298023225},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":9,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      FarmerWalk_0: -8384375276051852091
-      FarmerWalk_1: 8010611209384859797
-      FarmerWalk_10: 6791035068224704608
-      FarmerWalk_11: -2741232090152254688
-      FarmerWalk_12: -7056597878424421347
-      FarmerWalk_13: -1527746649086988392
-      FarmerWalk_14: -1316397125865524146
-      FarmerWalk_15: 5921970366271298569
-      FarmerWalk_2: -7343465017715675662
-      FarmerWalk_3: 2435561106038947803
-      FarmerWalk_4: -9121127907714963393
-      FarmerWalk_5: -84107065058005876
-      FarmerWalk_6: 7305788689270818854
-      FarmerWalk_7: 2767556026797275597
-      FarmerWalk_8: 7103321418996052967
-      FarmerWalk_9: -8628092836693457411
+      1: -8384375276051852091
+      11: 6791035068224704608
+      12: -2741232090152254688
+      13: -7056597878424421347
+      14: -1527746649086988392
+      15: -1316397125865524146
+      16: 5921970366271298569
+      2: 8010611209384859797
+      20: -8628092836693457411
+      3: -7343465017715675662
+      4: 2435561106038947803
+      5: -9121127907714963393
+      6: -84107065058005876
+      7: 7305788689270818854
+      8: 2767556026797275597
+      9: 7103321418996052967
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

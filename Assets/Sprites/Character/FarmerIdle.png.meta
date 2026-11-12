@@ -70,7 +70,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -84,7 +84,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -108,7 +108,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -142,19 +142,32 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: FarmerIdle_0
+      name: 1
       rect:
         serializedVersion: 2
-        x: 8
-        y: 119
-        width: 24
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 120
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -168,15 +181,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerIdle_1
+      name: 2
       rect:
         serializedVersion: 2
-        x: 48
-        y: 119
-        width: 24
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 40
+        y: 120
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -190,15 +203,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerIdle_2
+      name: 3
       rect:
         serializedVersion: 2
-        x: 88
-        y: 119
-        width: 24
-        height: 33
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 80
+        y: 120
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -212,15 +225,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerIdle_3
+      name: 4
       rect:
         serializedVersion: 2
-        x: 8
-        y: 79
-        width: 24
-        height: 35
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 80
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -234,15 +247,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerIdle_4
+      name: 5
       rect:
         serializedVersion: 2
-        x: 48
-        y: 79
-        width: 24
-        height: 35
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 40
+        y: 80
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -256,15 +269,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerIdle_5
+      name: 6
       rect:
         serializedVersion: 2
-        x: 88
-        y: 79
-        width: 24
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 80
+        y: 80
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -278,15 +291,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerIdle_6
+      name: 7
       rect:
         serializedVersion: 2
-        x: 7
-        y: 39
-        width: 24
-        height: 35
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 40
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -300,15 +313,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerIdle_7
+      name: 8
       rect:
         serializedVersion: 2
-        x: 47
-        y: 39
-        width: 24
-        height: 35
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 40
+        y: 40
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -322,15 +335,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerIdle_8
+      name: 9
       rect:
         serializedVersion: 2
-        x: 87
-        y: 39
-        width: 24
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 80
+        y: 40
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -344,15 +357,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerIdle_9
+      name: 10
       rect:
         serializedVersion: 2
-        x: 8
+        x: 0
         y: 0
-        width: 24
-        height: 33
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -366,15 +379,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerIdle_10
+      name: 11
       rect:
         serializedVersion: 2
-        x: 48
+        x: 40
         y: 0
-        width: 24
-        height: 33
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -388,15 +401,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: FarmerIdle_11
+      name: 12
       rect:
         serializedVersion: 2
-        x: 88
+        x: 80
         y: 0
-        width: 24
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -413,7 +426,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 6683ac7297cf79b459408da97cc6a8c4
     internalID: 0
     vertices: []
     indices: 
@@ -421,20 +434,22 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":3.0,"y":4.0},"gridSpriteSize":{"x":40.0,"y":40.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.20000000298023225},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":9,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      FarmerIdle_0: 1225501844407436721
-      FarmerIdle_1: -2730038860248115364
-      FarmerIdle_10: 7589259336620123347
-      FarmerIdle_11: 7343098035850496828
-      FarmerIdle_2: 7278349965766089498
-      FarmerIdle_3: -4215413557958164056
-      FarmerIdle_4: -5349016642980474015
-      FarmerIdle_5: -542447920299522042
-      FarmerIdle_6: -2449502815496587803
-      FarmerIdle_7: -3490355270410311508
-      FarmerIdle_8: 3135432422404022215
-      FarmerIdle_9: 5082708103872049474
+      1: 1225501844407436721
+      10: 5082708103872049474
+      11: 7589259336620123347
+      12: 7343098035850496828
+      2: -2730038860248115364
+      3: 7278349965766089498
+      4: -4215413557958164056
+      5: -5349016642980474015
+      6: -542447920299522042
+      7: -2449502815496587803
+      8: -3490355270410311508
+      9: 3135432422404022215
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

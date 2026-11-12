@@ -70,7 +70,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -84,7 +84,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -108,7 +108,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -142,19 +142,32 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: BlacksmithIdle_0
+      name: 1
       rect:
         serializedVersion: 2
-        x: 10
-        y: 119
-        width: 20
-        height: 36
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 120
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -168,15 +181,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: BlacksmithIdle_1
+      name: 2
       rect:
         serializedVersion: 2
-        x: 50
-        y: 119
-        width: 20
-        height: 36
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 40
+        y: 120
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -190,15 +203,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: BlacksmithIdle_2
+      name: 3
       rect:
         serializedVersion: 2
-        x: 90
-        y: 119
-        width: 20
-        height: 35
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 80
+        y: 120
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -212,15 +225,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: BlacksmithIdle_3
+      name: 4
       rect:
         serializedVersion: 2
-        x: 12
-        y: 79
-        width: 17
-        height: 37
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 80
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -234,15 +247,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: BlacksmithIdle_4
+      name: 5
       rect:
         serializedVersion: 2
-        x: 52
-        y: 79
-        width: 17
-        height: 37
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 40
+        y: 80
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -256,15 +269,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: BlacksmithIdle_5
+      name: 6
       rect:
         serializedVersion: 2
-        x: 92
-        y: 79
-        width: 17
-        height: 36
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 80
+        y: 80
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -278,15 +291,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: BlacksmithIdle_6
+      name: 7
       rect:
         serializedVersion: 2
-        x: 12
-        y: 39
-        width: 17
-        height: 37
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 40
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -300,15 +313,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: BlacksmithIdle_7
+      name: 8
       rect:
         serializedVersion: 2
-        x: 52
-        y: 39
-        width: 17
-        height: 37
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 40
+        y: 40
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -322,15 +335,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: BlacksmithIdle_8
+      name: 9
       rect:
         serializedVersion: 2
-        x: 92
-        y: 39
-        width: 17
-        height: 36
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 80
+        y: 40
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -344,15 +357,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: BlacksmithIdle_9
+      name: 10
       rect:
         serializedVersion: 2
-        x: 10
+        x: 0
         y: 0
-        width: 20
-        height: 35
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -366,15 +379,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: BlacksmithIdle_10
+      name: 11
       rect:
         serializedVersion: 2
-        x: 50
+        x: 40
         y: 0
-        width: 20
-        height: 35
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -388,15 +401,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: BlacksmithIdle_11
+      name: 12
       rect:
         serializedVersion: 2
-        x: 90
+        x: 80
         y: 0
-        width: 20
-        height: 34
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 40
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.2}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -413,7 +426,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 47672bd3fd9f4084c96e3690d99e9383
     internalID: 0
     vertices: []
     indices: 
@@ -421,20 +434,22 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":3.0,"y":4.0},"gridSpriteSize":{"x":40.0,"y":40.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.20000000298023225},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":9,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      BlacksmithIdle_0: -3691671735170080462
-      BlacksmithIdle_1: 7870412817221121842
-      BlacksmithIdle_10: 2900863966417775512
-      BlacksmithIdle_11: 4850666177356241142
-      BlacksmithIdle_2: 1957512288912935504
-      BlacksmithIdle_3: 5496757127708161748
-      BlacksmithIdle_4: -6063821587316955291
-      BlacksmithIdle_5: 5322081770202310905
-      BlacksmithIdle_6: -3745820905473675603
-      BlacksmithIdle_7: -8333118354355224161
-      BlacksmithIdle_8: -7263763573035934367
-      BlacksmithIdle_9: 3783430733933533078
+      1: -3691671735170080462
+      10: 3783430733933533078
+      11: 2900863966417775512
+      12: 4850666177356241142
+      2: 7870412817221121842
+      3: 1957512288912935504
+      4: 5496757127708161748
+      5: -6063821587316955291
+      6: 5322081770202310905
+      7: -3745820905473675603
+      8: -8333118354355224161
+      9: -7263763573035934367
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
